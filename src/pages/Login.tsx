@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import logoProativa from "@/assets/logo-proativa.png";
-import logoProativaVertical from "@/assets/logo-proativa-vertical.png";
+import logoIcon from "@/assets/logo-icon.png";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -54,9 +53,9 @@ const Login = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-primary opacity-80" />
         <div className="relative z-10 flex flex-col items-center text-center px-12">
           <div className="mb-8 flex flex-col items-center">
-            <img src={logoProativaVertical} alt="Proativa Jr" className="w-44 mb-4" />
+            <img src={logoIcon} alt="Proativa Jr" className="w-24 mb-4 rounded-2xl" />
             <h2 className="text-4xl font-bold tracking-tight">
-              <span className="text-white">Proativa </span>
+              <span className="text-primary-foreground">Proativa </span>
               <span className="text-accent">Jr</span>
             </h2>
           </div>
@@ -69,9 +68,9 @@ const Login = () => {
       {/* Right Panel */}
       <div className="flex-1 flex items-center justify-center bg-background px-6">
         <div className="w-full max-w-md">
-          <div className="lg:hidden flex justify-center mb-8">
-            <img src={logoProativaVertical} alt="Proativa Jr" className="w-28" />
-            <h2 className="text-2xl font-bold tracking-tight mt-2">
+          <div className="lg:hidden flex flex-col items-center justify-center mb-8">
+            <img src={logoIcon} alt="Proativa Jr" className="w-20 mb-3 rounded-xl" />
+            <h2 className="text-2xl font-bold tracking-tight">
               <span className="text-foreground">Proativa </span>
               <span className="text-accent">Jr</span>
             </h2>
