@@ -53,7 +53,7 @@ const Login = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-primary opacity-80" />
         <div className="relative z-10 flex flex-col items-center text-center px-12">
           <div className="mb-8 flex flex-col items-center">
-            <img src={logoIcon} alt="Proativa Jr" className="w-24 mb-4 rounded-2xl" />
+            <img src={logoIcon} alt="Proativa Jr" className="w-32 mb-4 rounded-2xl" />
             <h2 className="text-4xl font-bold tracking-tight">
               <span className="text-primary-foreground">Proativa </span>
               <span className="text-accent">Jr</span>
@@ -69,7 +69,7 @@ const Login = () => {
       <div className="flex-1 flex items-center justify-center bg-background px-6">
         <div className="w-full max-w-md">
           <div className="lg:hidden flex flex-col items-center justify-center mb-8">
-            <img src={logoIcon} alt="Proativa Jr" className="w-20 mb-3 rounded-xl" />
+            <img src={logoIcon} alt="Proativa Jr" className="w-28 mb-3 rounded-xl" />
             <h2 className="text-2xl font-bold tracking-tight">
               <span className="text-foreground">Proativa </span>
               <span className="text-accent">Jr</span>
