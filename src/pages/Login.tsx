@@ -4,6 +4,7 @@ import { Mail, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import logoIcon from "@/assets/logo-icon.png";
+import logoText from "@/assets/logo-text.png";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -54,10 +55,7 @@ const Login = () => {
         <div className="relative z-10 flex flex-col items-center text-center px-12">
           <div className="mb-8 flex flex-col items-center">
             <img src={logoIcon} alt="Proativa Jr" className="w-32 mb-4 rounded-2xl" />
-            <h2 className="text-4xl font-bold tracking-tight">
-              <span className="text-primary-foreground">Proativa </span>
-              <span className="text-accent">Jr</span>
-            </h2>
+            <img src={logoText} alt="Proativa Jr" className="w-56" />
           </div>
           <p className="text-primary-foreground/80 text-lg font-light max-w-sm leading-relaxed">
             Torre de Controle — Centralize KPIs, projetos e parcerias em um só lugar.
@@ -70,10 +68,7 @@ const Login = () => {
         <div className="w-full max-w-md">
           <div className="lg:hidden flex flex-col items-center justify-center mb-8">
             <img src={logoIcon} alt="Proativa Jr" className="w-28 mb-3 rounded-xl" />
-            <h2 className="text-2xl font-bold tracking-tight">
-              <span className="text-foreground">Proativa </span>
-              <span className="text-accent">Jr</span>
-            </h2>
+            <img src={logoText} alt="Proativa Jr" className="w-44" />
           </div>
 
           <h1 className="text-2xl font-bold text-foreground mb-1">
