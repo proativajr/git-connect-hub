@@ -53,9 +53,9 @@ const Login = () => {
       <div className="hidden lg:flex lg:w-1/2 bg-primary flex-col items-center justify-center relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-secondary to-primary opacity-80" />
         <div className="relative z-10 flex flex-col items-center text-center px-12">
-          <div className="mb-8 flex flex-col items-center">
-            <img src={logoIcon} alt="Proativa Jr" className="w-32 mb-4 rounded-2xl" />
-            <img src={logoText} alt="Proativa Jr" className="w-56" />
+          <div className="mb-6 flex flex-col items-center">
+            <img src={logoIcon} alt="Proativa Jr" className="w-32 mb-6 rounded-2xl" />
+            <img src={logoText} alt="Proativa Jr" className="w-56 mb-6" />
           </div>
           <p className="text-primary-foreground/80 text-lg font-light max-w-sm leading-relaxed">
             Torre de Controle — Centralize KPIs, projetos e parcerias em um só lugar.
