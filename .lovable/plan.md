@@ -1,18 +1,17 @@
 
 
-## Plano: Remover tela de acesso restrito da página Diretorias & KPIs
+## Plano: Substituir banner de citação por 3 caixas (Missão, Visão, Valores)
 
-A página `Departments.tsx` possui um mecanismo de bloqueio com código de acesso (`ACCESS_CODE`) que exige uma senha antes de exibir o conteúdo. O plano é remover toda essa lógica.
+### O que será feito
+Remover o banner de citação atual (fundo azul com o texto "Performance é o resultado...") e substituí-lo por 3 caixas lado a lado na mesma cor azul (bg-primary), com texto branco, contendo: **Missão**, **Visão** e **Valores**.
 
-### Alterações em `src/pages/Departments.tsx`:
+### Alterações em `src/pages/Dashboard.tsx`:
 
-1. **Remover estados desnecessários:** `unlocked`, `code`, `error`
-2. **Remover a constante** `ACCESS_CODE`
-3. **Remover imports não mais usados:** `Lock`, `X`
-4. **Remover a função** `handleUnlock`
-5. **Remover o bloco condicional** `if (!unlocked)` que renderiza a tela de senha
-6. **Remover o botão "Bloquear"** (com ícone `X`) do cabeçalho
-7. **Atualizar a query de departments** para remover `enabled: unlocked` (ficará sempre ativa)
+1. **Remover** o bloco do Quote Banner e o botão de edição associado
+2. **Remover** estados relacionados à citação (`editQuote`, `tmpQuote`, `tmpAuthor`) e o Dialog de edição da citação
+3. **Remover** import do ícone `Quote`
+4. **Adicionar** 3 caixas em grid (`grid-cols-3`) com `bg-primary` e `text-primary-foreground`, cada uma com o título centralizado (Missão, Visão, Valores)
+5. Cada caixa será editável (com conteúdo vindo do banco) — ou inicialmente estática com placeholder para o usuário informar o conteúdo depois
 
-O conteúdo da página será exibido diretamente ao acessar a rota, sem nenhuma barreira.
+As caixas terão o mesmo estilo visual do banner atual (cor primária azul), com texto branco e cantos arredondados.
 
