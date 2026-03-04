@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Briefcase, DollarSign, Star, CheckCircle2, Quote, X, Loader2 } from "lucide-react";
+import { Briefcase, DollarSign, Star, CheckCircle2, X, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,12 +68,9 @@ const Dashboard = () => {
   });
 
   // UI state
-  const [editQuote, setEditQuote] = useState(false);
   const [editRevenue, setEditRevenue] = useState(false);
   const [editKpiIdx, setEditKpiIdx] = useState<number | null>(null);
   const [editPriorities, setEditPriorities] = useState(false);
-  const [tmpQuote, setTmpQuote] = useState("");
-  const [tmpAuthor, setTmpAuthor] = useState("");
   const [tmpGoal, setTmpGoal] = useState(0);
   const [tmpCurrent, setTmpCurrent] = useState(0);
   const [tmpKpiValue, setTmpKpiValue] = useState("");
@@ -108,16 +105,18 @@ const Dashboard = () => {
         <p className="text-muted-foreground mt-1 capitalize">{today}</p>
       </div>
 
-      {/* Quote Banner */}
-      <div className="rounded-xl bg-primary p-6 flex items-start gap-4 relative">
-        <Quote className="h-8 w-8 text-accent shrink-0 mt-0.5" />
-        <p className="text-primary-foreground text-lg italic font-light leading-relaxed flex-1">
-          "{metrics.quote_text}" — {metrics.quote_author}
-        </p>
-        <EditButton
-          onClick={() => { setTmpQuote(metrics.quote_text); setTmpAuthor(metrics.quote_author); setEditQuote(true); }}
-          className="text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10"
-        />
+      {/* Missão, Visão, Valores */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[
+          { title: "Missão", text: "Conteúdo da missão aqui" },
+          { title: "Visão", text: "Conteúdo da visão aqui" },
+          { title: "Valores", text: "Conteúdo dos valores aqui" },
+        ].map((box) => (
+          <div key={box.title} className="rounded-xl bg-primary p-6 text-center">
+            <h3 className="text-xl font-bold text-primary-foreground mb-2">{box.title}</h3>
+            <p className="text-primary-foreground/80 text-sm">{box.text}</p>
+          </div>
+        ))}
       </div>
 
       {/* Revenue Thermometer */}
@@ -171,18 +170,6 @@ const Dashboard = () => {
           ))}
         </ul>
       </div>
-
-      {/* Edit Quote Dialog */}
-      <Dialog open={editQuote} onOpenChange={setEditQuote}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Editar Citação</DialogTitle></DialogHeader>
-          <div className="space-y-4 pt-2">
-            <div><Label>Citação</Label><Input value={tmpQuote} onChange={e => setTmpQuote(e.target.value)} /></div>
-            <div><Label>Autor</Label><Input value={tmpAuthor} onChange={e => setTmpAuthor(e.target.value)} /></div>
-            <button onClick={() => { updateMetrics.mutate({ quote_text: tmpQuote, quote_author: tmpAuthor }); setEditQuote(false); }} className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition-all">Salvar</button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Edit Revenue Dialog */}
       <Dialog open={editRevenue} onOpenChange={setEditRevenue}>
