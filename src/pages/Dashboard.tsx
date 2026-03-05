@@ -108,9 +108,9 @@ const Dashboard = () => {
       {/* Missão, Visão, Valores */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { title: "Missão", text: "Conteúdo da missão aqui" },
-          { title: "Visão", text: "Conteúdo da visão aqui" },
-          { title: "Valores", text: "Conteúdo dos valores aqui" },
+          { title: "Missão", text: "Formar líderes, por meio da vivência empresarial, realizando projetos de alto impacto." },
+          { title: "Visão", text: "\"Alcançar maturidade de gestão e fortalecer nossa imagem no ecossistema em 2026, operando com processos estruturados e pessoas proativas que garantam resultados agressivos em faturamento, qualidade de projetos e desenvolvimento de membros.\"" },
+          { title: "Valores", text: "PREDADOR - Proatividade, Resultado, Excelência, Dono, Antecipação, Dedicação, Organização, Rede" },
         ].map((box) => (
           <div key={box.title} className="rounded-xl bg-primary p-6 text-center">
             <h3 className="text-xl font-bold text-primary-foreground mb-2">{box.title}</h3>
