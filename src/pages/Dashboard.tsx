@@ -108,16 +108,16 @@ const Dashboard = () => {
       {/* Missão, Visão, Valores */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { title: "Missão", text: "Formar líderes, por meio da vivência empresarial, realizando projetos de alto impacto." },
-          { title: "Visão", text: "\"Alcançar maturidade de gestão e fortalecer nossa imagem no ecossistema em 2026, operando com processos estruturados e pessoas proativas que garantam resultados agressivos em faturamento, qualidade de projetos e desenvolvimento de membros.\"" },
-          { title: "Valores", text: "PREDADOR — Proatividade · Resultado · Excelência · Dono · Antecipação · Dedicação · Organização · Rede" },
+          { title: "Missão", text: "Formar líderes, por meio da vivência empresarial, realizando projetos de alto impacto.", icon: Target },
+          { title: "Visão", text: "Alcançar maturidade de gestão e fortalecer nossa imagem no ecossistema em 2026, operando com processos estruturados e pessoas proativas que garantam resultados agressivos em faturamento, qualidade de projetos e desenvolvimento dos membros", icon: Eye },
+          { title: "Valores", text: "PREDADOR\nProatividade, Resultado, Excelência, Dono, Antecipação, Dedicação, Organização e Rede", icon: Award },
         ].map((box) => (
-          <div key={box.title} className="rounded-lg bg-primary p-5 relative min-h-[140px] flex flex-col">
-            <span className="absolute top-2 left-3 text-4xl font-bold text-accent leading-none">"</span>
-            <div className="pt-7 flex-1">
-              <h3 className="text-base font-bold text-primary-foreground uppercase tracking-wide mb-2">{box.title}</h3>
-              <p className="text-primary-foreground/90 text-sm leading-relaxed">{box.text}</p>
+          <div key={box.title} className="rounded-lg bg-primary border-l-4 border-accent p-6 flex flex-col gap-3">
+            <div className="flex items-center gap-2">
+              <box.icon className="h-5 w-5 text-accent" />
+              <h3 className="text-lg font-bold text-primary-foreground">{box.title}</h3>
             </div>
+            <p className="text-primary-foreground/90 text-sm leading-relaxed whitespace-pre-line">{box.text}</p>
           </div>
         ))}
       </div>
