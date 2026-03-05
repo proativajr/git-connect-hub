@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Briefcase, DollarSign, Star, CheckCircle2, X, Loader2, Target, Eye, Award } from "lucide-react";
 import { Briefcase, DollarSign, Star, CheckCircle2, X, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
