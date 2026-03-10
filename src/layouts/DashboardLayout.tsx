@@ -11,7 +11,7 @@ import logoProativa from "@/assets/logo-proativa.png";
 const navItems = [
   { title: "Visão Geral", path: "/dashboard", icon: LayoutDashboard },
   { title: "Planejamento Estratégico", path: "/strategy", icon: Target },
-  { title: "Diretorias & KPIs", path: "/departments", icon: BarChart3 },
+  { title: "Diretorias", path: "/departments", icon: BarChart3 },
   { title: "Cultura & Governança", path: "/culture", icon: BookOpen },
   { title: "Gestão de Parcerias", path: "/crm", icon: Handshake },
   { title: "Membros", path: "/members", icon: Users },

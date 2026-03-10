@@ -53,7 +53,7 @@ const Departments = () => {
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Diretorias & KPIs</h1>
+          <h1 className="text-3xl font-bold text-foreground">Diretorias</h1>
           <p className="text-muted-foreground mt-1">Análise detalhada de performance por setor</p>
         </div>
       </div>

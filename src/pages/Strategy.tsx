@@ -96,7 +96,7 @@ const Strategy = () => {
       <div className="rounded-xl bg-card p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-6">
           <Target className="h-5 w-5 text-accent" />
-          <h2 className="text-lg font-semibold text-card-foreground">Projetos de Impacto</h2>
+          <h2 className="text-lg font-semibold text-card-foreground">OKRs e KRs</h2>
         </div>
         <div className="space-y-5">
           {projects.map((project: any, i: number) => (
