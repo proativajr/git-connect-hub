@@ -19,7 +19,7 @@
     --secondary: 222 34% 25%;
     --secondary-foreground: 0 0% 96%;
 
-    --muted: 60 10% 90%;
+    --muted: 0 0% 96%;
     --muted-foreground: 220 10% 46%;
 
     --accent: 50 96% 51%;
@@ -82,5 +82,16 @@
 
   body {
     @apply bg-background text-foreground font-sans;
+  }
+
+  /* Cards blend with background, hover goes to light gray */
+  .rounded-xl.bg-card {
+    box-shadow: none;
+    border: 1px solid hsl(var(--border));
+    transition: background-color 0.2s ease;
+  }
+
+  .rounded-xl.bg-card:hover {
+    background-color: hsl(var(--muted));
   }
 }
