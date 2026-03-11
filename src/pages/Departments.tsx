@@ -189,8 +189,8 @@ const Departments = () => {
 
       <Accordion type="multiple" defaultValue={currentDir.subSections} className="space-y-3">
         {currentDir.subSections.map((sub) => (
-          <AccordionItem key={sub} value={sub} className="rounded-xl bg-card shadow-sm border-none overflow-hidden">
-            <AccordionTrigger className="px-6 py-4 hover:no-underline">
+          <AccordionItem key={sub} value={sub} className="rounded-xl bg-muted border-none overflow-hidden">
+            <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-muted-foreground/10 transition-colors">
               <span className="text-base font-semibold text-card-foreground">{sub}</span>
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-5">
