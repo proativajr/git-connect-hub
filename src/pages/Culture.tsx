@@ -56,7 +56,7 @@ const Culture = () => {
           <button
             key={doc.title}
             onClick={() => setSelectedDoc(doc)}
-            className="group text-left rounded-xl bg-card p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+            className="group text-left rounded-xl bg-card p-6 border border-border hover:-translate-y-1 transition-all duration-300"
           >
             <div className="flex items-start justify-between mb-4">
               <div className="rounded-lg bg-primary/10 p-3">
