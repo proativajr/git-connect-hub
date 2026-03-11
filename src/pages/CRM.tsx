@@ -34,12 +34,12 @@ const CRM = () => {
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-12 py-12">
+      <div className="flex flex-wrap items-center justify-center gap-20 py-16">
         {partners.map((partner) => (
           <HoverCard key={partner.name} openDelay={100} closeDelay={200}>
             <HoverCardTrigger asChild>
               <button className="group flex flex-col items-center gap-4 outline-none">
-                <div className="h-36 w-36 rounded-2xl bg-card shadow-md p-4 flex items-center justify-center transition-all duration-300 group-hover:shadow-xl group-hover:scale-105">
+                <div className="h-40 w-40 rounded-2xl bg-white shadow-md p-5 flex items-center justify-center transition-all duration-300 group-hover:shadow-xl group-hover:scale-105">
                   <img
                     src={partner.logo}
                     alt={partner.name}
