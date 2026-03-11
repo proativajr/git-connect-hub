@@ -34,7 +34,7 @@ const CRM = () => {
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-12 py-12">
+      <div className="flex flex-wrap items-center justify-center gap-20 py-16">
         {partners.map((partner) => (
           <HoverCard key={partner.name} openDelay={100} closeDelay={200}>
             <HoverCardTrigger asChild>
