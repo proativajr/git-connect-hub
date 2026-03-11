@@ -13,7 +13,7 @@ const navItems = [
   { title: "Planejamento Estratégico", path: "/strategy", icon: Target },
   { title: "Diretorias", path: "/departments", icon: BarChart3 },
   { title: "Cultura & Governança", path: "/culture", icon: BookOpen },
-  { title: "Gestão de Parcerias", path: "/crm", icon: Handshake },
+  { title: "Parcerias", path: "/crm", icon: Handshake },
   { title: "Membros", path: "/members", icon: Users },
   { title: "Configurações", path: "/settings", icon: Settings },
 ];
