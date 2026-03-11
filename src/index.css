@@ -84,14 +84,13 @@
     @apply bg-background text-foreground font-sans;
   }
 
-  /* Cards blend with background, hover goes to light gray */
+  /* Cards blend with background, no border, no shadow */
   .rounded-xl.bg-card {
-    box-shadow: none;
-    border: 1px solid hsl(var(--border));
-    transition: background-color 0.2s ease;
+    box-shadow: none !important;
+    border: none;
   }
 
-  .rounded-xl.bg-card:hover {
-    background-color: hsl(var(--muted));
+  .shadow-sm {
+    box-shadow: none !important;
   }
 }
