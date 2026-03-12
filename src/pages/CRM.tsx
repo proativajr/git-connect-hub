@@ -2,6 +2,7 @@ import pipeloversLogo from "@/assets/partners/pipelovers.jpeg";
 import pwrLogo from "@/assets/partners/pwr-gestao.jpeg";
 import produtivaLogo from "@/assets/partners/produtiva-junior.jpeg";
 import geosegLogo from "@/assets/partners/geoseg.png";
+import redbullLogo from "@/assets/partners/redbull.png";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 const partners = [
@@ -28,6 +29,12 @@ const partners = [
     logo: geosegLogo,
     description:
       "Soluções em segurança e saúde ocupacional, com elaboração de programas, treinamentos em SSO, lançamento eSocial, assistência em perícia e mapeamento e organização de rotinas de SSO.",
+  },
+  {
+    name: "Red Bull",
+    logo: redbullLogo,
+    description:
+      "Marca global líder em bebidas energéticas, reconhecida por impulsionar o esporte, a cultura e a inovação. Parceira em eventos, ativações e iniciativas que conectam energia e performance.",
   },
 ];
 const CRM = () => {
