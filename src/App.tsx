@@ -12,7 +12,7 @@ import Departments from "./pages/Departments";
 import Culture from "./pages/Culture";
 import CRM from "./pages/CRM";
 import Gallery from "./pages/Gallery";
-import Governance from "./pages/Governance";
+
 import Members from "./pages/Members";
 import Settings from "./pages/Settings";
 import Shark from "./pages/Shark";
