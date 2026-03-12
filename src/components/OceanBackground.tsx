@@ -244,7 +244,8 @@ const OceanBackground = () => {
     window.addEventListener("scroll", onScroll);
 
     const animate = () => {
-      const w = window.innerWidth, h = window.innerHeight;
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width, h = rect.height;
       timeRef.current += 0.016;
       const t = timeRef.current;
       const mx = mouseRef.current.x, my = mouseRef.current.y;
