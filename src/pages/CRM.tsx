@@ -41,7 +41,7 @@ const partners = [
 const CRM = () => {
   return (
     <div className="space-y-8 animate-fade-in relative">
-      <OceanBackground />
+      
       <div>
         <h1 className="text-3xl font-bold text-foreground">Parcerias</h1>
         <p className="text-muted-foreground mt-1">

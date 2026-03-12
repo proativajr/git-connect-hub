@@ -15,6 +15,7 @@ const navItems = [
   { title: "Cultura & Governança", path: "/culture", icon: BookOpen },
   { title: "Parcerias", path: "/crm", icon: Handshake },
   { title: "Membros", path: "/members", icon: Users },
+  { title: "Shark", path: "/shark", icon: Fish },
   { title: "Configurações", path: "/settings", icon: Settings },
 ];
 

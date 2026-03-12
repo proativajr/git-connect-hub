@@ -50,6 +50,7 @@ const drawShark = (
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(angle);
+  ctx.scale(1.2, 1.2);
 
   const tailSwing = Math.sin(t * 4) * 0.12;
 
