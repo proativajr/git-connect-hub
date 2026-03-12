@@ -51,112 +51,91 @@ const drawShark = (
   ctx.translate(x, y);
   ctx.rotate(angle);
 
-  const tailSwing = Math.sin(t * 4) * 0.15;
+  const tailSwing = Math.sin(t * 4) * 0.12;
 
-  // Shadow beneath
-  ctx.globalAlpha = 0.12;
-  ctx.fillStyle = "rgba(0,5,20,1)";
+  // Shadow beneath (offset down-right for depth)
+  ctx.globalAlpha = 0.18;
+  ctx.fillStyle = "rgba(0,10,30,1)";
   ctx.beginPath();
-  ctx.ellipse(4, 6, 38, 12, 0, 0, Math.PI * 2);
+  ctx.ellipse(6, 8, 40, 13, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.globalAlpha = 0.9;
+  ctx.globalAlpha = 0.95;
 
-  // Main body
-  ctx.fillStyle = "#3a4f63";
-  ctx.beginPath();
-  ctx.moveTo(40, 0);
-  ctx.quadraticCurveTo(25, -10, 5, -11);
-  ctx.quadraticCurveTo(-15, -10, -25, -6);
-  ctx.lineTo(-25, 6);
-  ctx.quadraticCurveTo(-15, 10, 5, 11);
-  ctx.quadraticCurveTo(25, 10, 40, 0);
-  ctx.fill();
-
-  // Darker dorsal area
-  ctx.fillStyle = "#2d3e4e";
-  ctx.beginPath();
-  ctx.moveTo(38, 0);
-  ctx.quadraticCurveTo(22, -8, 0, -9);
-  ctx.quadraticCurveTo(-12, -8, -20, -4);
-  ctx.lineTo(-20, 0);
-  ctx.quadraticCurveTo(-5, -2, 15, -1);
-  ctx.quadraticCurveTo(28, 0, 38, 0);
-  ctx.fill();
-
-  // Belly (lighter)
-  ctx.fillStyle = "#7a9ab0";
-  ctx.beginPath();
-  ctx.moveTo(35, 2);
-  ctx.quadraticCurveTo(18, 9, 0, 9);
-  ctx.quadraticCurveTo(-12, 8, -20, 4);
-  ctx.lineTo(-20, 1);
-  ctx.quadraticCurveTo(-5, 3, 15, 2);
-  ctx.quadraticCurveTo(28, 1, 35, 2);
-  ctx.fill();
-
-  // Tail (with swing)
+  // --- Tail with swing ---
   ctx.save();
-  ctx.translate(-25, 0);
+  ctx.translate(-28, 0);
   ctx.rotate(tailSwing);
-  ctx.fillStyle = "#3a4f63";
+  ctx.fillStyle = "#f0f0f0";
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(-18, -14);
-  ctx.quadraticCurveTo(-14, -4, -10, 0);
-  ctx.quadraticCurveTo(-14, 4, -18, 14);
+  ctx.lineTo(-20, -15);
+  ctx.quadraticCurveTo(-15, -5, -11, 0);
+  ctx.quadraticCurveTo(-15, 5, -20, 15);
   ctx.lineTo(0, 0);
   ctx.fill();
   ctx.restore();
 
-  // Pectoral fins
-  ctx.fillStyle = "#4a6070";
-  // Left fin
+  // --- Main body (white) ---
+  ctx.fillStyle = "#ffffff";
   ctx.beginPath();
-  ctx.moveTo(8, -8);
-  ctx.quadraticCurveTo(2, -20, -8, -18);
-  ctx.quadraticCurveTo(-2, -12, 4, -7);
-  ctx.fill();
-  // Right fin
-  ctx.beginPath();
-  ctx.moveTo(8, 8);
-  ctx.quadraticCurveTo(2, 20, -8, 18);
-  ctx.quadraticCurveTo(-2, 12, 4, 7);
+  ctx.moveTo(42, 0);
+  ctx.quadraticCurveTo(28, -11, 6, -12);
+  ctx.quadraticCurveTo(-16, -11, -28, -6);
+  ctx.lineTo(-28, 6);
+  ctx.quadraticCurveTo(-16, 11, 6, 12);
+  ctx.quadraticCurveTo(28, 11, 42, 0);
   ctx.fill();
 
-  // Dorsal fin
-  ctx.fillStyle = "#3a4f63";
+  // Subtle spine line
+  ctx.strokeStyle = "rgba(180,195,210,0.35)";
+  ctx.lineWidth = 1.2;
   ctx.beginPath();
-  ctx.moveTo(5, -9);
-  ctx.lineTo(-2, -18);
-  ctx.lineTo(-8, -9);
+  ctx.moveTo(38, 0);
+  ctx.lineTo(-24, 0);
+  ctx.stroke();
+
+  // --- Pectoral fins ---
+  ctx.fillStyle = "#f5f5f5";
+  ctx.beginPath();
+  ctx.moveTo(6, -10);
+  ctx.quadraticCurveTo(-2, -24, -12, -20);
+  ctx.quadraticCurveTo(-4, -14, 3, -9);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(6, 10);
+  ctx.quadraticCurveTo(-2, 24, -12, 20);
+  ctx.quadraticCurveTo(-4, 14, 3, 9);
   ctx.fill();
 
-  // Eye
-  ctx.fillStyle = "rgba(10,20,30,0.8)";
+  // --- Dorsal fin (top-down ridge) ---
+  ctx.fillStyle = "#e8e8e8";
   ctx.beginPath();
-  ctx.arc(28, -4, 2.5, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "rgba(180,210,230,0.4)";
-  ctx.beginPath();
-  ctx.arc(28.5, -4.5, 1, 0, Math.PI * 2);
+  ctx.ellipse(2, 0, 8, 3.5, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Gill slits
-  ctx.strokeStyle = "rgba(20,40,60,0.3)";
-  ctx.lineWidth = 0.8;
-  for (let i = 0; i < 3; i++) {
-    const gx = 18 - i * 4;
-    ctx.beginPath();
-    ctx.moveTo(gx, -5);
-    ctx.lineTo(gx - 1, 5);
-    ctx.stroke();
-  }
-
-  // Nose highlight
-  ctx.fillStyle = "rgba(120,160,190,0.2)";
+  // --- Nose tip highlight ---
+  ctx.fillStyle = "rgba(255,255,255,0.6)";
   ctx.beginPath();
-  ctx.ellipse(34, -1, 5, 3, 0, 0, Math.PI * 2);
+  ctx.ellipse(38, 0, 5, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // --- Eyes (small dark dots) ---
+  ctx.fillStyle = "rgba(20,30,50,0.7)";
+  ctx.beginPath();
+  ctx.arc(26, -6, 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(26, 6, 2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Eye glint
+  ctx.fillStyle = "rgba(200,220,240,0.5)";
+  ctx.beginPath();
+  ctx.arc(26.5, -6.5, 0.8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(26.5, 5.5, 0.8, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.restore();
