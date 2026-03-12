@@ -4,6 +4,7 @@ import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { useAuth } from "@/contexts/AuthContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import FinanceiroPasswordGate from "@/components/FinanceiroPasswordGate";
 
 const DIRECTORIES = [
   { key: "projetos", name: "Projetos", icon: Briefcase, subSections: ["Projetos", "Inovação"] },
@@ -44,8 +45,9 @@ const transacoesRecentes = [
   { desc: "Consultoria Y", tipo: "entrada", valor: 2200, data: "04/03" },
   { desc: "Material de escritório", tipo: "saida", valor: 350, data: "03/03" },
 ];
-
 const isFinanceiro = (sub: string) => sub === "Financeiro";
+const needsPasswordGate = (dirKey: string, sub: string) =>
+  isFinanceiro(sub) && (dirKey === "vice-presidencia" || dirKey === "presidencia");
 
 const FinanceiroContent = () => (
   <div className="space-y-5">
@@ -194,7 +196,15 @@ const Departments = () => {
               <span className="text-base font-semibold text-card-foreground">{sub}</span>
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-5">
-              {isFinanceiro(sub) ? <FinanceiroContent /> : <DefaultSubContent sub={sub} />}
+              {needsPasswordGate(currentDir.key, sub) ? (
+                <FinanceiroPasswordGate>
+                  <FinanceiroContent />
+                </FinanceiroPasswordGate>
+              ) : isFinanceiro(sub) ? (
+                <FinanceiroContent />
+              ) : (
+                <DefaultSubContent sub={sub} />
+              )}
             </AccordionContent>
           </AccordionItem>
         ))}
