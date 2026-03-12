@@ -235,7 +235,10 @@ const OceanBackground = () => {
     resize();
     window.addEventListener("resize", resize);
 
-    const onMouse = (e: MouseEvent) => { mouseRef.current = { x: e.clientX, y: e.clientY }; };
+    const onMouse = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    };
     const onScroll = () => { scrollRef.current = window.scrollY; };
     window.addEventListener("mousemove", onMouse);
     window.addEventListener("scroll", onScroll);
