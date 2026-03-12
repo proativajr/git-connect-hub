@@ -196,7 +196,15 @@ const Departments = () => {
               <span className="text-base font-semibold text-card-foreground">{sub}</span>
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-5">
-              {isFinanceiro(sub) ? <FinanceiroContent /> : <DefaultSubContent sub={sub} />}
+              {needsPasswordGate(currentDir.key, sub) ? (
+                <FinanceiroPasswordGate>
+                  <FinanceiroContent />
+                </FinanceiroPasswordGate>
+              ) : isFinanceiro(sub) ? (
+                <FinanceiroContent />
+              ) : (
+                <DefaultSubContent sub={sub} />
+              )}
             </AccordionContent>
           </AccordionItem>
         ))}
