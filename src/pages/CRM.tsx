@@ -4,7 +4,7 @@ import produtivaLogo from "@/assets/partners/produtiva-junior.jpeg";
 import geosegLogo from "@/assets/partners/geoseg.png";
 import redbullLogo from "@/assets/partners/redbull.png";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
-import OceanBackground from "@/components/OceanBackground";
+
 
 const partners = [
   {
@@ -41,7 +41,7 @@ const partners = [
 const CRM = () => {
   return (
     <div className="space-y-8 animate-fade-in relative">
-      <OceanBackground />
+      
       <div>
         <h1 className="text-3xl font-bold text-foreground">Parcerias</h1>
         <p className="text-muted-foreground mt-1">

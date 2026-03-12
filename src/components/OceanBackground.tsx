@@ -50,6 +50,7 @@ const drawShark = (
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(angle);
+  ctx.scale(1.2, 1.2);
 
   const tailSwing = Math.sin(t * 4) * 0.12;
 
@@ -220,7 +221,8 @@ const OceanBackground = () => {
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const w = window.innerWidth, h = window.innerHeight;
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width, h = rect.height;
       canvas.width = w * dpr;
       canvas.height = h * dpr;
       canvas.style.width = w + "px";
@@ -233,13 +235,17 @@ const OceanBackground = () => {
     resize();
     window.addEventListener("resize", resize);
 
-    const onMouse = (e: MouseEvent) => { mouseRef.current = { x: e.clientX, y: e.clientY }; };
+    const onMouse = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    };
     const onScroll = () => { scrollRef.current = window.scrollY; };
     window.addEventListener("mousemove", onMouse);
     window.addEventListener("scroll", onScroll);
 
     const animate = () => {
-      const w = window.innerWidth, h = window.innerHeight;
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width, h = rect.height;
       timeRef.current += 0.016;
       const t = timeRef.current;
       const mx = mouseRef.current.x, my = mouseRef.current.y;
@@ -405,7 +411,7 @@ const OceanBackground = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 -z-10"
+      className="absolute inset-0 w-full h-full"
       style={{ pointerEvents: "all", cursor: "none" }}
     />
   );

@@ -13,6 +13,7 @@ import Culture from "./pages/Culture";
 import CRM from "./pages/CRM";
 import Members from "./pages/Members";
 import Settings from "./pages/Settings";
+import Shark from "./pages/Shark";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/crm" element={<CRM />} />
               <Route path="/members" element={<Members />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/shark" element={<Shark />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
