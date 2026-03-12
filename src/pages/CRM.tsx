@@ -1,6 +1,7 @@
 import pipeloversLogo from "@/assets/partners/pipelovers.jpeg";
 import pwrLogo from "@/assets/partners/pwr-gestao.jpeg";
 import produtivaLogo from "@/assets/partners/produtiva-junior.jpeg";
+import geosegLogo from "@/assets/partners/geoseg.png";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 const partners = [
@@ -22,8 +23,13 @@ const partners = [
     description:
       "Empresa júnior voltada para soluções em engenharia de produção, otimização de processos e gestão da qualidade.",
   },
+  {
+    name: "GeoSeg",
+    logo: geosegLogo,
+    description:
+      "Soluções em segurança e saúde ocupacional, com elaboração de programas, treinamentos em SSO, lançamento eSocial, assistência em perícia e mapeamento e organização de rotinas de SSO.",
+  },
 ];
-
 const CRM = () => {
   return (
     <div className="space-y-8 animate-fade-in">
