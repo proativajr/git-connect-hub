@@ -47,7 +47,7 @@ const Culture = () => {
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Cultura & Governança</h1>
+        <h1 className="text-3xl font-bold text-foreground">Identidade do Cardume</h1>
         <p className="text-muted-foreground mt-1">Documentos e diretrizes corporativas</p>
       </div>
 
