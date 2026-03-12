@@ -221,7 +221,8 @@ const OceanBackground = () => {
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const w = window.innerWidth, h = window.innerHeight;
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width, h = rect.height;
       canvas.width = w * dpr;
       canvas.height = h * dpr;
       canvas.style.width = w + "px";
