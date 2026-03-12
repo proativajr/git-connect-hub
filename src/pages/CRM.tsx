@@ -2,6 +2,7 @@ import pipeloversLogo from "@/assets/partners/pipelovers.jpeg";
 import pwrLogo from "@/assets/partners/pwr-gestao.jpeg";
 import produtivaLogo from "@/assets/partners/produtiva-junior.jpeg";
 import geosegLogo from "@/assets/partners/geoseg.png";
+import redbullLogo from "@/assets/partners/redbull.png";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 const partners = [
