@@ -4,6 +4,7 @@ import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { useAuth } from "@/contexts/AuthContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import FinanceiroPasswordGate from "@/components/FinanceiroPasswordGate";
 
 const DIRECTORIES = [
   { key: "projetos", name: "Projetos", icon: Briefcase, subSections: ["Projetos", "Inovação"] },
