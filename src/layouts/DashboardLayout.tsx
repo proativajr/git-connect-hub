@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, Target, BarChart3, BookOpen, Handshake, Users, Settings, Fish, Image, ShieldCheck,
+  LayoutDashboard, Target, BarChart3, BookOpen, Handshake, Users, Settings, Fish, Image,
   ChevronLeft, ChevronRight, LogOut,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
