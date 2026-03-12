@@ -14,6 +14,8 @@ const navItems = [
   { title: "Diretorias", path: "/departments", icon: BarChart3 },
   { title: "Identidade do Cardume", path: "/culture", icon: BookOpen },
   { title: "Parcerias", path: "/crm", icon: Handshake },
+  { title: "Galeria", path: "/gallery", icon: Image },
+  { title: "Governança", path: "/governance", icon: ShieldCheck },
   { title: "Membros", path: "/members", icon: Users },
   { title: "Shark", path: "/shark", icon: Fish },
   { title: "Configurações", path: "/settings", icon: Settings },
