@@ -12,7 +12,7 @@ import Departments from "./pages/Departments";
 import Culture from "./pages/Culture";
 import CRM from "./pages/CRM";
 import Gallery from "./pages/Gallery";
-import Governance from "./pages/Governance";
+
 import Members from "./pages/Members";
 import Settings from "./pages/Settings";
 import Shark from "./pages/Shark";
@@ -36,7 +36,7 @@ const App = () => (
               <Route path="/culture" element={<Culture />} />
               <Route path="/crm" element={<CRM />} />
               <Route path="/gallery" element={<Gallery />} />
-              <Route path="/governance" element={<Governance />} />
+              
               <Route path="/members" element={<Members />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/shark" element={<Shark />} />

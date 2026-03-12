@@ -39,13 +39,13 @@ const okrsData: OKR[] = [
   {
     id: "obj2",
     titulo: "Aumentar Qualidade dos Projetos",
-    avaliacao: 7,
+    avaliacao: 0,
     krs: [
-      { id: "kr2-1", label: "Notas de CSAT", desejado: "4,0", realizado: "0", progresso: 0 },
+      { id: "kr2-1", label: "Notas de CSAT", desejado: "4,5", realizado: "0", progresso: 0 },
       { id: "kr2-2", label: "Relatórios de Projetos Finalizados", desejado: "100%", realizado: "0%", progresso: 0 },
-      { id: "kr2-3", label: "Treinamentos realizados", desejado: "6", realizado: "2", progresso: 33 },
-      { id: "kr2-4", label: "Serviços Padronizados", desejado: "3", realizado: "0", progresso: 0 },
-      { id: "kr2-5", label: "Diretorias Mapeadas", desejado: "2", realizado: "0,00", progresso: 0 },
+      { id: "kr2-3", label: "Treinamentos realizados por parceiros de baixo investimento", desejado: "6", realizado: "0", progresso: 0 },
+      { id: "kr2-4", label: "Reuniões de acompanhamento mensais", desejado: "18", realizado: "0", progresso: 0 },
+      { id: "kr2-5", label: "Inovações desenvolvidas", desejado: "3", realizado: "0,00", progresso: 0 },
     ],
   },
   {
