@@ -50,94 +50,247 @@ const drawShark = (
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(angle);
-  ctx.scale(1.2, 1.2);
 
-  const tailSwing = Math.sin(t * 4) * 0.12;
+  const scale = 1.6;
+  ctx.scale(scale, scale);
 
-  // Shadow beneath (offset down-right for depth)
-  ctx.globalAlpha = 0.18;
-  ctx.fillStyle = "rgba(0,10,30,1)";
+  const tailSwing = Math.sin(t * 3.5) * 0.10;
+
+  // === Deep shadow (far beneath, blurred feel) ===
+  ctx.globalAlpha = 0.12;
+  ctx.fillStyle = "rgba(0,8,25,1)";
   ctx.beginPath();
-  ctx.ellipse(6, 8, 40, 13, 0, 0, Math.PI * 2);
+  ctx.ellipse(4, 10, 48, 16, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.globalAlpha = 0.95;
+  // === Closer shadow ===
+  ctx.globalAlpha = 0.08;
+  ctx.fillStyle = "rgba(0,15,40,1)";
+  ctx.beginPath();
+  ctx.ellipse(3, 6, 42, 13, 0, 0, Math.PI * 2);
+  ctx.fill();
 
-  // --- Tail with swing ---
+  ctx.globalAlpha = 1;
+
+  // === Tail (caudal fin) with swing ===
   ctx.save();
-  ctx.translate(-28, 0);
+  ctx.translate(-32, 0);
   ctx.rotate(tailSwing);
-  ctx.fillStyle = "#f0f0f0";
+
+  // Tail gradient
+  const tailGrad = ctx.createLinearGradient(-25, 0, 5, 0);
+  tailGrad.addColorStop(0, "#8a9bae");
+  tailGrad.addColorStop(0.5, "#a0b0c0");
+  tailGrad.addColorStop(1, "#b8c8d5");
+  ctx.fillStyle = tailGrad;
+
   ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(-20, -15);
-  ctx.quadraticCurveTo(-15, -5, -11, 0);
-  ctx.quadraticCurveTo(-15, 5, -20, 15);
-  ctx.lineTo(0, 0);
+  ctx.moveTo(2, 0);
+  ctx.bezierCurveTo(-4, -3, -14, -14, -24, -18);
+  ctx.bezierCurveTo(-20, -10, -14, -4, -8, 0);
+  ctx.bezierCurveTo(-14, 4, -20, 10, -24, 18);
+  ctx.bezierCurveTo(-14, 14, -4, 3, 2, 0);
   ctx.fill();
+
+  // Tail edge detail
+  ctx.strokeStyle = "rgba(70,90,110,0.3)";
+  ctx.lineWidth = 0.5;
+  ctx.stroke();
   ctx.restore();
 
-  // --- Main body (white) ---
-  ctx.fillStyle = "#ffffff";
+  // === Caudal peduncle (narrow part before tail) ===
+  const pedGrad = ctx.createLinearGradient(-35, 0, -22, 0);
+  pedGrad.addColorStop(0, "#95a8b8");
+  pedGrad.addColorStop(1, "#a8bac8");
+  ctx.fillStyle = pedGrad;
   ctx.beginPath();
-  ctx.moveTo(42, 0);
-  ctx.quadraticCurveTo(28, -11, 6, -12);
-  ctx.quadraticCurveTo(-16, -11, -28, -6);
-  ctx.lineTo(-28, 6);
-  ctx.quadraticCurveTo(-16, 11, 6, 12);
-  ctx.quadraticCurveTo(28, 11, 42, 0);
+  ctx.moveTo(-22, -5);
+  ctx.bezierCurveTo(-26, -4, -30, -3.5, -33, -3);
+  ctx.lineTo(-33, 3);
+  ctx.bezierCurveTo(-30, 3.5, -26, 4, -22, 5);
+  ctx.closePath();
   ctx.fill();
 
-  // Subtle spine line
-  ctx.strokeStyle = "rgba(180,195,210,0.35)";
-  ctx.lineWidth = 1.2;
+  // === Main body ===
+  // Body gradient (darker top/spine, lighter sides)
+  const bodyGrad = ctx.createLinearGradient(0, -14, 0, 14);
+  bodyGrad.addColorStop(0, "#7a8d9e");
+  bodyGrad.addColorStop(0.3, "#8ea0b2");
+  bodyGrad.addColorStop(0.5, "#a0b5c5");
+  bodyGrad.addColorStop(0.7, "#8ea0b2");
+  bodyGrad.addColorStop(1, "#7a8d9e");
+  ctx.fillStyle = bodyGrad;
+
   ctx.beginPath();
-  ctx.moveTo(38, 0);
-  ctx.lineTo(-24, 0);
+  ctx.moveTo(48, 0); // nose tip
+  ctx.bezierCurveTo(42, -5, 34, -10, 22, -13);
+  ctx.bezierCurveTo(10, -15, -4, -14, -14, -12);
+  ctx.bezierCurveTo(-22, -10, -28, -7, -32, -4);
+  ctx.lineTo(-32, 4);
+  ctx.bezierCurveTo(-28, 7, -22, 10, -14, 12);
+  ctx.bezierCurveTo(-4, 14, 10, 15, 22, 13);
+  ctx.bezierCurveTo(34, 10, 42, 5, 48, 0);
+  ctx.fill();
+
+  // Body outline
+  ctx.strokeStyle = "rgba(60,75,95,0.25)";
+  ctx.lineWidth = 0.8;
   ctx.stroke();
 
-  // --- Pectoral fins ---
-  ctx.fillStyle = "#f5f5f5";
+  // === Countershading (lighter belly) ===
+  ctx.globalAlpha = 0.25;
+  const bellyGrad = ctx.createLinearGradient(0, -6, 0, 6);
+  bellyGrad.addColorStop(0, "rgba(200,215,230,0)");
+  bellyGrad.addColorStop(0.4, "rgba(210,225,240,0.6)");
+  bellyGrad.addColorStop(0.6, "rgba(210,225,240,0.6)");
+  bellyGrad.addColorStop(1, "rgba(200,215,230,0)");
+  ctx.fillStyle = bellyGrad;
   ctx.beginPath();
-  ctx.moveTo(6, -10);
-  ctx.quadraticCurveTo(-2, -24, -12, -20);
-  ctx.quadraticCurveTo(-4, -14, 3, -9);
+  ctx.ellipse(5, 0, 32, 8, 0, 0, Math.PI * 2);
   ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // === Pectoral fins (large, swept back) ===
+  const finGrad = ctx.createLinearGradient(0, -12, 0, -28);
+  finGrad.addColorStop(0, "#8a9daf");
+  finGrad.addColorStop(1, "#6d8299");
+  ctx.fillStyle = finGrad;
+
+  // Left pectoral
   ctx.beginPath();
-  ctx.moveTo(6, 10);
-  ctx.quadraticCurveTo(-2, 24, -12, 20);
-  ctx.quadraticCurveTo(-4, 14, 3, 9);
+  ctx.moveTo(10, -12);
+  ctx.bezierCurveTo(6, -16, -2, -26, -10, -30);
+  ctx.bezierCurveTo(-8, -24, -4, -18, 0, -14);
+  ctx.bezierCurveTo(3, -12, 7, -11, 10, -12);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(60,80,100,0.2)";
+  ctx.lineWidth = 0.5;
+  ctx.stroke();
+
+  // Right pectoral
+  ctx.fillStyle = finGrad;
+  ctx.beginPath();
+  ctx.moveTo(10, 12);
+  ctx.bezierCurveTo(6, 16, -2, 26, -10, 30);
+  ctx.bezierCurveTo(-8, 24, -4, 18, 0, 14);
+  ctx.bezierCurveTo(3, 12, 7, 11, 10, 12);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(60,80,100,0.2)";
+  ctx.lineWidth = 0.5;
+  ctx.stroke();
+
+  // === Pelvic fins (small, near tail) ===
+  ctx.fillStyle = "#8a9bae";
+  ctx.globalAlpha = 0.8;
+  // Left pelvic
+  ctx.beginPath();
+  ctx.moveTo(-16, -9);
+  ctx.bezierCurveTo(-18, -12, -22, -16, -24, -15);
+  ctx.bezierCurveTo(-22, -13, -19, -10, -16, -9);
+  ctx.fill();
+  // Right pelvic
+  ctx.beginPath();
+  ctx.moveTo(-16, 9);
+  ctx.bezierCurveTo(-18, 12, -22, 16, -24, 15);
+  ctx.bezierCurveTo(-22, 13, -19, 10, -16, 9);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // === Dorsal fin (top-down ridge with shadow) ===
+  const dorsalGrad = ctx.createRadialGradient(4, 0, 0, 4, 0, 10);
+  dorsalGrad.addColorStop(0, "rgba(85,100,120,0.6)");
+  dorsalGrad.addColorStop(0.6, "rgba(85,100,120,0.3)");
+  dorsalGrad.addColorStop(1, "rgba(85,100,120,0)");
+  ctx.fillStyle = dorsalGrad;
+  ctx.beginPath();
+  ctx.ellipse(4, 0, 10, 4.5, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // --- Dorsal fin (top-down ridge) ---
-  ctx.fillStyle = "#e8e8e8";
+  // Dorsal fin spine highlight
+  ctx.strokeStyle = "rgba(140,160,180,0.5)";
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.ellipse(2, 0, 8, 3.5, 0, 0, Math.PI * 2);
+  ctx.moveTo(14, 0);
+  ctx.lineTo(-6, 0);
+  ctx.stroke();
+
+  // Dorsal fin tip
+  ctx.fillStyle = "rgba(100,115,135,0.5)";
+  ctx.beginPath();
+  ctx.ellipse(4, 0, 5, 2.5, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // --- Nose tip highlight ---
-  ctx.fillStyle = "rgba(255,255,255,0.6)";
+  // === Spine line (full length, subtle) ===
+  ctx.strokeStyle = "rgba(70,90,110,0.2)";
+  ctx.lineWidth = 0.8;
   ctx.beginPath();
-  ctx.ellipse(38, 0, 5, 3, 0, 0, Math.PI * 2);
+  ctx.moveTo(44, 0);
+  ctx.lineTo(-28, 0);
+  ctx.stroke();
+
+  // === Gill slits (5 on each side) ===
+  ctx.strokeStyle = "rgba(50,70,90,0.25)";
+  ctx.lineWidth = 0.6;
+  for (let i = 0; i < 5; i++) {
+    const gx = 18 - i * 3.5;
+    ctx.beginPath();
+    ctx.moveTo(gx, -8 - i * 0.3);
+    ctx.lineTo(gx - 1, -10 - i * 0.3);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(gx, 8 + i * 0.3);
+    ctx.lineTo(gx - 1, 10 + i * 0.3);
+    ctx.stroke();
+  }
+
+  // === Nose/snout (rounded, with highlight) ===
+  const noseGrad = ctx.createRadialGradient(44, 0, 0, 44, 0, 8);
+  noseGrad.addColorStop(0, "rgba(180,200,220,0.5)");
+  noseGrad.addColorStop(1, "rgba(160,180,200,0)");
+  ctx.fillStyle = noseGrad;
+  ctx.beginPath();
+  ctx.ellipse(44, 0, 6, 4, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // --- Eyes (small dark dots) ---
-  ctx.fillStyle = "rgba(20,30,50,0.7)";
+  // === Eyes ===
+  // Eye sockets (slightly recessed look)
+  ctx.fillStyle = "rgba(40,55,75,0.4)";
   ctx.beginPath();
-  ctx.arc(26, -6, 2, 0, Math.PI * 2);
+  ctx.ellipse(28, -8, 3, 2.2, -0.2, 0, Math.PI * 2);
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(26, 6, 2, 0, Math.PI * 2);
+  ctx.ellipse(28, 8, 3, 2.2, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Iris (dark)
+  ctx.fillStyle = "rgba(15,25,40,0.85)";
+  ctx.beginPath();
+  ctx.arc(28.5, -8, 1.8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(28.5, 8, 1.8, 0, Math.PI * 2);
   ctx.fill();
 
   // Eye glint
-  ctx.fillStyle = "rgba(200,220,240,0.5)";
+  ctx.fillStyle = "rgba(180,210,240,0.6)";
   ctx.beginPath();
-  ctx.arc(26.5, -6.5, 0.8, 0, Math.PI * 2);
+  ctx.arc(29.2, -8.5, 0.7, 0, Math.PI * 2);
   ctx.fill();
   ctx.beginPath();
-  ctx.arc(26.5, 5.5, 0.8, 0, Math.PI * 2);
+  ctx.arc(29.2, 7.5, 0.7, 0, Math.PI * 2);
   ctx.fill();
+
+  // === Subtle body texture (tiny speckles) ===
+  ctx.globalAlpha = 0.06;
+  ctx.fillStyle = "#3a4f65";
+  for (let i = 0; i < 20; i++) {
+    const tx = -20 + i * 3.2 + Math.sin(i * 2.3) * 2;
+    const ty = Math.sin(i * 1.7) * 6;
+    ctx.beginPath();
+    ctx.arc(tx, ty, 0.6 + Math.sin(i) * 0.3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
 
   ctx.restore();
 };
