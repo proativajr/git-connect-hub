@@ -4,6 +4,7 @@ import produtivaLogo from "@/assets/partners/produtiva-junior.jpeg";
 import geosegLogo from "@/assets/partners/geoseg.png";
 import redbullLogo from "@/assets/partners/redbull.png";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import OceanBackground from "@/components/OceanBackground";
 
 const partners = [
   {
