@@ -45,7 +45,7 @@ const transacoesRecentes = [
   { desc: "Consultoria Y", tipo: "entrada", valor: 2200, data: "04/03" },
   { desc: "Material de escritório", tipo: "saida", valor: 350, data: "03/03" },
 ];
-
+const isFinanceiro = (sub: string) => sub === "Financeiro";
 const needsPasswordGate = (dirKey: string, sub: string) =>
   isFinanceiro(sub) && (dirKey === "vice-presidencia" || dirKey === "presidencia");
 
