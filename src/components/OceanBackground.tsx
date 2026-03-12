@@ -19,8 +19,8 @@ interface Particle {
   drift: number;
 }
 
-const FISH_COUNT = 60;
-const PARTICLE_COUNT = 30;
+const FISH_COUNT = 80;
+const PARTICLE_COUNT = 40;
 
 // Boids parameters
 const SEPARATION_RADIUS = 18;
@@ -31,16 +31,142 @@ const ALIGNMENT_FORCE = 0.03;
 const COHESION_FORCE = 0.008;
 const MAX_SPEED = 2.2;
 const MIN_SPEED = 0.6;
-const CURSOR_FLEE_RADIUS = 140;
-const CURSOR_FLEE_FORCE = 0.35;
+const CURSOR_FLEE_RADIUS = 160;
+const CURSOR_FLEE_FORCE = 0.45;
 const WANDER_FORCE = 0.15;
 const EDGE_MARGIN = 60;
 const EDGE_FORCE = 0.08;
+
+// Shark smoothing
+const SHARK_LERP = 0.08;
+
+const drawShark = (
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  angle: number,
+  t: number
+) => {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+
+  const tailSwing = Math.sin(t * 4) * 0.15;
+
+  // Shadow beneath
+  ctx.globalAlpha = 0.12;
+  ctx.fillStyle = "rgba(0,5,20,1)";
+  ctx.beginPath();
+  ctx.ellipse(4, 6, 38, 12, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.globalAlpha = 0.9;
+
+  // Main body
+  ctx.fillStyle = "#3a4f63";
+  ctx.beginPath();
+  ctx.moveTo(40, 0);
+  ctx.quadraticCurveTo(25, -10, 5, -11);
+  ctx.quadraticCurveTo(-15, -10, -25, -6);
+  ctx.lineTo(-25, 6);
+  ctx.quadraticCurveTo(-15, 10, 5, 11);
+  ctx.quadraticCurveTo(25, 10, 40, 0);
+  ctx.fill();
+
+  // Darker dorsal area
+  ctx.fillStyle = "#2d3e4e";
+  ctx.beginPath();
+  ctx.moveTo(38, 0);
+  ctx.quadraticCurveTo(22, -8, 0, -9);
+  ctx.quadraticCurveTo(-12, -8, -20, -4);
+  ctx.lineTo(-20, 0);
+  ctx.quadraticCurveTo(-5, -2, 15, -1);
+  ctx.quadraticCurveTo(28, 0, 38, 0);
+  ctx.fill();
+
+  // Belly (lighter)
+  ctx.fillStyle = "#7a9ab0";
+  ctx.beginPath();
+  ctx.moveTo(35, 2);
+  ctx.quadraticCurveTo(18, 9, 0, 9);
+  ctx.quadraticCurveTo(-12, 8, -20, 4);
+  ctx.lineTo(-20, 1);
+  ctx.quadraticCurveTo(-5, 3, 15, 2);
+  ctx.quadraticCurveTo(28, 1, 35, 2);
+  ctx.fill();
+
+  // Tail (with swing)
+  ctx.save();
+  ctx.translate(-25, 0);
+  ctx.rotate(tailSwing);
+  ctx.fillStyle = "#3a4f63";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(-18, -14);
+  ctx.quadraticCurveTo(-14, -4, -10, 0);
+  ctx.quadraticCurveTo(-14, 4, -18, 14);
+  ctx.lineTo(0, 0);
+  ctx.fill();
+  ctx.restore();
+
+  // Pectoral fins
+  ctx.fillStyle = "#4a6070";
+  // Left fin
+  ctx.beginPath();
+  ctx.moveTo(8, -8);
+  ctx.quadraticCurveTo(2, -20, -8, -18);
+  ctx.quadraticCurveTo(-2, -12, 4, -7);
+  ctx.fill();
+  // Right fin
+  ctx.beginPath();
+  ctx.moveTo(8, 8);
+  ctx.quadraticCurveTo(2, 20, -8, 18);
+  ctx.quadraticCurveTo(-2, 12, 4, 7);
+  ctx.fill();
+
+  // Dorsal fin
+  ctx.fillStyle = "#3a4f63";
+  ctx.beginPath();
+  ctx.moveTo(5, -9);
+  ctx.lineTo(-2, -18);
+  ctx.lineTo(-8, -9);
+  ctx.fill();
+
+  // Eye
+  ctx.fillStyle = "rgba(10,20,30,0.8)";
+  ctx.beginPath();
+  ctx.arc(28, -4, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "rgba(180,210,230,0.4)";
+  ctx.beginPath();
+  ctx.arc(28.5, -4.5, 1, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Gill slits
+  ctx.strokeStyle = "rgba(20,40,60,0.3)";
+  ctx.lineWidth = 0.8;
+  for (let i = 0; i < 3; i++) {
+    const gx = 18 - i * 4;
+    ctx.beginPath();
+    ctx.moveTo(gx, -5);
+    ctx.lineTo(gx - 1, 5);
+    ctx.stroke();
+  }
+
+  // Nose highlight
+  ctx.fillStyle = "rgba(120,160,190,0.2)";
+  ctx.beginPath();
+  ctx.ellipse(34, -1, 5, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+};
 
 const OceanBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef(0);
   const mouseRef = useRef({ x: -9999, y: -9999 });
+  const sharkRef = useRef({ x: -9999, y: -9999, angle: 0 });
   const scrollRef = useRef(0);
   const fishRef = useRef<Fish[]>([]);
   const particlesRef = useRef<Particle[]>([]);
@@ -75,7 +201,7 @@ const OceanBackground = () => {
       drift: (Math.random() - 0.5) * 0.3,
     })), []);
 
-  const drawFish = (ctx: CanvasRenderingContext2D, f: Fish) => {
+  const drawFish = useCallback((ctx: CanvasRenderingContext2D, f: Fish) => {
     const angle = Math.atan2(f.vy, f.vx);
     const s = f.size;
     ctx.save();
@@ -83,13 +209,11 @@ const OceanBackground = () => {
     ctx.rotate(angle);
     ctx.globalAlpha = f.alpha;
 
-    // Body
     ctx.fillStyle = `hsla(${f.hue}, 55%, 65%, 0.85)`;
     ctx.beginPath();
     ctx.ellipse(0, 0, s * 1.8, s * 0.7, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Tail
     ctx.fillStyle = `hsla(${f.hue}, 50%, 55%, 0.7)`;
     ctx.beginPath();
     ctx.moveTo(-s * 1.6, 0);
@@ -98,20 +222,22 @@ const OceanBackground = () => {
     ctx.closePath();
     ctx.fill();
 
-    // Eye
     ctx.fillStyle = "rgba(220,240,255,0.9)";
     ctx.beginPath();
     ctx.arc(s * 1.0, -s * 0.15, s * 0.18, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();
-  };
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+
+    // Hide default cursor over canvas
+    canvas.style.cursor = "none";
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -137,6 +263,27 @@ const OceanBackground = () => {
       const w = window.innerWidth, h = window.innerHeight;
       timeRef.current += 0.016;
       const t = timeRef.current;
+      const mx = mouseRef.current.x, my = mouseRef.current.y;
+
+      // --- Smooth shark position ---
+      const shark = sharkRef.current;
+      if (shark.x < -5000) {
+        shark.x = mx;
+        shark.y = my;
+      } else {
+        shark.x += (mx - shark.x) * SHARK_LERP;
+        shark.y += (my - shark.y) * SHARK_LERP;
+      }
+      const sdx = mx - shark.x, sdy = my - shark.y;
+      const targetAngle = Math.atan2(sdy, sdx);
+      // Smooth angle interpolation
+      let angleDiff = targetAngle - shark.angle;
+      while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+      while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+      const sharkSpeed = Math.sqrt(sdx * sdx + sdy * sdy);
+      if (sharkSpeed > 1) {
+        shark.angle += angleDiff * 0.1;
+      }
 
       // --- Background ---
       const bg = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.7);
@@ -146,15 +293,15 @@ const OceanBackground = () => {
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, w, h);
 
-      // Water caustics / light ripples
+      // Water caustics
       ctx.globalAlpha = 0.03;
-      for (let i = 0; i < 6; i++) {
-        const cx = w * (0.2 + i * 0.12) + Math.sin(t * 0.3 + i) * 40;
-        const cy = h * 0.3 + Math.cos(t * 0.2 + i * 1.5) * 30 + scrollRef.current * 0.05;
-        const r = 80 + Math.sin(t * 0.5 + i) * 30;
+      for (let i = 0; i < 8; i++) {
+        const cx = w * (0.1 + i * 0.11) + Math.sin(t * 0.3 + i) * 50;
+        const cy = h * (0.2 + (i % 3) * 0.25) + Math.cos(t * 0.2 + i * 1.5) * 40 + scrollRef.current * 0.05;
+        const r = 90 + Math.sin(t * 0.5 + i) * 35;
         const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-        g.addColorStop(0, "rgba(120,200,255,0.5)");
-        g.addColorStop(1, "rgba(120,200,255,0)");
+        g.addColorStop(0, "rgba(100,200,255,0.5)");
+        g.addColorStop(1, "rgba(100,200,255,0)");
         ctx.fillStyle = g;
         ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
       }
@@ -173,29 +320,10 @@ const OceanBackground = () => {
       });
       ctx.globalAlpha = 1;
 
-      // --- Cursor shadow (shark beneath) ---
-      const mx = mouseRef.current.x, my = mouseRef.current.y;
-      if (mx > -1000) {
-        const shadow = ctx.createRadialGradient(mx, my, 0, mx, my, 90);
-        shadow.addColorStop(0, "rgba(0,10,30,0.18)");
-        shadow.addColorStop(0.5, "rgba(0,10,30,0.06)");
-        shadow.addColorStop(1, "rgba(0,10,30,0)");
-        ctx.fillStyle = shadow;
-        ctx.fillRect(mx - 90, my - 90, 180, 180);
-
-        // Ripple
-        const rippleR = 50 + Math.sin(t * 3) * 8;
-        ctx.strokeStyle = `rgba(100,180,255,${0.06 + Math.sin(t * 4) * 0.02})`;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(mx, my, rippleR, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-
       // --- Boids ---
       const fish = fishRef.current;
+      const sx = shark.x, sy = shark.y;
 
-      // Update wander direction occasionally
       wanderTimerRef.current -= 0.016;
       if (wanderTimerRef.current <= 0) {
         wanderAngleRef.current += (Math.random() - 0.5) * 1.2;
@@ -214,43 +342,27 @@ const OceanBackground = () => {
           if (i === j) continue;
           const dx = fish[j].x - f.x, dy = fish[j].y - f.y;
           const d = Math.sqrt(dx * dx + dy * dy);
-
-          if (d < SEPARATION_RADIUS && d > 0) {
-            sepX -= dx / d;
-            sepY -= dy / d;
-          }
-          if (d < ALIGNMENT_RADIUS) {
-            aliVx += fish[j].vx;
-            aliVy += fish[j].vy;
-            aliCount++;
-          }
-          if (d < COHESION_RADIUS) {
-            cohX += fish[j].x;
-            cohY += fish[j].y;
-            cohCount++;
-          }
+          if (d < SEPARATION_RADIUS && d > 0) { sepX -= dx / d; sepY -= dy / d; }
+          if (d < ALIGNMENT_RADIUS) { aliVx += fish[j].vx; aliVy += fish[j].vy; aliCount++; }
+          if (d < COHESION_RADIUS) { cohX += fish[j].x; cohY += fish[j].y; cohCount++; }
         }
 
-        // Apply forces
         f.vx += sepX * SEPARATION_FORCE;
         f.vy += sepY * SEPARATION_FORCE;
-
         if (aliCount > 0) {
           f.vx += (aliVx / aliCount - f.vx) * ALIGNMENT_FORCE;
           f.vy += (aliVy / aliCount - f.vy) * ALIGNMENT_FORCE;
         }
-
         if (cohCount > 0) {
           f.vx += (cohX / cohCount - f.x) * COHESION_FORCE;
           f.vy += (cohY / cohCount - f.y) * COHESION_FORCE;
         }
 
-        // Wander
         f.vx += Math.cos(wanderAngleRef.current + i * 0.1) * WANDER_FORCE * 0.016;
         f.vy += Math.sin(wanderAngleRef.current + i * 0.1) * WANDER_FORCE * 0.016;
 
-        // Flee cursor
-        const cdx = f.x - mx, cdy = f.y - my;
+        // Flee shark (smooth position)
+        const cdx = f.x - sx, cdy = f.y - sy;
         const cd = Math.sqrt(cdx * cdx + cdy * cdy);
         if (cd < CURSOR_FLEE_RADIUS && cd > 0) {
           const force = (1 - cd / CURSOR_FLEE_RADIUS) * CURSOR_FLEE_FORCE;
@@ -264,7 +376,6 @@ const OceanBackground = () => {
         if (f.y < EDGE_MARGIN) f.vy += EDGE_FORCE;
         if (f.y > h - EDGE_MARGIN) f.vy -= EDGE_FORCE;
 
-        // Clamp speed
         const spd = Math.sqrt(f.vx * f.vx + f.vy * f.vy);
         if (spd > MAX_SPEED) { f.vx = (f.vx / spd) * MAX_SPEED; f.vy = (f.vy / spd) * MAX_SPEED; }
         if (spd < MIN_SPEED && spd > 0) { f.vx = (f.vx / spd) * MIN_SPEED; f.vy = (f.vy / spd) * MIN_SPEED; }
@@ -272,13 +383,31 @@ const OceanBackground = () => {
         f.x += f.vx;
         f.y += f.vy + scrollShift * 0.01;
 
-        // Wrap
         if (f.x < -20) f.x = w + 20;
         if (f.x > w + 20) f.x = -20;
         if (f.y < -20) f.y = h + 20;
         if (f.y > h + 20) f.y = -20;
 
         drawFish(ctx, f);
+      }
+
+      // --- Draw shark (replaces cursor) ---
+      if (mx > -1000) {
+        // Water disturbance around shark
+        const ripple1R = 55 + Math.sin(t * 3) * 8;
+        const ripple2R = 35 + Math.sin(t * 4.5 + 1) * 5;
+        ctx.globalAlpha = 0.04 + Math.min(sharkSpeed * 0.002, 0.06);
+        ctx.strokeStyle = "rgba(100,180,255,0.8)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(shark.x, shark.y, ripple1R, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(shark.x, shark.y, ripple2R, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+
+        drawShark(ctx, shark.x, shark.y, shark.angle, t);
       }
 
       animRef.current = requestAnimationFrame(animate);
@@ -292,13 +421,13 @@ const OceanBackground = () => {
       window.removeEventListener("mousemove", onMouse);
       window.removeEventListener("scroll", onScroll);
     };
-  }, [initFish, initParticles]);
+  }, [initFish, initParticles, drawFish]);
 
   return (
     <canvas
       ref={canvasRef}
       className="fixed inset-0 -z-10"
-      style={{ pointerEvents: "all" }}
+      style={{ pointerEvents: "all", cursor: "none" }}
     />
   );
 };
