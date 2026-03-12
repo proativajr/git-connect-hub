@@ -48,7 +48,7 @@ const DashboardLayout = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full">
+    <div className="flex min-h-screen w-full" style={{ "--sidebar-width": collapsed ? "72px" : "256px" } as React.CSSProperties}>
       <aside className={`fixed inset-y-0 left-0 z-30 flex flex-col bg-primary transition-all duration-300 ${collapsed ? "w-[72px]" : "w-64"}`}>
         <div className="flex items-center justify-center px-4 py-6">
           <img src={logoProativa} alt="Proativa Jr" className={`transition-all duration-300 ${collapsed ? "w-10" : "w-20"}`} />
