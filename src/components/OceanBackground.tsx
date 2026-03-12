@@ -1,365 +1,303 @@
 import { useEffect, useRef, useCallback } from "react";
 
-interface Shark {
+interface Fish {
   x: number;
   y: number;
-  baseY: number;
-  speed: number;
-  size: number;
-  opacity: number;
-  depth: number;
-  wobbleOffset: number;
-  wobbleSpeed: number;
-  tailPhase: number;
   vx: number;
   vy: number;
-  targetVx: number;
-  fleeTimer: number;
+  size: number;
+  hue: number;
+  alpha: number;
 }
 
-interface Bubble {
+interface Particle {
   x: number;
   y: number;
   radius: number;
   speed: number;
-  wobble: number;
-  wobbleSpeed: number;
-  opacity: number;
+  alpha: number;
+  drift: number;
 }
 
-interface LightRay {
-  x: number;
-  width: number;
-  opacity: number;
-  speed: number;
-  angle: number;
-}
+const FISH_COUNT = 60;
+const PARTICLE_COUNT = 30;
 
-const SHARK_COUNT = 8;
-const BUBBLE_COUNT = 25;
-const RAY_COUNT = 5;
+// Boids parameters
+const SEPARATION_RADIUS = 18;
+const ALIGNMENT_RADIUS = 50;
+const COHESION_RADIUS = 80;
+const SEPARATION_FORCE = 0.05;
+const ALIGNMENT_FORCE = 0.03;
+const COHESION_FORCE = 0.008;
+const MAX_SPEED = 2.2;
+const MIN_SPEED = 0.6;
+const CURSOR_FLEE_RADIUS = 140;
+const CURSOR_FLEE_FORCE = 0.35;
+const WANDER_FORCE = 0.15;
+const EDGE_MARGIN = 60;
+const EDGE_FORCE = 0.08;
 
 const OceanBackground = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animFrameRef = useRef<number>(0);
-  const mouseRef = useRef({ x: -1000, y: -1000 });
+  const animRef = useRef(0);
+  const mouseRef = useRef({ x: -9999, y: -9999 });
   const scrollRef = useRef(0);
-  const sharksRef = useRef<Shark[]>([]);
-  const bubblesRef = useRef<Bubble[]>([]);
-  const raysRef = useRef<LightRay[]>([]);
+  const fishRef = useRef<Fish[]>([]);
+  const particlesRef = useRef<Particle[]>([]);
   const timeRef = useRef(0);
+  const wanderAngleRef = useRef(Math.random() * Math.PI * 2);
+  const wanderTimerRef = useRef(0);
 
-  const initSharks = useCallback((w: number, h: number) => {
-    const sharks: Shark[] = [];
-    for (let i = 0; i < SHARK_COUNT; i++) {
-      const depth = 0.3 + Math.random() * 0.7;
-      sharks.push({
-        x: Math.random() * w * 1.5 - w * 0.25,
-        y: h * 0.2 + Math.random() * h * 0.6,
-        baseY: h * 0.2 + Math.random() * h * 0.6,
-        speed: (0.3 + Math.random() * 0.5) * depth,
-        size: (30 + Math.random() * 25) * depth,
-        opacity: 0.15 + depth * 0.35,
-        depth,
-        wobbleOffset: Math.random() * Math.PI * 2,
-        wobbleSpeed: 0.5 + Math.random() * 0.5,
-        tailPhase: Math.random() * Math.PI * 2,
-        vx: 0,
-        vy: 0,
-        targetVx: 0,
-        fleeTimer: 0,
-      });
-    }
-    sharks.sort((a, b) => a.depth - b.depth);
-    return sharks;
+  const initFish = useCallback((w: number, h: number): Fish[] => {
+    const cx = w / 2, cy = h / 2;
+    return Array.from({ length: FISH_COUNT }, () => {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = MIN_SPEED + Math.random() * (MAX_SPEED - MIN_SPEED);
+      return {
+        x: cx + (Math.random() - 0.5) * w * 0.4,
+        y: cy + (Math.random() - 0.5) * h * 0.4,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 3 + Math.random() * 3,
+        hue: 190 + Math.random() * 30,
+        alpha: 0.5 + Math.random() * 0.4,
+      };
+    });
   }, []);
 
-  const initBubbles = useCallback((w: number, h: number) => {
-    const bubbles: Bubble[] = [];
-    for (let i = 0; i < BUBBLE_COUNT; i++) {
-      bubbles.push({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        radius: 1 + Math.random() * 3,
-        speed: 0.2 + Math.random() * 0.5,
-        wobble: Math.random() * Math.PI * 2,
-        wobbleSpeed: 0.5 + Math.random() * 1.5,
-        opacity: 0.1 + Math.random() * 0.2,
-      });
-    }
-    return bubbles;
-  }, []);
+  const initParticles = useCallback((w: number, h: number): Particle[] =>
+    Array.from({ length: PARTICLE_COUNT }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      radius: 0.5 + Math.random() * 1.5,
+      speed: 0.05 + Math.random() * 0.15,
+      alpha: 0.08 + Math.random() * 0.12,
+      drift: (Math.random() - 0.5) * 0.3,
+    })), []);
 
-  const initRays = useCallback((w: number) => {
-    const rays: LightRay[] = [];
-    for (let i = 0; i < RAY_COUNT; i++) {
-      rays.push({
-        x: Math.random() * w,
-        width: 40 + Math.random() * 80,
-        opacity: 0.02 + Math.random() * 0.04,
-        speed: 0.1 + Math.random() * 0.2,
-        angle: -0.15 + Math.random() * 0.3,
-      });
-    }
-    return rays;
-  }, []);
-
-  const drawShark = (
-    ctx: CanvasRenderingContext2D,
-    shark: Shark,
-    time: number
-  ) => {
-    const { x, y, size, opacity, tailPhase } = shark;
-    const tailSwing = Math.sin(time * 2.5 + tailPhase) * size * 0.15;
-
+  const drawFish = (ctx: CanvasRenderingContext2D, f: Fish) => {
+    const angle = Math.atan2(f.vy, f.vx);
+    const s = f.size;
     ctx.save();
-    ctx.globalAlpha = opacity;
-    ctx.translate(x, y);
+    ctx.translate(f.x, f.y);
+    ctx.rotate(angle);
+    ctx.globalAlpha = f.alpha;
 
-    // Body gradient
-    const grad = ctx.createLinearGradient(-size, -size * 0.15, size, size * 0.15);
-    grad.addColorStop(0, "rgba(20, 40, 70, 0.9)");
-    grad.addColorStop(0.5, "rgba(30, 55, 90, 0.8)");
-    grad.addColorStop(1, "rgba(15, 30, 55, 0.7)");
-
-    ctx.fillStyle = grad;
+    // Body
+    ctx.fillStyle = `hsla(${f.hue}, 55%, 65%, 0.85)`;
     ctx.beginPath();
+    ctx.ellipse(0, 0, s * 1.8, s * 0.7, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-    // Streamlined shark body using bezier curves
-    // Nose
-    ctx.moveTo(size * 0.8, 0);
-    // Top body
-    ctx.bezierCurveTo(
-      size * 0.6, -size * 0.18,
-      size * 0.2, -size * 0.22,
-      0, -size * 0.18
-    );
-    // Dorsal fin
-    ctx.lineTo(-size * 0.05, -size * 0.45);
-    ctx.lineTo(-size * 0.25, -size * 0.15);
-    // Back top
-    ctx.bezierCurveTo(
-      -size * 0.4, -size * 0.12,
-      -size * 0.6, -size * 0.08,
-      -size * 0.7, 0
-    );
     // Tail
-    ctx.lineTo(-size * 0.85 + tailSwing, -size * 0.25);
-    ctx.lineTo(-size * 0.75 + tailSwing * 0.5, 0);
-    ctx.lineTo(-size * 0.85 + tailSwing, size * 0.2);
-    ctx.lineTo(-size * 0.7, size * 0.02);
-    // Bottom body
-    ctx.bezierCurveTo(
-      -size * 0.5, size * 0.1,
-      -size * 0.2, size * 0.15,
-      0, size * 0.12
-    );
-    // Pectoral fin
-    ctx.lineTo(size * 0.15, size * 0.3);
-    ctx.lineTo(size * 0.3, size * 0.1);
-    // Belly to nose
-    ctx.bezierCurveTo(
-      size * 0.5, size * 0.1,
-      size * 0.7, size * 0.05,
-      size * 0.8, 0
-    );
-
+    ctx.fillStyle = `hsla(${f.hue}, 50%, 55%, 0.7)`;
+    ctx.beginPath();
+    ctx.moveTo(-s * 1.6, 0);
+    ctx.lineTo(-s * 2.8, -s * 0.8);
+    ctx.lineTo(-s * 2.8, s * 0.8);
     ctx.closePath();
     ctx.fill();
 
     // Eye
-    ctx.fillStyle = `rgba(180, 210, 240, ${opacity * 0.8})`;
+    ctx.fillStyle = "rgba(220,240,255,0.9)";
     ctx.beginPath();
-    ctx.arc(size * 0.55, -size * 0.06, size * 0.03, 0, Math.PI * 2);
+    ctx.arc(s * 1.0, -s * 0.15, s * 0.18, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.restore();
-  };
-
-  const drawBubble = (
-    ctx: CanvasRenderingContext2D,
-    bubble: Bubble,
-    time: number
-  ) => {
-    const wx = Math.sin(time * bubble.wobbleSpeed + bubble.wobble) * 3;
-    ctx.save();
-    ctx.globalAlpha = bubble.opacity;
-    ctx.strokeStyle = "rgba(150, 200, 255, 0.4)";
-    ctx.lineWidth = 0.5;
-    ctx.beginPath();
-    ctx.arc(bubble.x + wx, bubble.y, bubble.radius, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Highlight
-    ctx.fillStyle = "rgba(200, 230, 255, 0.15)";
-    ctx.beginPath();
-    ctx.arc(
-      bubble.x + wx - bubble.radius * 0.3,
-      bubble.y - bubble.radius * 0.3,
-      bubble.radius * 0.3,
-      0,
-      Math.PI * 2
-    );
-    ctx.fill();
-    ctx.restore();
-  };
-
-  const drawRay = (
-    ctx: CanvasRenderingContext2D,
-    ray: LightRay,
-    h: number
-  ) => {
-    ctx.save();
-    ctx.globalAlpha = ray.opacity;
-    const grad = ctx.createLinearGradient(ray.x, 0, ray.x, h);
-    grad.addColorStop(0, "rgba(150, 210, 255, 0.3)");
-    grad.addColorStop(0.4, "rgba(100, 180, 240, 0.1)");
-    grad.addColorStop(1, "rgba(50, 100, 180, 0)");
-
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.moveTo(ray.x - ray.width * 0.3, 0);
-    ctx.lineTo(ray.x + ray.width * 0.3, 0);
-    ctx.lineTo(ray.x + ray.width + ray.angle * h, h);
-    ctx.lineTo(ray.x - ray.width * 0.5 + ray.angle * h, h);
-    ctx.closePath();
-    ctx.fill();
     ctx.restore();
   };
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width = window.innerWidth + "px";
-      canvas.style.height = window.innerHeight + "px";
-      ctx.scale(dpr, dpr);
-
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      sharksRef.current = initSharks(w, h);
-      bubblesRef.current = initBubbles(w, h);
-      raysRef.current = initRays(w);
+      const w = window.innerWidth, h = window.innerHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = w + "px";
+      canvas.style.height = h + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      fishRef.current = initFish(w, h);
+      particlesRef.current = initParticles(w, h);
     };
 
     resize();
     window.addEventListener("resize", resize);
 
-    const onMouseMove = (e: MouseEvent) => {
-      mouseRef.current = { x: e.clientX, y: e.clientY };
-    };
-
-    const onScroll = () => {
-      scrollRef.current = window.scrollY;
-    };
-
-    window.addEventListener("mousemove", onMouseMove);
+    const onMouse = (e: MouseEvent) => { mouseRef.current = { x: e.clientX, y: e.clientY }; };
+    const onScroll = () => { scrollRef.current = window.scrollY; };
+    window.addEventListener("mousemove", onMouse);
     window.addEventListener("scroll", onScroll);
 
     const animate = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
+      const w = window.innerWidth, h = window.innerHeight;
       timeRef.current += 0.016;
-      const time = timeRef.current;
+      const t = timeRef.current;
 
-      // Deep ocean gradient
-      const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
-      bgGrad.addColorStop(0, "#0a1628");
-      bgGrad.addColorStop(0.3, "#0d1f3c");
-      bgGrad.addColorStop(0.6, "#091428");
-      bgGrad.addColorStop(1, "#050d1a");
-      ctx.fillStyle = bgGrad;
+      // --- Background ---
+      const bg = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.7);
+      bg.addColorStop(0, "#0e2a47");
+      bg.addColorStop(0.4, "#0a1e38");
+      bg.addColorStop(1, "#06101f");
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, w, h);
 
-      // Light rays
-      raysRef.current.forEach((ray) => {
-        drawRay(ctx, ray, h);
-        ray.x += ray.speed;
-        if (ray.x > w + ray.width) ray.x = -ray.width;
+      // Water caustics / light ripples
+      ctx.globalAlpha = 0.03;
+      for (let i = 0; i < 6; i++) {
+        const cx = w * (0.2 + i * 0.12) + Math.sin(t * 0.3 + i) * 40;
+        const cy = h * 0.3 + Math.cos(t * 0.2 + i * 1.5) * 30 + scrollRef.current * 0.05;
+        const r = 80 + Math.sin(t * 0.5 + i) * 30;
+        const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        g.addColorStop(0, "rgba(120,200,255,0.5)");
+        g.addColorStop(1, "rgba(120,200,255,0)");
+        ctx.fillStyle = g;
+        ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+      }
+      ctx.globalAlpha = 1;
+
+      // --- Particles ---
+      particlesRef.current.forEach(p => {
+        p.y -= p.speed;
+        p.x += p.drift;
+        if (p.y < -5) { p.y = h + 5; p.x = Math.random() * w; }
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = "rgba(180,220,255,0.6)";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
       });
+      ctx.globalAlpha = 1;
 
-      // Bubbles
-      bubblesRef.current.forEach((bubble) => {
-        drawBubble(ctx, bubble, time);
-        bubble.y -= bubble.speed;
-        if (bubble.y < -10) {
-          bubble.y = h + 10;
-          bubble.x = Math.random() * w;
+      // --- Cursor shadow (shark beneath) ---
+      const mx = mouseRef.current.x, my = mouseRef.current.y;
+      if (mx > -1000) {
+        const shadow = ctx.createRadialGradient(mx, my, 0, mx, my, 90);
+        shadow.addColorStop(0, "rgba(0,10,30,0.18)");
+        shadow.addColorStop(0.5, "rgba(0,10,30,0.06)");
+        shadow.addColorStop(1, "rgba(0,10,30,0)");
+        ctx.fillStyle = shadow;
+        ctx.fillRect(mx - 90, my - 90, 180, 180);
+
+        // Ripple
+        const rippleR = 50 + Math.sin(t * 3) * 8;
+        ctx.strokeStyle = `rgba(100,180,255,${0.06 + Math.sin(t * 4) * 0.02})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(mx, my, rippleR, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // --- Boids ---
+      const fish = fishRef.current;
+
+      // Update wander direction occasionally
+      wanderTimerRef.current -= 0.016;
+      if (wanderTimerRef.current <= 0) {
+        wanderAngleRef.current += (Math.random() - 0.5) * 1.2;
+        wanderTimerRef.current = 2 + Math.random() * 4;
+      }
+
+      const scrollShift = Math.sin(scrollRef.current * 0.004) * 12;
+
+      for (let i = 0; i < fish.length; i++) {
+        const f = fish[i];
+        let sepX = 0, sepY = 0;
+        let aliVx = 0, aliVy = 0, aliCount = 0;
+        let cohX = 0, cohY = 0, cohCount = 0;
+
+        for (let j = 0; j < fish.length; j++) {
+          if (i === j) continue;
+          const dx = fish[j].x - f.x, dy = fish[j].y - f.y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+
+          if (d < SEPARATION_RADIUS && d > 0) {
+            sepX -= dx / d;
+            sepY -= dy / d;
+          }
+          if (d < ALIGNMENT_RADIUS) {
+            aliVx += fish[j].vx;
+            aliVy += fish[j].vy;
+            aliCount++;
+          }
+          if (d < COHESION_RADIUS) {
+            cohX += fish[j].x;
+            cohY += fish[j].y;
+            cohCount++;
+          }
         }
-      });
 
-      // Sharks with cursor interaction
-      const mx = mouseRef.current.x;
-      const my = mouseRef.current.y;
-      const scrollOffset = Math.sin(scrollRef.current * 0.005) * 15;
+        // Apply forces
+        f.vx += sepX * SEPARATION_FORCE;
+        f.vy += sepY * SEPARATION_FORCE;
 
-      sharksRef.current.forEach((shark) => {
-        // Distance to cursor
-        const dx = shark.x - mx;
-        const dy = shark.y - my;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const fleeRadius = 180;
-
-        if (dist < fleeRadius) {
-          const force = (1 - dist / fleeRadius) * 3;
-          shark.targetVx = (dx / dist) * force;
-          shark.vy += (dy / dist) * force * 0.3;
-          shark.fleeTimer = 60;
+        if (aliCount > 0) {
+          f.vx += (aliVx / aliCount - f.vx) * ALIGNMENT_FORCE;
+          f.vy += (aliVy / aliCount - f.vy) * ALIGNMENT_FORCE;
         }
 
-        if (shark.fleeTimer > 0) {
-          shark.fleeTimer--;
-        } else {
-          shark.targetVx *= 0.95;
+        if (cohCount > 0) {
+          f.vx += (cohX / cohCount - f.x) * COHESION_FORCE;
+          f.vy += (cohY / cohCount - f.y) * COHESION_FORCE;
         }
 
-        shark.vx += (shark.targetVx - shark.vx) * 0.05;
-        shark.vy *= 0.95;
+        // Wander
+        f.vx += Math.cos(wanderAngleRef.current + i * 0.1) * WANDER_FORCE * 0.016;
+        f.vy += Math.sin(wanderAngleRef.current + i * 0.1) * WANDER_FORCE * 0.016;
 
-        // Wobble + scroll
-        const wobble =
-          Math.sin(time * shark.wobbleSpeed + shark.wobbleOffset) * 8 * shark.depth;
+        // Flee cursor
+        const cdx = f.x - mx, cdy = f.y - my;
+        const cd = Math.sqrt(cdx * cdx + cdy * cdy);
+        if (cd < CURSOR_FLEE_RADIUS && cd > 0) {
+          const force = (1 - cd / CURSOR_FLEE_RADIUS) * CURSOR_FLEE_FORCE;
+          f.vx += (cdx / cd) * force;
+          f.vy += (cdy / cd) * force;
+        }
 
-        shark.x += shark.speed + shark.vx;
-        shark.y =
-          shark.baseY +
-          wobble +
-          scrollOffset * shark.depth +
-          shark.vy;
+        // Edge avoidance
+        if (f.x < EDGE_MARGIN) f.vx += EDGE_FORCE;
+        if (f.x > w - EDGE_MARGIN) f.vx -= EDGE_FORCE;
+        if (f.y < EDGE_MARGIN) f.vy += EDGE_FORCE;
+        if (f.y > h - EDGE_MARGIN) f.vy -= EDGE_FORCE;
+
+        // Clamp speed
+        const spd = Math.sqrt(f.vx * f.vx + f.vy * f.vy);
+        if (spd > MAX_SPEED) { f.vx = (f.vx / spd) * MAX_SPEED; f.vy = (f.vy / spd) * MAX_SPEED; }
+        if (spd < MIN_SPEED && spd > 0) { f.vx = (f.vx / spd) * MIN_SPEED; f.vy = (f.vy / spd) * MIN_SPEED; }
+
+        f.x += f.vx;
+        f.y += f.vy + scrollShift * 0.01;
 
         // Wrap
-        if (shark.x > w + shark.size * 2) {
-          shark.x = -shark.size * 2;
-          shark.baseY = h * 0.2 + Math.random() * h * 0.6;
-        }
+        if (f.x < -20) f.x = w + 20;
+        if (f.x > w + 20) f.x = -20;
+        if (f.y < -20) f.y = h + 20;
+        if (f.y > h + 20) f.y = -20;
 
-        drawShark(ctx, shark, time);
-      });
+        drawFish(ctx, f);
+      }
 
-      animFrameRef.current = requestAnimationFrame(animate);
+      animRef.current = requestAnimationFrame(animate);
     };
 
-    animFrameRef.current = requestAnimationFrame(animate);
+    animRef.current = requestAnimationFrame(animate);
 
     return () => {
-      cancelAnimationFrame(animFrameRef.current);
+      cancelAnimationFrame(animRef.current);
       window.removeEventListener("resize", resize);
-      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mousemove", onMouse);
       window.removeEventListener("scroll", onScroll);
     };
-  }, [initSharks, initBubbles, initRays]);
+  }, [initFish, initParticles]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 -z-10 pointer-events-none"
+      className="fixed inset-0 -z-10"
       style={{ pointerEvents: "all" }}
     />
   );
