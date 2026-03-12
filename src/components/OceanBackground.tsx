@@ -54,271 +54,156 @@ const drawShark = (
   const scale = 1.8;
   ctx.scale(scale, scale);
 
-  // Body undulation — segments sway with phase offset
-  const freq = 3.2;
-  const amp = 0.06;
-  const tailSwing = Math.sin(t * freq) * 0.14;
-  const bodyWave = (seg: number) => Math.sin(t * freq - seg * 0.7) * amp * seg;
+  // Subtle tail sway
+  const tailSwing = Math.sin(t * 3.2) * 0.12;
+  const bodyWave = (seg: number) => Math.sin(t * 3.2 - seg * 0.7) * 0.04 * seg;
 
-  // === Deep shadow ===
-  ctx.globalAlpha = 0.13;
-  ctx.fillStyle = "rgba(0,10,30,1)";
+  // === Shadow ===
+  ctx.globalAlpha = 0.12;
+  ctx.fillStyle = "#061020";
   ctx.beginPath();
-  ctx.ellipse(0, 9, 44, 14, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 8, 42, 13, 0, 0, Math.PI * 2);
   ctx.fill();
-  ctx.globalAlpha = 0.07;
-  ctx.beginPath();
-  ctx.ellipse(-2, 6, 38, 11, 0, 0, Math.PI * 2);
-  ctx.fill();
-
   ctx.globalAlpha = 1;
 
   // === Tail (caudal fin) ===
   ctx.save();
-  ctx.translate(-34, bodyWave(5));
+  ctx.translate(-32, bodyWave(5));
   ctx.rotate(tailSwing);
-
-  ctx.fillStyle = "rgba(255,255,255,0.92)";
+  ctx.fillStyle = "#8fa8b8";
   ctx.beginPath();
-  ctx.moveTo(3, 0);
-  ctx.bezierCurveTo(-2, -4, -12, -14, -22, -19);
-  ctx.bezierCurveTo(-18, -11, -12, -5, -7, 0);
-  ctx.bezierCurveTo(-12, 5, -18, 11, -22, 19);
-  ctx.bezierCurveTo(-12, 14, -2, 4, 3, 0);
+  ctx.moveTo(4, 0);
+  ctx.lineTo(-18, -16);
+  ctx.lineTo(-8, 0);
+  ctx.lineTo(-18, 16);
+  ctx.closePath();
   ctx.fill();
-
-  // Tail subtle edge
-  ctx.strokeStyle = "rgba(200,210,220,0.4)";
-  ctx.lineWidth = 0.4;
-  ctx.stroke();
   ctx.restore();
 
   // === Caudal peduncle ===
-  ctx.fillStyle = "rgba(248,250,252,0.95)";
+  ctx.fillStyle = "#9db5c6";
   ctx.beginPath();
   const py = bodyWave(4);
-  ctx.moveTo(-24, -5 + py);
-  ctx.bezierCurveTo(-28, -4 + py, -32, -3.5 + bodyWave(4.5), -35, -3 + bodyWave(5));
-  ctx.lineTo(-35, 3 + bodyWave(5));
-  ctx.bezierCurveTo(-32, 3.5 + bodyWave(4.5), -28, 4 + py, -24, 5 + py);
+  ctx.moveTo(-22, -4 + py);
+  ctx.lineTo(-34, -3 + bodyWave(5));
+  ctx.lineTo(-34, 3 + bodyWave(5));
+  ctx.lineTo(-22, 4 + py);
   ctx.closePath();
   ctx.fill();
 
-  // === Second dorsal fin (small, near tail) ===
-  ctx.fillStyle = "rgba(240,242,245,0.7)";
-  ctx.beginPath();
-  ctx.ellipse(-18, bodyWave(3.5), 4, 2, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // === Pelvic fins ===
-  ctx.fillStyle = "rgba(245,248,250,0.85)";
-  ctx.globalAlpha = 0.85;
+  // === Pelvic fins (small, near tail) ===
+  ctx.fillStyle = "#a3bccb";
   const pvY = bodyWave(3);
   ctx.beginPath();
-  ctx.moveTo(-14, -9 + pvY);
-  ctx.bezierCurveTo(-16, -13 + pvY, -21, -17 + pvY, -23, -15 + pvY);
-  ctx.bezierCurveTo(-20, -12 + pvY, -17, -10 + pvY, -14, -9 + pvY);
+  ctx.moveTo(-12, -8 + pvY);
+  ctx.lineTo(-20, -14 + pvY);
+  ctx.lineTo(-16, -8 + pvY);
+  ctx.closePath();
   ctx.fill();
   ctx.beginPath();
-  ctx.moveTo(-14, 9 + pvY);
-  ctx.bezierCurveTo(-16, 13 + pvY, -21, 17 + pvY, -23, 15 + pvY);
-  ctx.bezierCurveTo(-20, 12 + pvY, -17, 10 + pvY, -14, 9 + pvY);
+  ctx.moveTo(-12, 8 + pvY);
+  ctx.lineTo(-20, 14 + pvY);
+  ctx.lineTo(-16, 8 + pvY);
+  ctx.closePath();
   ctx.fill();
-  ctx.globalAlpha = 1;
 
   // === Main body ===
   const bw1 = bodyWave(1);
   const bw2 = bodyWave(2);
   const bw3 = bodyWave(3);
 
-  // Body fill — pure white with subtle gradient for depth
-  const bodyGrad = ctx.createLinearGradient(0, -14, 0, 14);
-  bodyGrad.addColorStop(0, "rgba(235,240,245,0.95)");
-  bodyGrad.addColorStop(0.3, "rgba(248,250,255,0.98)");
-  bodyGrad.addColorStop(0.5, "rgba(255,255,255,1)");
-  bodyGrad.addColorStop(0.7, "rgba(248,250,255,0.98)");
-  bodyGrad.addColorStop(1, "rgba(235,240,245,0.95)");
-  ctx.fillStyle = bodyGrad;
-
+  // Body — flat blue-grey
+  ctx.fillStyle = "#b0c8d6";
   ctx.beginPath();
-  ctx.moveTo(28, 0); // front of body (behind hammer)
-  ctx.bezierCurveTo(24, -6 + bw1, 16, -11 + bw1, 6, -13 + bw2);
-  ctx.bezierCurveTo(-4, -14 + bw2, -14, -12 + bw3, -24, -8 + bw3);
-  ctx.lineTo(-24, 8 + bw3);
-  ctx.bezierCurveTo(-14, 12 + bw3, -4, 14 + bw2, 6, 13 + bw2);
-  ctx.bezierCurveTo(16, 11 + bw1, 24, 6 + bw1, 28, 0);
+  ctx.moveTo(26, 0);
+  ctx.bezierCurveTo(22, -7 + bw1, 14, -12 + bw1, 4, -13 + bw2);
+  ctx.bezierCurveTo(-6, -13 + bw2, -14, -11 + bw3, -22, -7 + bw3);
+  ctx.lineTo(-22, 7 + bw3);
+  ctx.bezierCurveTo(-14, 11 + bw3, -6, 13 + bw2, 4, 13 + bw2);
+  ctx.bezierCurveTo(14, 12 + bw1, 22, 7 + bw1, 26, 0);
   ctx.fill();
 
-  // Subtle body outline
-  ctx.strokeStyle = "rgba(190,200,215,0.3)";
-  ctx.lineWidth = 0.6;
-  ctx.stroke();
+  // Belly — lighter flat area
+  ctx.fillStyle = "#d4e3ec";
+  ctx.beginPath();
+  ctx.ellipse(2, bw2, 18, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
 
   // === Pectoral fins (large, swept back) ===
-  ctx.fillStyle = "rgba(245,248,252,0.93)";
+  ctx.fillStyle = "#a3bccb";
 
   // Left pectoral
   ctx.beginPath();
-  ctx.moveTo(12, -11 + bw1);
-  ctx.bezierCurveTo(8, -16 + bw1, 0, -28, -8, -32);
-  ctx.bezierCurveTo(-6, -25, -2, -18, 2, -13 + bw1);
-  ctx.bezierCurveTo(5, -11 + bw1, 9, -10 + bw1, 12, -11 + bw1);
-  ctx.fill();
-  ctx.strokeStyle = "rgba(190,200,215,0.25)";
-  ctx.lineWidth = 0.4;
-  ctx.stroke();
-
-  // Right pectoral
-  ctx.beginPath();
-  ctx.moveTo(12, 11 + bw1);
-  ctx.bezierCurveTo(8, 16 + bw1, 0, 28, -8, 32);
-  ctx.bezierCurveTo(-6, 25, -2, 18, 2, 13 + bw1);
-  ctx.bezierCurveTo(5, 11 + bw1, 9, 10 + bw1, 12, 11 + bw1);
-  ctx.fill();
-  ctx.strokeStyle = "rgba(190,200,215,0.25)";
-  ctx.lineWidth = 0.4;
-  ctx.stroke();
-
-  // === Dorsal fin ridge (top-down) ===
-  const dorsalGrad = ctx.createRadialGradient(4, bw2, 0, 4, bw2, 9);
-  dorsalGrad.addColorStop(0, "rgba(220,225,235,0.6)");
-  dorsalGrad.addColorStop(0.5, "rgba(230,235,240,0.3)");
-  dorsalGrad.addColorStop(1, "rgba(240,242,245,0)");
-  ctx.fillStyle = dorsalGrad;
-  ctx.beginPath();
-  ctx.ellipse(4, bw2, 9, 4, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Dorsal spine
-  ctx.strokeStyle = "rgba(200,210,225,0.4)";
-  ctx.lineWidth = 1.2;
-  ctx.beginPath();
-  ctx.moveTo(13, bw1);
-  ctx.lineTo(-5, bw2);
-  ctx.stroke();
-
-  // === Spine line ===
-  ctx.strokeStyle = "rgba(200,210,225,0.2)";
-  ctx.lineWidth = 0.7;
-  ctx.beginPath();
-  ctx.moveTo(26, 0);
-  ctx.quadraticCurveTo(10, bw1, -5, bw2);
-  ctx.quadraticCurveTo(-15, bw3, -30, bodyWave(4.5));
-  ctx.stroke();
-
-  // === Gill slits ===
-  ctx.strokeStyle = "rgba(180,190,210,0.3)";
-  ctx.lineWidth = 0.5;
-  for (let i = 0; i < 5; i++) {
-    const gx = 20 - i * 3;
-    const gy = bodyWave(1 + i * 0.3);
-    ctx.beginPath();
-    ctx.moveTo(gx, -8 + gy);
-    ctx.lineTo(gx - 0.8, -10.5 + gy);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(gx, 8 + gy);
-    ctx.lineTo(gx - 0.8, 10.5 + gy);
-    ctx.stroke();
-  }
-
-  // === HAMMERHEAD (cephalofoil) ===
-  // The distinctive T-shaped head
-  const headY = 0;
-
-  // Hammer bar (wide horizontal bar)
-  ctx.fillStyle = "rgba(250,252,255,0.97)";
-  ctx.beginPath();
-  // Left side of hammer
-  ctx.moveTo(28, -4);
-  ctx.bezierCurveTo(30, -6, 32, -14, 34, -18);
-  ctx.bezierCurveTo(36, -20, 38, -20.5, 40, -20);
-  ctx.bezierCurveTo(42, -19.5, 43, -18, 43, -16);
-  ctx.bezierCurveTo(43, -14, 42, -12, 40, -11);
-  // Top edge of hammer (left to right)
-  ctx.bezierCurveTo(38, -9, 34, -6, 30, -3);
-  ctx.lineTo(30, 3);
-  // Right side of hammer
-  ctx.bezierCurveTo(34, 6, 38, 9, 40, 11);
-  ctx.bezierCurveTo(42, 12, 43, 14, 43, 16);
-  ctx.bezierCurveTo(43, 18, 42, 19.5, 40, 20);
-  ctx.bezierCurveTo(38, 20.5, 36, 20, 34, 18);
-  ctx.bezierCurveTo(32, 14, 30, 6, 28, 4);
+  ctx.moveTo(10, -10 + bw1);
+  ctx.lineTo(-4, -28);
+  ctx.lineTo(0, -12 + bw1);
   ctx.closePath();
   ctx.fill();
 
-  // Hammer outline
-  ctx.strokeStyle = "rgba(185,195,210,0.35)";
-  ctx.lineWidth = 0.5;
-  ctx.stroke();
+  // Right pectoral
+  ctx.beginPath();
+  ctx.moveTo(10, 10 + bw1);
+  ctx.lineTo(-4, 28);
+  ctx.lineTo(0, 12 + bw1);
+  ctx.closePath();
+  ctx.fill();
 
-  // Hammer highlight (front edge glow)
-  ctx.globalAlpha = 0.15;
-  ctx.strokeStyle = "rgba(255,255,255,0.8)";
+  // === Dorsal ridge (top-down view — subtle oval) ===
+  ctx.fillStyle = "#8fa8b8";
+  ctx.beginPath();
+  ctx.ellipse(4, bw2, 7, 3, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // === Spine line ===
+  ctx.strokeStyle = "#7a96a8";
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(40, -18);
-  ctx.bezierCurveTo(42, -17, 43, -15, 43, -14);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(40, 18);
-  ctx.bezierCurveTo(42, 17, 43, 15, 43, 14);
-  ctx.stroke();
-  ctx.globalAlpha = 1;
-
-  // Hammer inner structure lines
-  ctx.strokeStyle = "rgba(195,205,220,0.2)";
-  ctx.lineWidth = 0.4;
-  ctx.beginPath();
-  ctx.moveTo(30, -3);
-  ctx.bezierCurveTo(33, -8, 36, -14, 38, -17);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(30, 3);
-  ctx.bezierCurveTo(33, 8, 36, 14, 38, 17);
+  ctx.moveTo(24, 0);
+  ctx.quadraticCurveTo(8, bw1, -6, bw2);
+  ctx.quadraticCurveTo(-16, bw3, -30, bodyWave(4.5));
   ctx.stroke();
 
-  // === Eyes (at the tips of the hammer) ===
-  // Left eye
-  ctx.fillStyle = "rgba(30,40,60,0.5)";
+  // === Gill slits ===
+  ctx.strokeStyle = "#7a96a8";
+  ctx.lineWidth = 0.8;
+  for (let i = 0; i < 4; i++) {
+    const gx = 18 - i * 3;
+    const gy = bodyWave(1 + i * 0.3);
+    ctx.beginPath();
+    ctx.moveTo(gx, -7 + gy);
+    ctx.lineTo(gx - 0.5, -10 + gy);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(gx, 7 + gy);
+    ctx.lineTo(gx - 0.5, 10 + gy);
+    ctx.stroke();
+  }
+
+  // === Head (pointed snout) ===
+  ctx.fillStyle = "#c0d4e0";
   ctx.beginPath();
-  ctx.ellipse(40, -17, 2.2, 1.6, -0.3, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "rgba(10,15,30,0.8)";
-  ctx.beginPath();
-  ctx.arc(40.3, -17, 1.2, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "rgba(200,220,250,0.5)";
-  ctx.beginPath();
-  ctx.arc(40.8, -17.4, 0.5, 0, Math.PI * 2);
+  ctx.moveTo(26, 0);
+  ctx.bezierCurveTo(30, -3, 36, -4, 40, 0);
+  ctx.bezierCurveTo(36, 4, 30, 3, 26, 0);
   ctx.fill();
 
-  // Right eye
-  ctx.fillStyle = "rgba(30,40,60,0.5)";
+  // === Eyes ===
+  ctx.fillStyle = "#2a3a48";
   ctx.beginPath();
-  ctx.ellipse(40, 17, 2.2, 1.6, 0.3, 0, Math.PI * 2);
+  ctx.arc(30, -6, 1.8, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = "rgba(10,15,30,0.8)";
   ctx.beginPath();
-  ctx.arc(40.3, 17, 1.2, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "rgba(200,220,250,0.5)";
-  ctx.beginPath();
-  ctx.arc(40.8, 16.6, 0.5, 0, Math.PI * 2);
+  ctx.arc(30, 6, 1.8, 0, Math.PI * 2);
   ctx.fill();
 
-  // === Body sheen (light reflection) ===
-  ctx.globalAlpha = 0.08;
-  const sheenGrad = ctx.createLinearGradient(-20, -8, 20, 8);
-  sheenGrad.addColorStop(0, "rgba(255,255,255,0)");
-  sheenGrad.addColorStop(0.4, "rgba(255,255,255,1)");
-  sheenGrad.addColorStop(0.6, "rgba(255,255,255,1)");
-  sheenGrad.addColorStop(1, "rgba(255,255,255,0)");
-  ctx.fillStyle = sheenGrad;
+  // Eye highlights
+  ctx.fillStyle = "#d4e8f4";
   ctx.beginPath();
-  ctx.ellipse(5, bw1, 28, 6, 0.1, 0, Math.PI * 2);
+  ctx.arc(30.5, -6.3, 0.6, 0, Math.PI * 2);
   ctx.fill();
-  ctx.globalAlpha = 1;
+  ctx.beginPath();
+  ctx.arc(30.5, 5.7, 0.6, 0, Math.PI * 2);
+  ctx.fill();
 
   ctx.restore();
 };
