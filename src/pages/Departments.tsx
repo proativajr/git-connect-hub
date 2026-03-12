@@ -46,7 +46,8 @@ const transacoesRecentes = [
   { desc: "Material de escritório", tipo: "saida", valor: 350, data: "03/03" },
 ];
 
-const isFinanceiro = (sub: string) => sub === "Financeiro";
+const needsPasswordGate = (dirKey: string, sub: string) =>
+  isFinanceiro(sub) && (dirKey === "vice-presidencia" || dirKey === "presidencia");
 
 const FinanceiroContent = () => (
   <div className="space-y-5">
