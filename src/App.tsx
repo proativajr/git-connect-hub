@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Strategy from "./pages/Strategy";
 import Departments from "./pages/Departments";
 import Culture from "./pages/Culture";
+import Governance from "./pages/Governance";
 import CRM from "./pages/CRM";
 import Gallery from "./pages/Gallery";
 
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/strategy" element={<Strategy />} />
               <Route path="/departments" element={<Departments />} />
               <Route path="/culture" element={<Culture />} />
+              <Route path="/governance" element={<Governance />} />
               <Route path="/crm" element={<CRM />} />
               <Route path="/gallery" element={<Gallery />} />
               
