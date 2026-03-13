@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Strategy from "./pages/Strategy";
 import Departments from "./pages/Departments";
 import Culture from "./pages/Culture";
+import Governance from "./pages/Governance";
 import CRM from "./pages/CRM";
 import Gallery from "./pages/Gallery";
 
