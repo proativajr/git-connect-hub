@@ -12,7 +12,7 @@ const navItems = [
   { title: "Visão Geral", path: "/dashboard", icon: LayoutDashboard },
   { title: "Planejamento Estratégico", path: "/strategy", icon: Target },
   { title: "Diretorias", path: "/departments", icon: BarChart3 },
-  { title: "Identidade do Cardume", path: "/culture", icon: BookOpen },
+  { title: "Identidade e Governança", path: "/culture", icon: BookOpen },
   { title: "Parcerias", path: "/crm", icon: Handshake },
   { title: "Galeria", path: "/gallery", icon: Image },
   { title: "Membros", path: "/members", icon: Users },
