@@ -9,16 +9,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import logoProativa from "@/assets/logo-proativa.png";
 
 const navItems = [
-  { title: "Visão Geral", path: "/dashboard", icon: LayoutDashboard },
-  { title: "Planejamento Estratégico", path: "/strategy", icon: Target },
-  { title: "Diretorias", path: "/departments", icon: BarChart3 },
-  { title: "Identidade do Cardume", path: "/culture", icon: BookOpen },
-  { title: "Governança", path: "/culture#governanca", icon: ShieldCheck },
-  { title: "Parcerias", path: "/crm", icon: Handshake },
-  { title: "Galeria", path: "/gallery", icon: Image },
-  { title: "Membros", path: "/members", icon: Users },
-  { title: "Shark", path: "/shark", icon: Fish },
-  { title: "Configurações", path: "/settings", icon: Settings },
+  { title: "Visão Geral", path: "/dashboard", icon: LayoutDashboard, multiLine: false },
+  { title: "Planejamento Estratégico", path: "/strategy", icon: Target, multiLine: false },
+  { title: "Diretorias", path: "/departments", icon: BarChart3, multiLine: false },
+  { title: "Identidade do Cardume &\nGovernança", path: "/culture", icon: BookOpen, multiLine: true },
+  { title: "Parcerias", path: "/crm", icon: Handshake, multiLine: false },
+  { title: "Galeria", path: "/gallery", icon: Image, multiLine: false },
+  { title: "Membros", path: "/members", icon: Users, multiLine: false },
+  { title: "Shark", path: "/shark", icon: Fish, multiLine: false },
+  { title: "Configurações", path: "/settings", icon: Settings, multiLine: false },
 ];
 
 const DashboardLayout = () => {
