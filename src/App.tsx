@@ -19,6 +19,7 @@ import Settings from "./pages/Settings";
 import Shark from "./pages/Shark";
 import NotFound from "./pages/NotFound";
 
+
 const queryClient = new QueryClient();
 
 const App = () => (
