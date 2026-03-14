@@ -54,156 +54,173 @@ const drawShark = (
   const scale = 1.8;
   ctx.scale(scale, scale);
 
-  // Subtle tail sway
-  const tailSwing = Math.sin(t * 3.2) * 0.12;
-  const bodyWave = (seg: number) => Math.sin(t * 3.2 - seg * 0.7) * 0.04 * seg;
+  const tailSwing = Math.sin(t * 3.2) * 0.1;
+  const bodyWave = (seg: number) => Math.sin(t * 3.2 - seg * 0.6) * 0.8 * seg;
 
-  // === Shadow ===
-  ctx.globalAlpha = 0.12;
+  // === Shadow below ===
+  ctx.globalAlpha = 0.1;
   ctx.fillStyle = "#061020";
   ctx.beginPath();
-  ctx.ellipse(0, 8, 42, 13, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 18, 38, 6, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.globalAlpha = 1;
 
-  // === Tail (caudal fin) ===
+  // === Tail (caudal fin) — forked, upper lobe larger ===
   ctx.save();
-  ctx.translate(-32, bodyWave(5));
+  ctx.translate(-34, bodyWave(4));
   ctx.rotate(tailSwing);
-  ctx.fillStyle = "#8fa8b8";
+  // Upper lobe
+  ctx.fillStyle = "#4a6e8a";
   ctx.beginPath();
-  ctx.moveTo(4, 0);
-  ctx.lineTo(-18, -16);
-  ctx.lineTo(-8, 0);
-  ctx.lineTo(-18, 16);
+  ctx.moveTo(2, -1);
+  ctx.bezierCurveTo(-6, -4, -14, -14, -20, -18);
+  ctx.bezierCurveTo(-16, -12, -12, -6, -8, -2);
+  ctx.closePath();
+  ctx.fill();
+  // Lower lobe (smaller)
+  ctx.beginPath();
+  ctx.moveTo(2, 1);
+  ctx.bezierCurveTo(-4, 4, -10, 10, -14, 13);
+  ctx.bezierCurveTo(-10, 8, -6, 4, -4, 1);
   ctx.closePath();
   ctx.fill();
   ctx.restore();
 
-  // === Caudal peduncle ===
-  ctx.fillStyle = "#9db5c6";
+  // === Caudal peduncle (narrow tail section) ===
+  ctx.fillStyle = "#5a7d96";
   ctx.beginPath();
-  const py = bodyWave(4);
-  ctx.moveTo(-22, -4 + py);
-  ctx.lineTo(-34, -3 + bodyWave(5));
-  ctx.lineTo(-34, 3 + bodyWave(5));
-  ctx.lineTo(-22, 4 + py);
+  ctx.moveTo(-20, -3 + bodyWave(3));
+  ctx.lineTo(-36, -1 + bodyWave(4));
+  ctx.lineTo(-36, 1 + bodyWave(4));
+  ctx.lineTo(-20, 3 + bodyWave(3));
   ctx.closePath();
   ctx.fill();
 
-  // === Pelvic fins (small, near tail) ===
-  ctx.fillStyle = "#a3bccb";
-  const pvY = bodyWave(3);
+  // === Main body — side view, torpedo shape ===
+  const bw1 = bodyWave(0.5);
+  const bw2 = bodyWave(1.5);
+
+  // Dark blue-grey upper body
+  ctx.fillStyle = "#4a6e8a";
   ctx.beginPath();
-  ctx.moveTo(-12, -8 + pvY);
-  ctx.lineTo(-20, -14 + pvY);
-  ctx.lineTo(-16, -8 + pvY);
-  ctx.closePath();
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(-12, 8 + pvY);
-  ctx.lineTo(-20, 14 + pvY);
-  ctx.lineTo(-16, 8 + pvY);
-  ctx.closePath();
+  ctx.moveTo(30, 0 + bw1);
+  ctx.bezierCurveTo(26, -10 + bw1, 16, -14 + bw1, 4, -14 + bw2);
+  ctx.bezierCurveTo(-8, -13 + bw2, -16, -10 + bodyWave(2), -22, -5 + bodyWave(2.5));
+  ctx.lineTo(-22, 0 + bodyWave(2.5));
+  ctx.lineTo(30, 0 + bw1);
   ctx.fill();
 
-  // === Main body ===
-  const bw1 = bodyWave(1);
-  const bw2 = bodyWave(2);
-  const bw3 = bodyWave(3);
-
-  // Body — flat blue-grey
-  ctx.fillStyle = "#b0c8d6";
+  // Lighter belly
+  ctx.fillStyle = "#8aafc8";
   ctx.beginPath();
-  ctx.moveTo(26, 0);
-  ctx.bezierCurveTo(22, -7 + bw1, 14, -12 + bw1, 4, -13 + bw2);
-  ctx.bezierCurveTo(-6, -13 + bw2, -14, -11 + bw3, -22, -7 + bw3);
-  ctx.lineTo(-22, 7 + bw3);
-  ctx.bezierCurveTo(-14, 11 + bw3, -6, 13 + bw2, 4, 13 + bw2);
-  ctx.bezierCurveTo(14, 12 + bw1, 22, 7 + bw1, 26, 0);
+  ctx.moveTo(30, 0 + bw1);
+  ctx.lineTo(-22, 0 + bodyWave(2.5));
+  ctx.lineTo(-22, 5 + bodyWave(2.5));
+  ctx.bezierCurveTo(-16, 10 + bodyWave(2), -8, 12 + bw2, 4, 11 + bw2);
+  ctx.bezierCurveTo(16, 10 + bw1, 26, 6 + bw1, 30, 0 + bw1);
   ctx.fill();
 
-  // Belly — lighter flat area
-  ctx.fillStyle = "#d4e3ec";
+  // Belly highlight
+  ctx.fillStyle = "#a8cce0";
   ctx.beginPath();
-  ctx.ellipse(2, bw2, 18, 7, 0, 0, Math.PI * 2);
+  ctx.moveTo(24, 2 + bw1);
+  ctx.bezierCurveTo(18, 7 + bw1, 6, 9 + bw2, -6, 8 + bw2);
+  ctx.bezierCurveTo(-14, 6 + bw2, -18, 4 + bodyWave(2.5), -18, 2 + bodyWave(2.5));
+  ctx.lineTo(24, 2 + bw1);
   ctx.fill();
 
-  // === Pectoral fins (large, swept back) ===
-  ctx.fillStyle = "#a3bccb";
-
-  // Left pectoral
+  // === Dorsal fin (tall, triangular) ===
+  ctx.fillStyle = "#3d6078";
   ctx.beginPath();
-  ctx.moveTo(10, -10 + bw1);
-  ctx.lineTo(-4, -28);
-  ctx.lineTo(0, -12 + bw1);
+  ctx.moveTo(4, -14 + bw2);
+  ctx.bezierCurveTo(2, -24 + bw2, -2, -28 + bw2, -6, -30 + bw2);
+  ctx.bezierCurveTo(-6, -26 + bw2, -8, -18 + bw2, -10, -12 + bw2);
   ctx.closePath();
   ctx.fill();
 
-  // Right pectoral
+  // === Pectoral fin (large, swept back) ===
+  ctx.fillStyle = "#4a6e8a";
   ctx.beginPath();
-  ctx.moveTo(10, 10 + bw1);
-  ctx.lineTo(-4, 28);
-  ctx.lineTo(0, 12 + bw1);
+  ctx.moveTo(8, 6 + bw1);
+  ctx.bezierCurveTo(4, 14 + bw1, -4, 22 + bw2, -10, 24 + bw2);
+  ctx.bezierCurveTo(-6, 18 + bw2, -2, 12 + bw1, 4, 8 + bw1);
   ctx.closePath();
   ctx.fill();
 
-  // === Dorsal ridge (top-down view — subtle oval) ===
-  ctx.fillStyle = "#8fa8b8";
+  // === Pelvic fin (small, near tail) ===
+  ctx.fillStyle = "#4a6e8a";
   ctx.beginPath();
-  ctx.ellipse(4, bw2, 7, 3, 0, 0, Math.PI * 2);
+  ctx.moveTo(-14, 6 + bodyWave(2));
+  ctx.lineTo(-18, 12 + bodyWave(2.5));
+  ctx.lineTo(-20, 6 + bodyWave(2.5));
+  ctx.closePath();
   ctx.fill();
 
-  // === Spine line ===
-  ctx.strokeStyle = "#7a96a8";
-  ctx.lineWidth = 1;
+  // === Anal fin ===
   ctx.beginPath();
-  ctx.moveTo(24, 0);
-  ctx.quadraticCurveTo(8, bw1, -6, bw2);
-  ctx.quadraticCurveTo(-16, bw3, -30, bodyWave(4.5));
-  ctx.stroke();
+  ctx.moveTo(-18, 4 + bodyWave(2.5));
+  ctx.lineTo(-22, 9 + bodyWave(3));
+  ctx.lineTo(-24, 4 + bodyWave(3));
+  ctx.closePath();
+  ctx.fill();
+
+  // === Second dorsal fin (small) ===
+  ctx.fillStyle = "#3d6078";
+  ctx.beginPath();
+  ctx.moveTo(-14, -10 + bodyWave(2));
+  ctx.lineTo(-16, -16 + bodyWave(2.5));
+  ctx.lineTo(-20, -9 + bodyWave(2.5));
+  ctx.closePath();
+  ctx.fill();
+
+  // === Head — pointed snout ===
+  ctx.fillStyle = "#4a6e8a";
+  ctx.beginPath();
+  ctx.moveTo(30, 0 + bw1);
+  ctx.bezierCurveTo(34, -3 + bw1, 38, -2 + bw1, 40, 0 + bw1);
+  ctx.bezierCurveTo(38, 2 + bw1, 34, 3 + bw1, 30, 0 + bw1);
+  ctx.fill();
 
   // === Gill slits ===
-  ctx.strokeStyle = "#7a96a8";
-  ctx.lineWidth = 0.8;
-  for (let i = 0; i < 4; i++) {
+  ctx.strokeStyle = "#3a5a70";
+  ctx.lineWidth = 0.7;
+  for (let i = 0; i < 3; i++) {
     const gx = 18 - i * 3;
-    const gy = bodyWave(1 + i * 0.3);
+    const gy = bw1;
     ctx.beginPath();
-    ctx.moveTo(gx, -7 + gy);
-    ctx.lineTo(gx - 0.5, -10 + gy);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(gx, 7 + gy);
-    ctx.lineTo(gx - 0.5, 10 + gy);
+    ctx.moveTo(gx, -4 + gy);
+    ctx.lineTo(gx - 0.5, 4 + gy);
     ctx.stroke();
   }
 
-  // === Head (pointed snout) ===
-  ctx.fillStyle = "#c0d4e0";
+  // === Eye ===
+  ctx.fillStyle = "#1a2e3e";
   ctx.beginPath();
-  ctx.moveTo(26, 0);
-  ctx.bezierCurveTo(30, -3, 36, -4, 40, 0);
-  ctx.bezierCurveTo(36, 4, 30, 3, 26, 0);
+  ctx.arc(28, -4 + bw1, 1.8, 0, Math.PI * 2);
+  ctx.fill();
+  // Eye highlight
+  ctx.fillStyle = "#c0dae8";
+  ctx.beginPath();
+  ctx.arc(28.5, -4.5 + bw1, 0.6, 0, Math.PI * 2);
   ctx.fill();
 
-  // === Eyes ===
-  ctx.fillStyle = "#2a3a48";
+  // === Subtle outline strokes for definition ===
+  ctx.strokeStyle = "#2e4d62";
+  ctx.lineWidth = 0.5;
+  ctx.globalAlpha = 0.4;
+  // Upper body contour
   ctx.beginPath();
-  ctx.arc(30, -6, 1.8, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.moveTo(38, -1 + bw1);
+  ctx.bezierCurveTo(26, -11 + bw1, 16, -14 + bw1, 4, -14 + bw2);
+  ctx.bezierCurveTo(-8, -13 + bw2, -16, -10 + bodyWave(2), -22, -5 + bodyWave(2.5));
+  ctx.stroke();
+  // Lower body contour
   ctx.beginPath();
-  ctx.arc(30, 6, 1.8, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Eye highlights
-  ctx.fillStyle = "#d4e8f4";
-  ctx.beginPath();
-  ctx.arc(30.5, -6.3, 0.6, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(30.5, 5.7, 0.6, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.moveTo(38, 1 + bw1);
+  ctx.bezierCurveTo(26, 7 + bw1, 16, 10 + bw1, 4, 11 + bw2);
+  ctx.bezierCurveTo(-8, 12 + bw2, -16, 10 + bodyWave(2), -22, 5 + bodyWave(2.5));
+  ctx.stroke();
+  ctx.globalAlpha = 1;
 
   ctx.restore();
 };
