@@ -13,7 +13,7 @@ const navItems = [
   { title: "Planejamento Estratégico", path: "/strategy", icon: Target },
   { title: "Diretorias", path: "/departments", icon: BarChart3 },
   { title: "Identidade do Cardume", path: "/culture", icon: BookOpen },
-  { title: "Governança", path: "/governance", icon: ShieldCheck },
+  { title: "Governança", path: "/culture#governanca", icon: ShieldCheck },
   { title: "Parcerias", path: "/crm", icon: Handshake },
   { title: "Galeria", path: "/gallery", icon: Image },
   { title: "Membros", path: "/members", icon: Users },
@@ -48,6 +48,27 @@ const DashboardLayout = () => {
     navigate("/");
   };
 
+  const handleNavClick = (path: string) => {
+    // Handle hash navigation for governance
+    if (path.includes("#")) {
+      const [basePath, hash] = path.split("#");
+      if (location.pathname === basePath) {
+        // Already on the page, just scroll
+        const el = document.getElementById(hash);
+        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        navigate(`${basePath}#${hash}`);
+      }
+    } else {
+      navigate(path);
+    }
+  };
+
+  const isActive = (itemPath: string) => {
+    const basePath = itemPath.split("#")[0];
+    return location.pathname === basePath;
+  };
+
   return (
     <div className="flex min-h-screen w-full" style={{ "--sidebar-width": collapsed ? "72px" : "256px" } as React.CSSProperties}>
       <aside className={`fixed inset-y-0 left-0 z-30 flex flex-col bg-primary transition-all duration-300 ${collapsed ? "w-[72px]" : "w-64"}`}>
@@ -56,12 +77,12 @@ const DashboardLayout = () => {
         </div>
         <nav className="flex-1 space-y-1 px-3 mt-2">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
+            const active = isActive(item.path);
             return (
               <button
-                key={item.path} onClick={() => navigate(item.path)}
+                key={item.path} onClick={() => handleNavClick(item.path)}
                 className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-300 ${
-                  isActive ? "bg-sidebar-accent text-sidebar-primary" : "text-primary-foreground/70 hover:bg-sidebar-accent hover:text-primary-foreground"
+                  active ? "bg-sidebar-accent text-sidebar-primary" : "text-primary-foreground/70 hover:bg-sidebar-accent hover:text-primary-foreground"
                 }`}
               >
                 <item.icon className="h-5 w-5 shrink-0" />
