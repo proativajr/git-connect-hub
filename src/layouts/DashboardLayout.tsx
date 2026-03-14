@@ -85,7 +85,16 @@ const DashboardLayout = () => {
                 }`}
               >
                 <item.icon className="h-5 w-5 shrink-0" />
-                {!collapsed && <span className="truncate">{item.title}</span>}
+                {!collapsed && (
+                  item.multiLine ? (
+                    <span className="text-left leading-tight">
+                      <span className="block">Identidade do Cardume &</span>
+                      <span className="block">Governança</span>
+                    </span>
+                  ) : (
+                    <span className="truncate">{item.title}</span>
+                  )
+                )}
               </button>
             );
           })}
