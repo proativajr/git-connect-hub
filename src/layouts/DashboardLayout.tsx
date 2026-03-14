@@ -2,23 +2,22 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, Target, BarChart3, BookOpen, Handshake, Users, Settings, Fish, Image, ShieldCheck,
+  LayoutDashboard, Target, BarChart3, BookOpen, Handshake, Users, Settings, Fish, Image,
   ChevronLeft, ChevronRight, LogOut,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import logoProativa from "@/assets/logo-proativa.png";
 
 const navItems = [
-  { title: "Visão Geral", path: "/dashboard", icon: LayoutDashboard },
-  { title: "Planejamento Estratégico", path: "/strategy", icon: Target },
-  { title: "Diretorias", path: "/departments", icon: BarChart3 },
-  { title: "Identidade do Cardume", path: "/culture", icon: BookOpen },
-  { title: "Governança", path: "/culture#governanca", icon: ShieldCheck },
-  { title: "Parcerias", path: "/crm", icon: Handshake },
-  { title: "Galeria", path: "/gallery", icon: Image },
-  { title: "Membros", path: "/members", icon: Users },
-  { title: "Shark", path: "/shark", icon: Fish },
-  { title: "Configurações", path: "/settings", icon: Settings },
+  { title: "Visão Geral", path: "/dashboard", icon: LayoutDashboard, multiLine: false },
+  { title: "Planejamento Estratégico", path: "/strategy", icon: Target, multiLine: false },
+  { title: "Diretorias", path: "/departments", icon: BarChart3, multiLine: false },
+  { title: "Identidade do Cardume &\nGovernança", path: "/culture", icon: BookOpen, multiLine: true },
+  { title: "Parcerias", path: "/crm", icon: Handshake, multiLine: false },
+  { title: "Galeria", path: "/gallery", icon: Image, multiLine: false },
+  { title: "Membros", path: "/members", icon: Users, multiLine: false },
+  { title: "Shark", path: "/shark", icon: Fish, multiLine: false },
+  { title: "Configurações", path: "/settings", icon: Settings, multiLine: false },
 ];
 
 const DashboardLayout = () => {
@@ -86,7 +85,16 @@ const DashboardLayout = () => {
                 }`}
               >
                 <item.icon className="h-5 w-5 shrink-0" />
-                {!collapsed && <span className="truncate">{item.title}</span>}
+                {!collapsed && (
+                  item.multiLine ? (
+                    <span className="text-left leading-tight">
+                      <span className="block">Identidade do Cardume &</span>
+                      <span className="block">Governança</span>
+                    </span>
+                  ) : (
+                    <span className="truncate">{item.title}</span>
+                  )
+                )}
               </button>
             );
           })}
