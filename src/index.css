@@ -84,29 +84,47 @@
     @apply bg-background text-foreground font-sans;
   }
 
-  /* Custom scrollbar matching dark background */
+  /* Custom scrollbar — adapts to page background */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    background: hsl(var(--sidebar-background));
+    background: hsl(var(--background));
   }
 
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--sidebar-accent));
+    background: hsl(var(--border));
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--sidebar-ring));
+    background: hsl(var(--muted-foreground));
   }
 
   /* Firefox scrollbar */
   * {
     scrollbar-width: thin;
-    scrollbar-color: hsl(var(--sidebar-accent)) hsl(var(--sidebar-background));
+    scrollbar-color: hsl(var(--border)) hsl(var(--background));
+  }
+
+  /* Ocean-themed scrollbar for dark pages */
+  .ocean-scroll::-webkit-scrollbar-track {
+    background: #0a2540;
+  }
+
+  .ocean-scroll::-webkit-scrollbar-thumb {
+    background: hsl(211 60% 18%);
+    border-radius: 4px;
+  }
+
+  .ocean-scroll::-webkit-scrollbar-thumb:hover {
+    background: hsl(50 96% 51%);
+  }
+
+  .ocean-scroll {
+    scrollbar-color: hsl(211 60% 18%) #0a2540;
   }
 
   /* Cards blend with background, no border, no shadow */

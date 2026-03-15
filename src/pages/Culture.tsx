@@ -175,7 +175,7 @@ const Culture = () => {
       <div className="relative z-10">
         {/* ===== PILLAR DETAIL VIEW ===== */}
         {animPhase === "detail" && selectedPillar && (
-          <div className="animate-fade-in p-8 pt-12 min-h-[calc(100vh-4rem)]">
+          <div className="animate-fade-in p-8 pt-12 min-h-screen">
             <button
               onClick={handleBack}
               className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-6"
