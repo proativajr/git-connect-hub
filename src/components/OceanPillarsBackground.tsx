@@ -60,6 +60,8 @@ const OceanPillarsBackground = ({
       drift: (Math.random() - 0.5) * 0.2,
     })), []);
 
+  const dimsRef = useRef({ w: 0, h: 0 });
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -68,21 +70,26 @@ const OceanPillarsBackground = ({
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
+      const parent = canvas.parentElement;
+      const w = parent ? parent.clientWidth : window.innerWidth;
+      const h = parent ? parent.clientHeight : window.innerHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width = w + "px";
+      canvas.style.height = h + "px";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      fishRef.current = initFish(rect.width, rect.height);
-      sharksRef.current = initSharks(rect.width, rect.height);
-      particlesRef.current = initParticles(rect.width, rect.height);
+      dimsRef.current = { w, h };
+      if (fishRef.current.length === 0) fishRef.current = initFish(w, h);
+      if (sharksRef.current.length === 0) sharksRef.current = initSharks(w, h);
+      if (particlesRef.current.length === 0) particlesRef.current = initParticles(w, h);
     };
 
     resize();
     window.addEventListener("resize", resize);
 
     const animate = () => {
-      const rect = canvas.getBoundingClientRect();
-      const w = rect.width, h = rect.height;
+      const { w, h } = dimsRef.current;
+      if (w === 0 || h === 0) { animRef.current = requestAnimationFrame(animate); return; }
       timeRef.current += 0.016;
       const t = timeRef.current;
 
