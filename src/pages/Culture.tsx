@@ -165,7 +165,7 @@ const Culture = () => {
   };
 
   return (
-    <div className="relative -m-8" style={{ overflow: "hidden", minHeight: "calc(100vh - 4rem)" }}>
+    <div className="relative -m-8 ocean-scroll" style={{ overflow: "auto", minHeight: "calc(100vh - 4rem)" }}>
       {/* Ocean background fills entire area */}
       <div className="fixed inset-0" style={{ zIndex: 0 }}>
         <OceanPillarsBackground selectedPillarIndex={risingIndex} />
@@ -175,7 +175,7 @@ const Culture = () => {
       <div className="relative z-10">
         {/* ===== PILLAR DETAIL VIEW ===== */}
         {animPhase === "detail" && selectedPillar && (
-          <div className="animate-fade-in p-8 pt-12 min-h-[calc(100vh-4rem)]">
+          <div className="animate-fade-in p-8 pt-12 min-h-screen">
             <button
               onClick={handleBack}
               className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-6"
