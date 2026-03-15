@@ -84,6 +84,31 @@
     @apply bg-background text-foreground font-sans;
   }
 
+  /* Custom scrollbar matching dark background */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--sidebar-background));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--sidebar-accent));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--sidebar-ring));
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--sidebar-accent)) hsl(var(--sidebar-background));
+  }
+
   /* Cards blend with background, no border, no shadow */
   .rounded-xl.bg-card {
     box-shadow: none !important;
