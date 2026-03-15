@@ -165,7 +165,7 @@ const Culture = () => {
   };
 
   return (
-    <div className="relative -m-8" style={{ overflow: "hidden", minHeight: "calc(100vh - 4rem)" }}>
+    <div className="relative -m-8 ocean-scroll" style={{ overflow: "auto", minHeight: "calc(100vh - 4rem)" }}>
       {/* Ocean background fills entire area */}
       <div className="fixed inset-0" style={{ zIndex: 0 }}>
         <OceanPillarsBackground selectedPillarIndex={risingIndex} />
