@@ -175,7 +175,7 @@ const Culture = () => {
       <div className="relative z-10">
         {/* ===== PILLAR DETAIL VIEW ===== */}
         {animPhase === "detail" && selectedPillar && (
-          <div className="animate-fade-in min-h-[calc(100vh-4rem)] flex flex-col p-8 pt-12">
+          <div className="animate-fade-in p-8 pt-12">
             <button
               onClick={handleBack}
               className="flex items-center gap-2 text-sm text-white/60 hover:text-white transition-colors mb-6"
@@ -201,7 +201,7 @@ const Culture = () => {
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white font-bold text-sm">
                     {i + 1}
                   </div>
-                  <p className="text-sm text-white leading-relaxed pt-1">{item}</p>
+                  <p className="text-sm text-white/80 leading-relaxed pt-1">{item}</p>
                 </div>
               ))}
             </div>
