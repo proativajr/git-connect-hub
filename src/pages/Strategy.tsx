@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Target, TrendingUp, ArrowRight, Loader2, ChevronDown } from "lucide-react";
+import { Target, TrendingUp, ArrowRight, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,77 +8,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import EditButton from "@/components/EditButton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-
-interface KR {
-  id: string;
-  label: string;
-  desejado: string;
-  realizado: string;
-  progresso: number;
-}
-
-interface OKR {
-  id: string;
-  titulo: string;
-  krs: KR[];
-  avaliacao: number;
-}
-
-const okrsData: OKR[] = [
-  {
-    id: "obj1",
-    titulo: "Aumentar Faturamento",
-    avaliacao: 14,
-    krs: [
-      { id: "kr1-1", label: "Faturamento por membro", desejado: "R$ 13.000,00", realizado: "R$ 2.562,50", progresso: 20 },
-      { id: "kr1-2", label: "Briefings marcados por membro", desejado: "12,00", realizado: "1,00", progresso: 8 },
-      { id: "kr1-3", label: "Reuniões realizadas", desejado: "36,00", realizado: "3,00", progresso: 8 },
-      { id: "kr1-4", label: "Renda de Leads Passivos", desejado: "40%", realizado: "100,00%", progresso: 250 },
-    ],
-  },
-  {
-    id: "obj2",
-    titulo: "Aumentar Qualidade dos Projetos",
-    avaliacao: 0,
-    krs: [
-      { id: "kr2-1", label: "Notas de CSAT", desejado: "4,5", realizado: "0", progresso: 0 },
-      { id: "kr2-2", label: "Relatórios de Projetos Finalizados", desejado: "100%", realizado: "0%", progresso: 0 },
-      { id: "kr2-3", label: "Treinamentos realizados por parceiros de baixo investimento", desejado: "6", realizado: "0", progresso: 0 },
-      { id: "kr2-4", label: "Reuniões de acompanhamento mensais", desejado: "18", realizado: "0", progresso: 0 },
-      { id: "kr2-5", label: "Inovações desenvolvidas", desejado: "3", realizado: "0,00", progresso: 0 },
-    ],
-  },
-  {
-    id: "obj3",
-    titulo: "Gestão Inteligente do Caixa",
-    avaliacao: 0,
-    krs: [
-      { id: "kr3-1", label: "SUPERÁVIT de 15% da margem de dois meses de \"manutenção\" da empresa", desejado: "15%", realizado: "0%", progresso: 0 },
-      { id: "kr3-2", label: "Diminuição do teto de custos fixos com dívidas", desejado: "15%", realizado: "0%", progresso: 0 },
-    ],
-  },
-  {
-    id: "obj4",
-    titulo: "Implementar a Jornada do Membro Dentro da EJ",
-    avaliacao: 0,
-    krs: [
-      { id: "kr4-1", label: "Número de processos implementados para mapeamento da jornada do membro", desejado: "4,0", realizado: "0,00", progresso: 0 },
-      { id: "kr4-2", label: "Percentual de eficácia da jornada em membros", desejado: "80%", realizado: "0,00", progresso: 0 },
-      { id: "kr4-3", label: "Percentual de participação de membros em eventos da rede", desejado: "75%", realizado: "0,00", progresso: 0 },
-    ],
-  },
-  {
-    id: "obj5",
-    titulo: "Visualização da Visão Executiva",
-    avaliacao: 13,
-    krs: [
-      { id: "kr5-1", label: "Eventos institucionais", desejado: "4", realizado: "0", progresso: 0 },
-      { id: "kr5-2", label: "Participações em eventos do MEJ", desejado: "5", realizado: "2", progresso: 40 },
-      { id: "kr5-3", label: "Média de satisfação das parcerias", desejado: "90", realizado: "0", progresso: 0 },
-      { id: "kr5-4", label: "Parcerias rodando", desejado: "3", realizado: "2", progresso: 67 },
-    ],
-  },
-];
+import { defaultOkrs, defaultInfo, fetchOKRsFromSheetDB } from "@/lib/sheetdb";
+import type { OKR, OKRInfo } from "@/lib/sheetdb";
 
 const getProgressColor = (value: number) => {
   if (value >= 70) return "bg-green-500";
@@ -104,6 +35,15 @@ const Strategy = () => {
     },
   });
 
+  const { data: okrData } = useQuery({
+    queryKey: ["sheetdb_okrs"],
+    queryFn: fetchOKRsFromSheetDB,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const okrsData: OKR[] = okrData?.okrs ?? defaultOkrs;
+  const info: OKRInfo = okrData?.info ?? defaultInfo;
+
   const updateTimeline = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Record<string, any> }) => {
       const { error } = await supabase.from("growth_journey").update(updates).eq("id", id);
@@ -115,10 +55,6 @@ const Strategy = () => {
 
   const [editTimelineIdx, setEditTimelineIdx] = useState<number | null>(null);
   const [tmpTimeline, setTmpTimeline] = useState({ year: "", label: "", value_text: "" });
-
-  // General info
-  const geralAvaliacao = 7;
-  const tempoGestao = 28;
 
   if (tlLoading) {
     return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
@@ -162,7 +98,6 @@ const Strategy = () => {
 
       {/* OKRs e KRs */}
       <div className="rounded-xl bg-card p-6 shadow-sm">
-        {/* Header com info geral */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <Target className="h-5 w-5 text-accent" />
@@ -171,26 +106,24 @@ const Strategy = () => {
           <div className="flex items-center gap-4">
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Tempo de Gestão</p>
-              <p className="text-xl font-bold text-accent">{tempoGestao}%</p>
+              <p className="text-xl font-bold text-accent">{info.tempoGestao}%</p>
             </div>
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Avaliação Geral</p>
-              <p className={`text-xl font-bold ${getAvaliacaoColor(geralAvaliacao)}`}>{geralAvaliacao}%</p>
+              <p className={`text-xl font-bold ${getAvaliacaoColor(info.avaliacaoGeral)}`}>{info.avaliacaoGeral}%</p>
             </div>
           </div>
         </div>
 
-        {/* Info bar */}
         <div className="grid grid-cols-3 gap-4 mb-6 rounded-lg bg-muted/50 p-4 text-sm">
-          <div><span className="text-muted-foreground">Data de início:</span> <span className="font-medium text-card-foreground">01/01/2026</span></div>
-          <div><span className="text-muted-foreground">Prazo:</span> <span className="font-medium text-card-foreground">28/08/2026</span></div>
-          <div><span className="text-muted-foreground">Faturamento:</span> <span className="font-medium text-card-foreground">R$ 41.000,00</span></div>
-          <div><span className="text-muted-foreground">Dias passados:</span> <span className="font-medium text-card-foreground">68</span></div>
-          <div><span className="text-muted-foreground">Dias restantes:</span> <span className="font-medium text-card-foreground">171</span></div>
-          <div><span className="text-muted-foreground">N. de Projetos:</span> <span className="font-medium text-card-foreground">9</span></div>
+          <div><span className="text-muted-foreground">Data de início:</span> <span className="font-medium text-card-foreground">{info.dataInicio}</span></div>
+          <div><span className="text-muted-foreground">Prazo:</span> <span className="font-medium text-card-foreground">{info.prazo}</span></div>
+          <div><span className="text-muted-foreground">Faturamento:</span> <span className="font-medium text-card-foreground">{info.faturamento}</span></div>
+          <div><span className="text-muted-foreground">Dias passados:</span> <span className="font-medium text-card-foreground">{info.diasPassados}</span></div>
+          <div><span className="text-muted-foreground">Dias restantes:</span> <span className="font-medium text-card-foreground">{info.diasRestantes}</span></div>
+          <div><span className="text-muted-foreground">N. de Projetos:</span> <span className="font-medium text-card-foreground">{info.numProjetos}</span></div>
         </div>
 
-        {/* Objetivos */}
         <Accordion type="multiple" defaultValue={["obj1"]} className="space-y-3">
           {okrsData.map((obj) => (
             <AccordionItem key={obj.id} value={obj.id} className="border rounded-lg overflow-hidden">
@@ -201,7 +134,6 @@ const Strategy = () => {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="p-0">
-                {/* Table header */}
                 <div className="grid grid-cols-12 gap-2 px-4 py-2 bg-muted/50 text-xs font-semibold text-muted-foreground border-b border-border">
                   <div className="col-span-1">KR</div>
                   <div className="col-span-5">Descrição</div>
@@ -209,7 +141,6 @@ const Strategy = () => {
                   <div className="col-span-2 text-center">Realizado</div>
                   <div className="col-span-2 text-center">Progresso</div>
                 </div>
-                {/* KR rows */}
                 {obj.krs.map((kr, idx) => (
                   <div key={kr.id} className={`grid grid-cols-12 gap-2 px-4 py-3 items-center text-sm ${idx % 2 === 0 ? "bg-card" : "bg-muted/20"}`}>
                     <div className="col-span-1 font-semibold text-accent">KR{idx + 1}</div>
