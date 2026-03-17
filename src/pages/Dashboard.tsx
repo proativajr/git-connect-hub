@@ -93,7 +93,10 @@ const Dashboard = () => {
 
   if (!metrics) return <p className="text-muted-foreground">Sem dados disponíveis.</p>;
 
-  const revenuePercent = Math.round((Number(metrics.revenue_current) / Number(metrics.revenue_goal)) * 100);
+  // Parse faturamento from SheetDB (e.g. "R$ 50.000,00" -> 50000)
+  const parsedFaturamento = parseFloat(faturamento.replace(/[R$\s.]/g, "").replace(",", ".")) || Number(metrics.revenue_goal);
+  const revenueGoal = parsedFaturamento;
+  const revenuePercent = Math.round((Number(metrics.revenue_current) / revenueGoal) * 100);
   const today = new Date().toLocaleDateString("pt-BR", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
   const kpis = [
