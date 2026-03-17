@@ -94,9 +94,10 @@ const Dashboard = () => {
   if (!metrics) return <p className="text-muted-foreground">Sem dados disponíveis.</p>;
 
   // Parse faturamento from SheetDB (e.g. "R$ 50.000,00" -> 50000)
-  const parsedFaturamento = parseFloat(faturamento.replace(/[R$\s.]/g, "").replace(",", ".")) || Number(metrics.revenue_goal);
-  const revenueGoal = parsedFaturamento;
-  const revenuePercent = Math.round((Number(metrics.revenue_current) / revenueGoal) * 100);
+  const parsedFaturamento = parseFloat(faturamento.replace(/[R$\s.]/g, "").replace(",", ".")) || 0;
+  const revenueCurrent = parsedFaturamento;
+  const revenueGoal = 260000;
+  const revenuePercent = revenueGoal > 0 ? Math.round((revenueCurrent / revenueGoal) * 100) : 0;
   const today = new Date().toLocaleDateString("pt-BR", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
   const kpis = [
@@ -145,8 +146,8 @@ const Dashboard = () => {
           <EditButton label="Editar" onClick={() => { setTmpGoal(revenueGoal); setTmpCurrent(Number(metrics.revenue_current)); setEditRevenue(true); }} />
         </div>
         <div className="flex justify-between text-sm text-muted-foreground mb-2">
-          <span>R$ {(Number(metrics.revenue_current) / 1000).toFixed(0)}.000</span>
-          <span>Meta: {faturamento}</span>
+          <span>{faturamento}</span>
+          <span>Meta: R$ 260.000,00</span>
         </div>
         <div className="w-full h-4 bg-muted rounded-full overflow-hidden">
           <div className="h-full bg-accent rounded-full transition-all duration-700" style={{ width: `${revenuePercent}%` }} />
