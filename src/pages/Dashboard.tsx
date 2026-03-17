@@ -24,6 +24,15 @@ const Dashboard = () => {
     },
   });
 
+  // Fetch OKR data from SheetDB (for faturamento sync)
+  const { data: okrData } = useQuery({
+    queryKey: ["sheetdb_okrs"],
+    queryFn: fetchOKRsFromSheetDB,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const faturamento = okrData?.info?.faturamento ?? defaultInfo.faturamento;
+
   // Fetch priorities
   const { data: priorities = [] } = useQuery({
     queryKey: ["quarterly_priorities"],
