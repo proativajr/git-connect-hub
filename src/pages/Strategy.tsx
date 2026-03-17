@@ -35,7 +35,7 @@ const Strategy = () => {
     },
   });
 
-  const { data: okrData } = useQuery({
+  const { data: okrData, isLoading: okrLoading } = useQuery({
     queryKey: ["sheetdb_okrs"],
     queryFn: fetchOKRsFromSheetDB,
     staleTime: 5 * 60 * 1000,

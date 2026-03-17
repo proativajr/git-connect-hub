@@ -94,21 +94,85 @@ export const defaultOkrs: OKR[] = [
   },
 ];
 
+function parsePercent(val: string): number {
+  if (!val) return 0;
+  return parseFloat(val.replace("%", "").replace(",", ".")) || 0;
+}
+
+interface SheetRow {
+  objetivo: string;
+  kr: string;
+  descricao: string;
+  desejado: string;
+  realizado: string;
+  progresso: string;
+  "avaliação": string;
+}
+
 export async function fetchOKRsFromSheetDB(): Promise<{ info: OKRInfo; okrs: OKR[] } | null> {
   try {
-    const res = await fetch(`${SHEETDB_URL}?sheet=OKRs%202026.1`, {
-      headers: { Authorization: `Bearer ${SHEETDB_TOKEN}` },
-    });
+    const res = await fetch(
+      `${SHEETDB_URL}?sheet=Planilha%20Automatizada(Lovable)&limit=30`,
+      { headers: { Authorization: `Bearer ${SHEETDB_TOKEN}` } }
+    );
     if (!res.ok) return null;
-    const data = await res.json();
-    
-    // SheetDB returns empty arrays when headers aren't set properly
-    if (!data || !Array.isArray(data) || data.length === 0 || (Array.isArray(data[0]) && data[0].length === 0)) {
-      return null;
+    const data: SheetRow[] = await res.json();
+    if (!data || !Array.isArray(data) || data.length === 0) return null;
+
+    // Split rows into KR rows and info rows
+    const krRows = data.filter(r => r.objetivo && r.kr && r.kr.startsWith("KR"));
+    const infoRows = data.filter(r => r.objetivo && !r.kr?.startsWith("KR") && r.kr && r.objetivo !== "metrica");
+
+    // Parse info from key-value rows
+    const infoMap = new Map<string, string>();
+    for (const row of data) {
+      if (row.objetivo && row.kr && !row.kr.startsWith("KR") && row.objetivo !== "metrica" && row.objetivo !== "") {
+        infoMap.set(row.objetivo, row.kr);
+      }
     }
-    
-    // TODO: Parse real data when SheetDB headers are properly configured
-    return null;
+
+    const info: OKRInfo = {
+      dataInicio: infoMap.get("data_inicio") || defaultInfo.dataInicio,
+      prazo: infoMap.get("prazo") || defaultInfo.prazo,
+      faturamento: infoMap.get("faturamento") || defaultInfo.faturamento,
+      diasPassados: parseInt(infoMap.get("dias_passados") || "") || defaultInfo.diasPassados,
+      diasRestantes: parseInt(infoMap.get("dias_restantes") || "") || defaultInfo.diasRestantes,
+      numProjetos: parseInt(infoMap.get("projetos") || "") || defaultInfo.numProjetos,
+      tempoGestao: parsePercent(infoMap.get("tempo_gestao") || ""),
+      avaliacaoGeral: parsePercent(infoMap.get("avaliacao_geral") || ""),
+    };
+
+    // Group KR rows by objetivo
+    const objMap = new Map<string, { krs: KR[]; avaliacao: number }>();
+    let objIdx = 0;
+    for (const row of krRows) {
+      const objName = row.objetivo;
+      if (!objMap.has(objName)) {
+        objIdx++;
+        objMap.set(objName, { krs: [], avaliacao: parsePercent(row["avaliação"]) });
+      }
+      const entry = objMap.get(objName)!;
+      // If avaliação is set on this row, update (first KR of each obj has it)
+      if (row["avaliação"]) {
+        entry.avaliacao = parsePercent(row["avaliação"]);
+      }
+      entry.krs.push({
+        id: `kr${objIdx}-${entry.krs.length + 1}`,
+        label: row.descricao,
+        desejado: row.desejado,
+        realizado: row.realizado,
+        progresso: parsePercent(row.progresso),
+      });
+    }
+
+    const okrs: OKR[] = [];
+    let i = 0;
+    for (const [titulo, val] of objMap) {
+      i++;
+      okrs.push({ id: `obj${i}`, titulo, krs: val.krs, avaliacao: val.avaliacao });
+    }
+
+    return { info, okrs };
   } catch {
     return null;
   }
