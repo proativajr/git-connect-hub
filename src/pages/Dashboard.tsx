@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import EditButton from "@/components/EditButton";
+import { fetchOKRsFromSheetDB, defaultInfo } from "@/lib/sheetdb";
 
 const kpiIcons = [Briefcase, DollarSign, Star];
 
@@ -22,6 +23,15 @@ const Dashboard = () => {
       return data;
     },
   });
+
+  // Fetch OKR data from SheetDB (for faturamento sync)
+  const { data: okrData } = useQuery({
+    queryKey: ["sheetdb_okrs"],
+    queryFn: fetchOKRsFromSheetDB,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const faturamento = okrData?.info?.faturamento ?? defaultInfo.faturamento;
 
   // Fetch priorities
   const { data: priorities = [] } = useQuery({
@@ -83,7 +93,10 @@ const Dashboard = () => {
 
   if (!metrics) return <p className="text-muted-foreground">Sem dados disponíveis.</p>;
 
-  const revenuePercent = Math.round((Number(metrics.revenue_current) / Number(metrics.revenue_goal)) * 100);
+  // Parse faturamento from SheetDB (e.g. "R$ 50.000,00" -> 50000)
+  const parsedFaturamento = parseFloat(faturamento.replace(/[R$\s.]/g, "").replace(",", ".")) || Number(metrics.revenue_goal);
+  const revenueGoal = parsedFaturamento;
+  const revenuePercent = Math.round((Number(metrics.revenue_current) / revenueGoal) * 100);
   const today = new Date().toLocaleDateString("pt-BR", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
   const kpis = [
@@ -129,11 +142,11 @@ const Dashboard = () => {
             <DollarSign className="h-5 w-5 text-accent" />
             <h2 className="text-lg font-semibold text-card-foreground">Receita Anual</h2>
           </div>
-          <EditButton label="Editar" onClick={() => { setTmpGoal(Number(metrics.revenue_goal)); setTmpCurrent(Number(metrics.revenue_current)); setEditRevenue(true); }} />
+          <EditButton label="Editar" onClick={() => { setTmpGoal(revenueGoal); setTmpCurrent(Number(metrics.revenue_current)); setEditRevenue(true); }} />
         </div>
         <div className="flex justify-between text-sm text-muted-foreground mb-2">
           <span>R$ {(Number(metrics.revenue_current) / 1000).toFixed(0)}.000</span>
-          <span>Meta: R$ {(Number(metrics.revenue_goal) / 1000).toFixed(0)}.000</span>
+          <span>Meta: {faturamento}</span>
         </div>
         <div className="w-full h-4 bg-muted rounded-full overflow-hidden">
           <div className="h-full bg-accent rounded-full transition-all duration-700" style={{ width: `${revenuePercent}%` }} />
