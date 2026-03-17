@@ -142,11 +142,11 @@ const Dashboard = () => {
             <DollarSign className="h-5 w-5 text-accent" />
             <h2 className="text-lg font-semibold text-card-foreground">Receita Anual</h2>
           </div>
-          <EditButton label="Editar" onClick={() => { setTmpGoal(Number(metrics.revenue_goal)); setTmpCurrent(Number(metrics.revenue_current)); setEditRevenue(true); }} />
+          <EditButton label="Editar" onClick={() => { setTmpGoal(revenueGoal); setTmpCurrent(Number(metrics.revenue_current)); setEditRevenue(true); }} />
         </div>
         <div className="flex justify-between text-sm text-muted-foreground mb-2">
           <span>R$ {(Number(metrics.revenue_current) / 1000).toFixed(0)}.000</span>
-          <span>Meta: R$ {(Number(metrics.revenue_goal) / 1000).toFixed(0)}.000</span>
+          <span>Meta: {faturamento}</span>
         </div>
         <div className="w-full h-4 bg-muted rounded-full overflow-hidden">
           <div className="h-full bg-accent rounded-full transition-all duration-700" style={{ width: `${revenuePercent}%` }} />
