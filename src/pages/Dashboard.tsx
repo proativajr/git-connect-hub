@@ -147,12 +147,21 @@ const Dashboard = () => {
         </div>
         <div className="flex justify-between text-sm text-muted-foreground mb-2">
           <span>{faturamento}</span>
-          <span>Meta: R$ 260.000,00</span>
+          <span>Meta Interna: R$ 260.000,00</span>
         </div>
         <div className="w-full h-4 bg-muted rounded-full overflow-hidden">
           <div className="h-full bg-accent rounded-full transition-all duration-700" style={{ width: `${revenuePercent}%` }} />
         </div>
         <p className="text-right text-sm font-semibold text-accent mt-2">{revenuePercent}% atingido</p>
+
+        <div className="flex justify-between text-sm text-muted-foreground mb-2 mt-4">
+          <span>{faturamento}</span>
+          <span>Meta Externa: R$ 200.000,00</span>
+        </div>
+        <div className="w-full h-4 bg-muted rounded-full overflow-hidden">
+          <div className="h-full bg-accent/70 rounded-full transition-all duration-700" style={{ width: `${revenueGoal > 0 ? Math.round((revenueCurrent / 200000) * 100) : 0}%` }} />
+        </div>
+        <p className="text-right text-sm font-semibold text-accent/70 mt-2">{revenueGoal > 0 ? Math.round((revenueCurrent / 200000) * 100) : 0}% atingido</p>
       </div>
 
       {/* KPI Cards */}
