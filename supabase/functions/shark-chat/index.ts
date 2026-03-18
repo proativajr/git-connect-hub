@@ -12,54 +12,85 @@ serve(async (req) => {
 
   try {
     const { messages } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+    if (!ANTHROPIC_API_KEY) throw new Error("ANTHROPIC_API_KEY is not configured");
 
-    const response = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            {
-              role: "system",
-              content:
-                "Você é o Shark, o assistente IA da Proativa Jr — uma empresa júnior. Responda de forma amigável, concisa e útil em português brasileiro. Você ajuda com dúvidas sobre a empresa, planejamento estratégico, OKRs, e assuntos gerais.",
-            },
-            ...messages,
-          ],
-          stream: true,
-        }),
-      }
-    );
+    // Convert from OpenAI format to Claude format
+    const claudeMessages = messages.map((m: any) => ({
+      role: m.role,
+      content: m.content,
+    }));
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1024,
+        system: "Você é o Shark, o assistente IA da Proativa Jr — uma empresa júnior. Responda de forma amigável, concisa e útil em português brasileiro. Você ajuda com dúvidas sobre a empresa, planejamento estratégico, OKRs, e assuntos gerais.",
+        messages: claudeMessages,
+        stream: true,
+      }),
+    });
 
     if (!response.ok) {
+      const t = await response.text();
+      console.error("Claude API error:", response.status, t);
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "Muitas requisições. Tente novamente em instantes." }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Créditos insuficientes. Adicione fundos ao workspace." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
       return new Response(
-        JSON.stringify({ error: "Erro no gateway de IA" }),
+        JSON.stringify({ error: "Erro na API do Claude" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    return new Response(response.body, {
+    // Transform Claude SSE stream to OpenAI-compatible SSE stream
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+    const reader = response.body!.getReader();
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        let buf = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+            controller.close();
+            break;
+          }
+          buf += decoder.decode(value, { stream: true });
+
+          let idx: number;
+          while ((idx = buf.indexOf("\n")) !== -1) {
+            const line = buf.slice(0, idx).trim();
+            buf = buf.slice(idx + 1);
+            if (!line.startsWith("data: ")) continue;
+            const json = line.slice(6);
+            if (json === "[DONE]") continue;
+            try {
+              const event = JSON.parse(json);
+              if (event.type === "content_block_delta" && event.delta?.text) {
+                const openaiChunk = {
+                  choices: [{ delta: { content: event.delta.text } }],
+                };
+                controller.enqueue(encoder.encode(`data: ${JSON.stringify(openaiChunk)}\n\n`));
+              }
+            } catch { /* skip */ }
+          }
+        }
+      },
+    });
+
+    return new Response(stream, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (e) {
