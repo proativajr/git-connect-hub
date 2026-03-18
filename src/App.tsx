@@ -18,7 +18,7 @@ import Members from "./pages/Members";
 import Settings from "./pages/Settings";
 import Shark from "./pages/Shark";
 import NotFound from "./pages/NotFound";
-
+import SharkChat from "./components/SharkChat";
 
 const queryClient = new QueryClient();
 
