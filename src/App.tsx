@@ -47,7 +47,6 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           <SharkChat />
-          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
