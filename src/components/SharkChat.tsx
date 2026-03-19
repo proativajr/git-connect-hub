@@ -25,7 +25,7 @@ async function streamChat({
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnbG1jaG5zY3hydXliZGl1c2VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzY3OTIsImV4cCI6MjA4NzU1Mjc5Mn0.PFY2we3jT-I_nXuKr8O4IQ01tpwfknOWRRNMB0dYQyA`,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
     },
     body: JSON.stringify({ messages }),
     signal,
