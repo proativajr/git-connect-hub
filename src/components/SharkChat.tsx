@@ -6,7 +6,9 @@ import sharkJaws from "@/assets/shark-jaws.png";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const CHAT_URL = `https://iglmchnscxruybdiuseo.supabase.co/functions/v1/shark-chat`;
+const SUPABASE_URL = "https://iglmchnscxruybdiuseo.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnbG1jaG5zY3hydXliZGl1c2VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzY3OTIsImV4cCI6MjA4NzU1Mjc5Mn0.PFY2we3jT-I_nXuKr8O4IQ01tpwfknOWRRNMB0dYQyA";
+const CHAT_URL = `${SUPABASE_URL}/functions/v1/shark-chat`;
 
 async function streamChat({
   messages,
@@ -23,7 +25,7 @@ async function streamChat({
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
     },
     body: JSON.stringify({ messages }),
     signal,
