@@ -2,10 +2,12 @@ import { useState, useRef, useEffect } from "react";
 import { X, Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import sharkJaws from "@/assets/shark-jaws.png";
+import { supabase } from "@/integrations/supabase/client";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 const SUPABASE_URL = "https://iglmchnscxruybdiuseo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnbG1jaG5zY3hydXliZGl1c2VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzY3OTIsImV4cCI6MjA4NzU1Mjc5Mn0.PFY2we3jT-I_nXuKr8O4IQ01tpwfknOWRRNMB0dYQyA";
 const CHAT_URL = `${SUPABASE_URL}/functions/v1/shark-chat`;
 
 async function streamChat({
@@ -22,9 +24,18 @@ async function streamChat({
   let resp: Response;
 
   try {
-    // Sem headers customizados para evitar preflight CORS desnecessário
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const authToken = session?.access_token ?? SUPABASE_ANON_KEY;
+
     resp = await fetch(CHAT_URL, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${authToken}`,
+      },
       body: JSON.stringify({ messages }),
       signal,
     });

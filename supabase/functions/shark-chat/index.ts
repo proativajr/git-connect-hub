@@ -1,4 +1,4 @@
-// Shark Chat Edge Function v2
+// Shark Chat Edge Function v3
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -9,7 +9,7 @@ const corsHeaders = {
 
 serve(async (req) => {
   if (req.method === "OPTIONS")
-    return new Response(null, { headers: corsHeaders });
+    return new Response("ok", { headers: corsHeaders });
 
   try {
     const { messages } = await req.json();
