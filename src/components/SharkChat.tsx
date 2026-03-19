@@ -1,13 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { X, Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { supabase } from "@/integrations/supabase/client";
 import sharkJaws from "@/assets/shark-jaws.png";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 const SUPABASE_URL = "https://iglmchnscxruybdiuseo.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnbG1jaG5zY3hydXliZGl1c2VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzY3OTIsImV4cCI6MjA4NzU1Mjc5Mn0.PFY2we3jT-I_nXuKr8O4IQ01tpwfknOWRRNMB0dYQyA";
 const CHAT_URL = `${SUPABASE_URL}/functions/v1/shark-chat`;
 
 async function streamChat({
@@ -21,19 +19,35 @@ async function streamChat({
   onDone: () => void;
   signal?: AbortSignal;
 }) {
-  const resp = await fetch(CHAT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${SUPABASE_KEY}`,
-    },
-    body: JSON.stringify({ messages }),
-    signal,
-  });
+  let resp: Response;
+
+  try {
+    // Sem headers customizados para evitar preflight CORS desnecessário
+    resp = await fetch(CHAT_URL, {
+      method: "POST",
+      body: JSON.stringify({ messages }),
+      signal,
+    });
+  } catch {
+    throw new Error("Não foi possível conectar ao Jaws agora.");
+  }
 
   if (!resp.ok || !resp.body) {
-    const err = await resp.json().catch(() => ({}));
-    throw new Error(err.error || "Falha na conexão");
+    const errText = await resp.text();
+    let errMsg = "Falha na conexão";
+
+    try {
+      const err = JSON.parse(errText);
+      errMsg = err.error || err.message || errMsg;
+    } catch {
+      // mantém mensagem padrão
+    }
+
+    if (resp.status === 404) {
+      errMsg = "A função shark-chat não está publicada no backend.";
+    }
+
+    throw new Error(errMsg);
   }
 
   const reader = resp.body.getReader();
