@@ -2,23 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { X, Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
+import sharkJaws from "@/assets/shark-jaws.png";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 const CHAT_URL = `https://iglmchnscxruybdiuseo.supabase.co/functions/v1/shark-chat`;
-
-const SharkMouthIcon = ({ className = "" }: { className?: string }) => (
-  <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    {/* Upper jaw */}
-    <path d="M8 32 Q12 16 32 14 Q52 16 56 32" />
-    {/* Upper teeth */}
-    <path d="M14 32 L18 24 L22 32 L26 22 L30 32 L34 22 L38 32 L42 24 L46 32 L50 26 L54 32" />
-    {/* Lower jaw */}
-    <path d="M8 32 Q12 48 32 50 Q52 48 56 32" />
-    {/* Lower teeth */}
-    <path d="M14 32 L18 40 L22 32 L26 42 L30 32 L34 42 L38 32 L42 40 L46 32 L50 38 L54 32" />
-  </svg>
-);
 
 async function streamChat({
   messages,
@@ -129,22 +117,32 @@ const SharkChat = () => {
 
   return (
     <>
-      {/* Floating button */}
-      <button
-        onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-110 transition-transform flex items-center justify-center"
-        aria-label="Abrir chat Shark"
-      >
-        {open ? <X className="h-6 w-6" /> : <SharkMouthIcon className="h-8 w-8" />}
-      </button>
+      {/* Floating shark character */}
+      <div className="fixed bottom-0 right-6 z-50 group">
+        {/* Tooltip */}
+        <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-card text-card-foreground text-sm rounded-xl shadow-lg border border-border opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
+          Sou o Jaws, tiro suas dúvidas igual eu mordo 🦈
+        </div>
+        <button
+          onClick={() => setOpen(!open)}
+          className="relative h-[90px] w-[90px] overflow-hidden cursor-pointer hover:translate-y-[-8px] transition-transform duration-300 bg-transparent border-none outline-none"
+          aria-label="Abrir chat Shark"
+        >
+          <img
+            src={sharkJaws}
+            alt="Jaws - Assistente IA"
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[120px] max-w-none object-contain object-bottom"
+          />
+        </button>
+      </div>
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-[360px] h-[480px] rounded-2xl bg-card border border-border shadow-2xl flex flex-col overflow-hidden animate-fade-in">
+        <div className="fixed bottom-[100px] right-6 z-50 w-[360px] h-[480px] rounded-2xl bg-card border border-border shadow-2xl flex flex-col overflow-hidden animate-fade-in">
           {/* Header */}
           <div className="flex items-center gap-2 px-4 py-3 bg-primary text-primary-foreground">
-            <SharkMouthIcon className="h-6 w-6" />
-            <span className="font-semibold text-sm">Shark — Assistente IA</span>
+            <img src={sharkJaws} alt="Jaws" className="h-6 w-6 object-contain" />
+            <span className="font-semibold text-sm">Jaws — Assistente IA</span>
           </div>
 
           {/* Messages */}
