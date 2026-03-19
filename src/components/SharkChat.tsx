@@ -2,23 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { X, Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { supabase } from "@/integrations/supabase/client";
+import sharkJaws from "@/assets/shark-jaws.png";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
 const CHAT_URL = `https://iglmchnscxruybdiuseo.supabase.co/functions/v1/shark-chat`;
-
-const SharkMouthIcon = ({ className = "" }: { className?: string }) => (
-  <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    {/* Upper jaw */}
-    <path d="M8 32 Q12 16 32 14 Q52 16 56 32" />
-    {/* Upper teeth */}
-    <path d="M14 32 L18 24 L22 32 L26 22 L30 32 L34 22 L38 32 L42 24 L46 32 L50 26 L54 32" />
-    {/* Lower jaw */}
-    <path d="M8 32 Q12 48 32 50 Q52 48 56 32" />
-    {/* Lower teeth */}
-    <path d="M14 32 L18 40 L22 32 L26 42 L30 32 L34 42 L38 32 L42 40 L46 32 L50 38 L54 32" />
-  </svg>
-);
 
 async function streamChat({
   messages,
