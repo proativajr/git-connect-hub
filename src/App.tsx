@@ -45,6 +45,7 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
               <Route path="/shark" element={<Shark />} />
             </Route>
+            <Route path="/monday" element={<Monday />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <SharkChat />
