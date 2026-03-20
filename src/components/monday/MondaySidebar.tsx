@@ -32,15 +32,8 @@ interface Board {
 const DEPT_ICONS: Record<string, typeof LayoutGrid> = {
   projetos: LayoutGrid,
   comercial: Briefcase,
-  vp: Building2,
-  presidencia: Crown,
-};
-
-const DEPT_LABELS: Record<string, string> = {
-  projetos: "Projetos",
-  comercial: "Comercial",
-  vp: "Vice-Presidência",
-  presidencia: "Presidência",
+  "vice-presidência": Building2,
+  presidência: Crown,
 };
 
 interface Props {
@@ -70,14 +63,15 @@ export function MondaySidebar({ selectedBoardId, onSelectBoard }: Props) {
   }, [collapsed]);
 
   const fetchData = async () => {
+    const sb = supabase as any;
     const [wRes, fRes, bRes] = await Promise.all([
-      supabase.from("workspaces").select("*").limit(1).single(),
-      supabase.from("folders").select("*").order("position"),
-      supabase.from("boards").select("*").order("position"),
+      sb.from("workspaces").select("*").limit(1).single(),
+      sb.from("folders").select("*").order("position"),
+      sb.from("boards").select("*").order("position"),
     ]);
-    if (wRes.data) setWorkspace(wRes.data);
-    if (fRes.data) setFolders(fRes.data);
-    if (bRes.data) setBoards(bRes.data);
+    if (wRes.data) setWorkspace(wRes.data as Workspace);
+    if (fRes.data) setFolders(fRes.data as Folder[]);
+    if (bRes.data) setBoards(bRes.data as Board[]);
   };
 
   const toggleFolder = (folderId: string) => {
@@ -86,14 +80,15 @@ export function MondaySidebar({ selectedBoardId, onSelectBoard }: Props) {
 
   const handleCreateBoard = async () => {
     if (!newBoardName.trim() || !workspace) return;
-    const { data } = await supabase.from("boards").insert({
+    const sb = supabase as any;
+    const { data } = await sb.from("boards").insert({
       name: newBoardName.trim(),
       workspace_id: workspace.id,
       folder_id: newBoardFolderId,
       position: boards.length,
     }).select().single();
     if (data) {
-      setBoards((prev) => [...prev, data]);
+      setBoards((prev) => [...prev, data as Board]);
       setNewBoardName("");
       setNewBoardDialog(false);
     }
@@ -117,9 +112,7 @@ export function MondaySidebar({ selectedBoardId, onSelectBoard }: Props) {
         {folders.map((folder) => {
           const isCollapsed = collapsed[folder.id];
           const fBoards = boardsForFolder(folder.id);
-          const Icon = DEPT_ICONS[folder.name.toLowerCase()] ||
-            DEPT_ICONS[Object.keys(DEPT_LABELS).find(k => DEPT_LABELS[k] === folder.name) || ""] ||
-            FolderOpen;
+          const Icon = DEPT_ICONS[folder.name.toLowerCase()] || FolderOpen;
 
           return (
             <div key={folder.id}>

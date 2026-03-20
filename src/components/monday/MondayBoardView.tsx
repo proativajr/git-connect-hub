@@ -21,12 +21,7 @@ interface Props {
 
 export function MondayBoardView({ boardId }: Props) {
   const [board, setBoard] = useState<Board | null>(null);
-  const [activeTab, setActiveTab] = useState(() => {
-    if (!boardId) return "table";
-    try {
-      return localStorage.getItem(`monday_tab_${boardId}`) || "table";
-    } catch { return "table"; }
-  });
+  const [activeTab, setActiveTab] = useState("table");
 
   useEffect(() => {
     if (!boardId) { setBoard(null); return; }
@@ -34,8 +29,9 @@ export function MondayBoardView({ boardId }: Props) {
     if (stored) setActiveTab(stored);
     else setActiveTab("table");
 
-    supabase.from("boards").select("id, name").eq("id", boardId).single()
-      .then(({ data }) => { if (data) setBoard(data); });
+    const sb = supabase as any;
+    sb.from("boards").select("id, name").eq("id", boardId).single()
+      .then(({ data }: any) => { if (data) setBoard(data as Board); });
   }, [boardId]);
 
   useEffect(() => {
