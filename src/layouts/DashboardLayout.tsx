@@ -17,6 +17,7 @@ const navItems = [
   { title: "Galeria", path: "/gallery", icon: Image, multiLine: false },
   { title: "Membros", path: "/members", icon: Users, multiLine: false },
   { title: "Shark", path: "/shark", icon: Fish, multiLine: false },
+  { title: "Gestão (Monday)", path: "/monday", icon: Columns3, multiLine: false },
   { title: "Configurações", path: "/settings", icon: Settings, multiLine: false },
 ];
 
