@@ -17,6 +17,7 @@ import Gallery from "./pages/Gallery";
 import Members from "./pages/Members";
 import Settings from "./pages/Settings";
 import Shark from "./pages/Shark";
+import Monday from "./pages/Monday";
 import NotFound from "./pages/NotFound";
 import SharkChat from "./components/SharkChat";
 
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/settings" element={<Settings />} />
               <Route path="/shark" element={<Shark />} />
             </Route>
+            <Route path="/monday" element={<Monday />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <SharkChat />
