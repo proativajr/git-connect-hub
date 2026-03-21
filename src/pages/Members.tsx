@@ -43,7 +43,7 @@ const Members = () => {
         const { error } = await (supabase as any).from("members").update({ name: f.name, role: f.role, email: f.email, squad: f.squad }).eq("id", f.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("members").insert({ name: f.name, role: f.role, email: f.email, squad: f.squad });
+        const { error } = await (supabase as any).from("members").insert({ name: f.name, role: f.role, email: f.email, squad: f.squad });
         if (error) throw error;
       }
     },
