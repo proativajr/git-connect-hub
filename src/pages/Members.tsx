@@ -73,7 +73,7 @@ const Members = () => {
   const { data: allowedEmails = [] } = useQuery({
     queryKey: ["allowed_emails"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("allowed_emails").select("*").order("created_at");
+      const { data, error } = await (supabase as any).from("allowed_emails").select("*").order("created_at");
       if (error) throw error;
       return data;
     },
