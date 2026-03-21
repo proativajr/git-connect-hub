@@ -61,7 +61,7 @@ const Dashboard = () => {
       if (priorities.length > 0) {
         const toDelete = priorities.filter((p: any) => !currentIds.includes(p.id));
         for (const d of toDelete) {
-          await supabase.from("quarterly_priorities").delete().eq("id", d.id);
+          await (supabase as any).from("quarterly_priorities").delete().eq("id", d.id);
         }
       }
       for (let i = 0; i < items.length; i++) {
