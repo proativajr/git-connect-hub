@@ -29,7 +29,7 @@ const Strategy = () => {
   const { data: timeline = [], isLoading: tlLoading } = useQuery({
     queryKey: ["growth_journey"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("growth_journey").select("*").order("sort_order");
+      const { data, error } = await (supabase as any).from("growth_journey").select("*").order("sort_order");
       if (error) throw error;
       return data;
     },
