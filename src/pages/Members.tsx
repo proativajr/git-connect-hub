@@ -96,7 +96,7 @@ const Members = () => {
 
   const addAllowedEmail = useMutation({
     mutationFn: async (email: string) => {
-      const { error } = await supabase.from("allowed_emails").insert({ email: email.toLowerCase().trim() });
+      const { error } = await (supabase as any).from("allowed_emails").insert({ email: email.toLowerCase().trim() });
       if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["allowed_emails"] }); toast({ title: "E-mail autorizado!" }); setNewAllowedEmail(""); },
