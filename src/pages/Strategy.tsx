@@ -29,7 +29,7 @@ const Strategy = () => {
   const { data: timeline = [], isLoading: tlLoading } = useQuery({
     queryKey: ["growth_journey"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("growth_journey").select("*").order("sort_order");
+      const { data, error } = await (supabase as any).from("growth_journey").select("*").order("sort_order");
       if (error) throw error;
       return data;
     },
@@ -46,7 +46,7 @@ const Strategy = () => {
 
   const updateTimeline = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Record<string, any> }) => {
-      const { error } = await supabase.from("growth_journey").update(updates).eq("id", id);
+      const { error } = await (supabase as any).from("growth_journey").update(updates).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["growth_journey"] }); toast({ title: "Salvo!" }); },

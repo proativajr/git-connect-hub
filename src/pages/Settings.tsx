@@ -49,7 +49,7 @@ const Settings = () => {
         .from("avatars")
         .getPublicUrl(path);
 
-      const { error: updateError } = await supabase
+      const { error: updateError } = await (supabase as any)
         .from("profiles")
         .update({ avatar_url: publicUrl })
         .eq("id", profile.id);
@@ -68,7 +68,7 @@ const Settings = () => {
   };
 
   const handleSaveProfile = async () => {
-    const { error } = await supabase.from("profiles").update({ full_name: name }).eq("id", profile?.id);
+    const { error } = await (supabase as any).from("profiles").update({ full_name: name }).eq("id", profile?.id);
     if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
     await refreshProfile();
     toast({ title: "Perfil atualizado!" });

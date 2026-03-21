@@ -19,7 +19,7 @@ const Login = () => {
     try {
       if (isSignUp) {
         // Check allowlist before signup
-        const { data: allowed } = await supabase
+        const { data: allowed } = await (supabase as any)
           .from("allowed_emails")
           .select("id")
           .eq("email", email.toLowerCase().trim())

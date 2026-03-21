@@ -31,7 +31,7 @@ const Members = () => {
   const { data: members = [], isLoading } = useQuery({
     queryKey: ["members"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("members").select("*").order("created_at");
+      const { data, error } = await (supabase as any).from("members").select("*").order("created_at");
       if (error) throw error;
       return data;
     },
@@ -40,10 +40,10 @@ const Members = () => {
   const upsert = useMutation({
     mutationFn: async (f: MemberForm) => {
       if (f.id) {
-        const { error } = await supabase.from("members").update({ name: f.name, role: f.role, email: f.email, squad: f.squad }).eq("id", f.id);
+        const { error } = await (supabase as any).from("members").update({ name: f.name, role: f.role, email: f.email, squad: f.squad }).eq("id", f.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("members").insert({ name: f.name, role: f.role, email: f.email, squad: f.squad });
+        const { error } = await (supabase as any).from("members").insert({ name: f.name, role: f.role, email: f.email, squad: f.squad });
         if (error) throw error;
       }
     },
@@ -53,7 +53,7 @@ const Members = () => {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("members").delete().eq("id", id);
+      const { error } = await (supabase as any).from("members").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["members"] }); toast({ title: "Removido!" }); },
@@ -62,7 +62,7 @@ const Members = () => {
 
   const bulkInsert = useMutation({
     mutationFn: async (items: MemberForm[]) => {
-      const { error } = await supabase.from("members").insert(items.map(i => ({ name: i.name, role: i.role, email: i.email, squad: i.squad })));
+      const { error } = await (supabase as any).from("members").insert(items.map(i => ({ name: i.name, role: i.role, email: i.email, squad: i.squad })));
       if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["members"] }); toast({ title: "CSV importado!" }); },
@@ -73,7 +73,7 @@ const Members = () => {
   const { data: allowedEmails = [] } = useQuery({
     queryKey: ["allowed_emails"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("allowed_emails").select("*").order("created_at");
+      const { data, error } = await (supabase as any).from("allowed_emails").select("*").order("created_at");
       if (error) throw error;
       return data;
     },
@@ -83,7 +83,7 @@ const Members = () => {
   const { data: profiles = [] } = useQuery({
     queryKey: ["profiles_emails"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("profiles").select("id");
+      const { data, error } = await (supabase as any).from("profiles").select("id");
       if (error) throw error;
       return data;
     },
@@ -96,7 +96,7 @@ const Members = () => {
 
   const addAllowedEmail = useMutation({
     mutationFn: async (email: string) => {
-      const { error } = await supabase.from("allowed_emails").insert({ email: email.toLowerCase().trim() });
+      const { error } = await (supabase as any).from("allowed_emails").insert({ email: email.toLowerCase().trim() });
       if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["allowed_emails"] }); toast({ title: "E-mail autorizado!" }); setNewAllowedEmail(""); },
@@ -105,7 +105,7 @@ const Members = () => {
 
   const revokeAllowedEmail = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from("allowed_emails").delete().eq("id", id);
+      const { error } = await (supabase as any).from("allowed_emails").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["allowed_emails"] }); toast({ title: "Permissão revogada!" }); },

@@ -18,7 +18,7 @@ const Dashboard = () => {
   const { data: metrics, isLoading: metricsLoading } = useQuery({
     queryKey: ["dashboard_metrics"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("dashboard_metrics").select("*").limit(1).single();
+      const { data, error } = await (supabase as any).from("dashboard_metrics").select("*").limit(1).single();
       if (error) throw error;
       return data;
     },
@@ -37,7 +37,7 @@ const Dashboard = () => {
   const { data: priorities = [] } = useQuery({
     queryKey: ["quarterly_priorities"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("quarterly_priorities").select("*").order("sort_order");
+      const { data, error } = await (supabase as any).from("quarterly_priorities").select("*").order("sort_order");
       if (error) throw error;
       return data;
     },
@@ -47,7 +47,7 @@ const Dashboard = () => {
   const updateMetrics = useMutation({
     mutationFn: async (updates: Record<string, any>) => {
       if (!metrics) return;
-      const { error } = await supabase.from("dashboard_metrics").update(updates).eq("id", metrics.id);
+      const { error } = await (supabase as any).from("dashboard_metrics").update(updates).eq("id", (metrics as any).id);
       if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["dashboard_metrics"] }); toast({ title: "Salvo!" }); },
@@ -61,15 +61,15 @@ const Dashboard = () => {
       if (priorities.length > 0) {
         const toDelete = priorities.filter((p: any) => !currentIds.includes(p.id));
         for (const d of toDelete) {
-          await supabase.from("quarterly_priorities").delete().eq("id", d.id);
+          await (supabase as any).from("quarterly_priorities").delete().eq("id", d.id);
         }
       }
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
         if (item.id) {
-          await supabase.from("quarterly_priorities").update({ title: item.title, sort_order: i }).eq("id", item.id);
+          await (supabase as any).from("quarterly_priorities").update({ title: item.title, sort_order: i }).eq("id", item.id);
         } else {
-          await supabase.from("quarterly_priorities").insert({ title: item.title, sort_order: i });
+          await (supabase as any).from("quarterly_priorities").insert({ title: item.title, sort_order: i });
         }
       }
     },
