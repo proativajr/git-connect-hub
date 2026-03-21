@@ -46,7 +46,7 @@ const Strategy = () => {
 
   const updateTimeline = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Record<string, any> }) => {
-      const { error } = await supabase.from("growth_journey").update(updates).eq("id", id);
+      const { error } = await (supabase as any).from("growth_journey").update(updates).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["growth_journey"] }); toast({ title: "Salvo!" }); },

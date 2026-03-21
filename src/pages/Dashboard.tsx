@@ -67,9 +67,9 @@ const Dashboard = () => {
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
         if (item.id) {
-          await supabase.from("quarterly_priorities").update({ title: item.title, sort_order: i }).eq("id", item.id);
+          await (supabase as any).from("quarterly_priorities").update({ title: item.title, sort_order: i }).eq("id", item.id);
         } else {
-          await supabase.from("quarterly_priorities").insert({ title: item.title, sort_order: i });
+          await (supabase as any).from("quarterly_priorities").insert({ title: item.title, sort_order: i });
         }
       }
     },
