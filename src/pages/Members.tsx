@@ -31,7 +31,7 @@ const Members = () => {
   const { data: members = [], isLoading } = useQuery({
     queryKey: ["members"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("members").select("*").order("created_at");
+      const { data, error } = await (supabase as any).from("members").select("*").order("created_at");
       if (error) throw error;
       return data;
     },
