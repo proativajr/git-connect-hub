@@ -40,7 +40,7 @@ const Members = () => {
   const upsert = useMutation({
     mutationFn: async (f: MemberForm) => {
       if (f.id) {
-        const { error } = await supabase.from("members").update({ name: f.name, role: f.role, email: f.email, squad: f.squad }).eq("id", f.id);
+        const { error } = await (supabase as any).from("members").update({ name: f.name, role: f.role, email: f.email, squad: f.squad }).eq("id", f.id);
         if (error) throw error;
       } else {
         const { error } = await supabase.from("members").insert({ name: f.name, role: f.role, email: f.email, squad: f.squad });
