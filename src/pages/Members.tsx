@@ -62,7 +62,7 @@ const Members = () => {
 
   const bulkInsert = useMutation({
     mutationFn: async (items: MemberForm[]) => {
-      const { error } = await supabase.from("members").insert(items.map(i => ({ name: i.name, role: i.role, email: i.email, squad: i.squad })));
+      const { error } = await (supabase as any).from("members").insert(items.map(i => ({ name: i.name, role: i.role, email: i.email, squad: i.squad })));
       if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["members"] }); toast({ title: "CSV importado!" }); },
