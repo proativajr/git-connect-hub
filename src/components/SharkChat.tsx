@@ -73,27 +73,13 @@ const SharkChat = () => {
     setMessages((p) => [...p, userMsg]);
     setLoading(true);
 
-    let assistantSoFar = "";
-    const upsert = (chunk: string) => {
-      assistantSoFar += chunk;
-      setMessages((prev) => {
-        const last = prev[prev.length - 1];
-        if (last?.role === "assistant") {
-          return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
-        }
-        return [...prev, { role: "assistant", content: assistantSoFar }];
-      });
-    };
-
     try {
-      await streamChat({
-        messages: [...messages, userMsg],
-        onDelta: upsert,
-        onDone: () => setLoading(false),
-      });
+      const reply = await sendChat([...messages, userMsg]);
+      setMessages((p) => [...p, { role: "assistant", content: reply }]);
     } catch (e: any) {
       console.error(e);
       setMessages((p) => [...p, { role: "assistant", content: `Erro: ${e.message}` }]);
+    } finally {
       setLoading(false);
     }
   };
