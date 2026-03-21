@@ -18,7 +18,7 @@ const Dashboard = () => {
   const { data: metrics, isLoading: metricsLoading } = useQuery({
     queryKey: ["dashboard_metrics"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("dashboard_metrics").select("*").limit(1).single();
+      const { data, error } = await (supabase as any).from("dashboard_metrics").select("*").limit(1).single();
       if (error) throw error;
       return data;
     },
