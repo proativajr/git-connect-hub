@@ -47,7 +47,7 @@ const Dashboard = () => {
   const updateMetrics = useMutation({
     mutationFn: async (updates: Record<string, any>) => {
       if (!metrics) return;
-      const { error } = await supabase.from("dashboard_metrics").update(updates).eq("id", metrics.id);
+      const { error } = await (supabase as any).from("dashboard_metrics").update(updates).eq("id", (metrics as any).id);
       if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["dashboard_metrics"] }); toast({ title: "Salvo!" }); },
