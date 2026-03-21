@@ -83,7 +83,7 @@ const Members = () => {
   const { data: profiles = [] } = useQuery({
     queryKey: ["profiles_emails"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("profiles").select("id");
+      const { data, error } = await (supabase as any).from("profiles").select("id");
       if (error) throw error;
       return data;
     },
