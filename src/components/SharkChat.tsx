@@ -5,92 +5,48 @@ import sharkJaws from "@/assets/shark-jaws.png";
 import { supabase } from "@/integrations/supabase/client";
 
 type Msg = { role: "user" | "assistant"; content: string };
+type GeminiMsg = { role: "user" | "model"; parts: { text: string }[] };
 
 const SUPABASE_URL = "https://iglmchnscxruybdiuseo.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnbG1jaG5zY3hydXliZGl1c2VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzY3OTIsImV4cCI6MjA4NzU1Mjc5Mn0.PFY2we3jT-I_nXuKr8O4IQ01tpwfknOWRRNMB0dYQyA";
 const CHAT_URL = `${SUPABASE_URL}/functions/v1/shark-chat`;
 
-async function streamChat({
-  messages,
-  onDelta,
-  onDone,
-  signal,
-}: {
-  messages: Msg[];
-  onDelta: (t: string) => void;
-  onDone: () => void;
-  signal?: AbortSignal;
-}) {
-  let resp: Response;
+async function sendChat(messages: Msg[]): Promise<string> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const authToken = session?.access_token ?? SUPABASE_ANON_KEY;
 
-  try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    const authToken = session?.access_token ?? SUPABASE_ANON_KEY;
+  // Convert chat history to Gemini format
+  const history: GeminiMsg[] = messages.slice(0, -1).map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.content }],
+  }));
 
-    resp = await fetch(CHAT_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${authToken}`,
-      },
-      body: JSON.stringify({ messages }),
-      signal,
-    });
-  } catch {
-    throw new Error("Não foi possível conectar ao Jaws agora.");
-  }
+  const lastMessage = messages[messages.length - 1].content;
 
-  if (!resp.ok || !resp.body) {
+  const resp = await fetch(CHAT_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${authToken}`,
+    },
+    body: JSON.stringify({ message: lastMessage, history }),
+  });
+
+  if (!resp.ok) {
     const errText = await resp.text();
     let errMsg = "Falha na conexão";
-
     try {
       const err = JSON.parse(errText);
       errMsg = err.error || err.message || errMsg;
-    } catch {
-      // mantém mensagem padrão
-    }
-
-    if (resp.status === 404) {
-      errMsg = "A função shark-chat não está publicada no backend.";
-    }
-
+    } catch { /* keep default */ }
     throw new Error(errMsg);
   }
 
-  const reader = resp.body.getReader();
-  const decoder = new TextDecoder();
-  let buf = "";
-  let done = false;
-
-  while (!done) {
-    const { done: d, value } = await reader.read();
-    if (d) break;
-    buf += decoder.decode(value, { stream: true });
-
-    let idx: number;
-    while ((idx = buf.indexOf("\n")) !== -1) {
-      let line = buf.slice(0, idx);
-      buf = buf.slice(idx + 1);
-      if (line.endsWith("\r")) line = line.slice(0, -1);
-      if (line.startsWith(":") || !line.trim()) continue;
-      if (!line.startsWith("data: ")) continue;
-      const json = line.slice(6).trim();
-      if (json === "[DONE]") { done = true; break; }
-      try {
-        const parsed = JSON.parse(json);
-        const c = parsed.choices?.[0]?.delta?.content;
-        if (c) onDelta(c);
-      } catch {
-        buf = line + "\n" + buf;
-        break;
-      }
-    }
-  }
-  onDone();
+  const data = await resp.json();
+  return data.reply;
 }
 
 const SharkChat = () => {
@@ -117,27 +73,13 @@ const SharkChat = () => {
     setMessages((p) => [...p, userMsg]);
     setLoading(true);
 
-    let assistantSoFar = "";
-    const upsert = (chunk: string) => {
-      assistantSoFar += chunk;
-      setMessages((prev) => {
-        const last = prev[prev.length - 1];
-        if (last?.role === "assistant") {
-          return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
-        }
-        return [...prev, { role: "assistant", content: assistantSoFar }];
-      });
-    };
-
     try {
-      await streamChat({
-        messages: [...messages, userMsg],
-        onDelta: upsert,
-        onDone: () => setLoading(false),
-      });
+      const reply = await sendChat([...messages, userMsg]);
+      setMessages((p) => [...p, { role: "assistant", content: reply }]);
     } catch (e: any) {
       console.error(e);
       setMessages((p) => [...p, { role: "assistant", content: `Erro: ${e.message}` }]);
+    } finally {
       setLoading(false);
     }
   };
