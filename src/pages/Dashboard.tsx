@@ -37,7 +37,7 @@ const Dashboard = () => {
   const { data: priorities = [] } = useQuery({
     queryKey: ["quarterly_priorities"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("quarterly_priorities").select("*").order("sort_order");
+      const { data, error } = await (supabase as any).from("quarterly_priorities").select("*").order("sort_order");
       if (error) throw error;
       return data;
     },
