@@ -49,7 +49,7 @@ const Settings = () => {
         .from("avatars")
         .getPublicUrl(path);
 
-      const { error: updateError } = await supabase
+      const { error: updateError } = await (supabase as any)
         .from("profiles")
         .update({ avatar_url: publicUrl })
         .eq("id", profile.id);
