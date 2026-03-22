@@ -28,7 +28,7 @@ async function sendChat(messages: Msg[]): Promise<string> {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      apikey: SUPABASE_ANON_KEY,
+      apikey: anonKey,
       Authorization: `Bearer ${authToken}`,
     },
     body: JSON.stringify({ message: lastMessage, history }),
