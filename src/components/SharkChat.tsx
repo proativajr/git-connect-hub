@@ -7,15 +7,14 @@ import { supabase } from "@/integrations/supabase/client";
 type Msg = { role: "user" | "assistant"; content: string };
 type GeminiMsg = { role: "user" | "model"; parts: { text: string }[] };
 
-const SUPABASE_URL = "https://iglmchnscxruybdiuseo.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnbG1jaG5zY3hydXliZGl1c2VvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE5NzY3OTIsImV4cCI6MjA4NzU1Mjc5Mn0.PFY2we3jT-I_nXuKr8O4IQ01tpwfknOWRRNMB0dYQyA";
-const CHAT_URL = `${SUPABASE_URL}/functions/v1/shark-chat`;
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/shark-chat`;
 
 async function sendChat(messages: Msg[]): Promise<string> {
   const {
     data: { session },
   } = await supabase.auth.getSession();
-  const authToken = session?.access_token ?? SUPABASE_ANON_KEY;
+  const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  const authToken = session?.access_token ?? anonKey;
 
   // Convert chat history to Gemini format
   const history: GeminiMsg[] = messages.slice(0, -1).map((m) => ({
@@ -29,7 +28,7 @@ async function sendChat(messages: Msg[]): Promise<string> {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      apikey: SUPABASE_ANON_KEY,
+      apikey: anonKey,
       Authorization: `Bearer ${authToken}`,
     },
     body: JSON.stringify({ message: lastMessage, history }),
