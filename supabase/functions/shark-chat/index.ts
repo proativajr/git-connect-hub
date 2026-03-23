@@ -258,10 +258,9 @@ serve(async (req) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: systemPrompt }],
-          },
           contents: [
+            { role: "user", parts: [{ text: systemPrompt }] },
+            { role: "model", parts: [{ text: "Entendido. Sou Jaws, especialista em mapeamento de processos BPMN. Estou pronto para ajudar." }] },
             ...history,
             { role: "user", parts: [{ text: message }] },
           ],
