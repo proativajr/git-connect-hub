@@ -117,7 +117,7 @@ const SharkChat = () => {
           <div className="flex-1 overflow-y-auto p-3 space-y-3 ocean-scroll">
             {messages.length === 0 && (
               <p className="text-muted-foreground text-sm text-center mt-8">
-                Olá! Sou o Shark 🦈<br />Como posso te ajudar?
+                Fala! Sou o Jaws 🦈<br />Seu guia no sistema da Proativa Jr.<br />Manda a dúvida que eu te mostro o caminho!
               </p>
             )}
             {messages.map((m, i) => (
