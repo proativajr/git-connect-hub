@@ -253,14 +253,15 @@ serve(async (req) => {
     if (!API_KEY) throw new Error("API_KEY_GEMINI is not configured");
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          system_instruction: {
+            parts: [{ text: systemPrompt }],
+          },
           contents: [
-            { role: "user", parts: [{ text: systemPrompt }] },
-            { role: "model", parts: [{ text: "Entendido. Sou Jaws, especialista em mapeamento de processos BPMN. Estou pronto para ajudar." }] },
             ...history,
             { role: "user", parts: [{ text: message }] },
           ],
