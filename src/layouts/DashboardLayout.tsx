@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Target, BarChart3, BookOpen, Handshake, Users, Settings, Fish, Image,
-  ChevronLeft, ChevronRight, LogOut, Columns3,
+  ChevronLeft, ChevronRight, LogOut,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import logoProativa from "@/assets/logo-proativa.png";
