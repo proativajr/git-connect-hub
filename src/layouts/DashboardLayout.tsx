@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Target, BarChart3, BookOpen, Handshake, Users, Settings, Fish, Image,
-  ChevronLeft, ChevronRight, LogOut, Columns3,
+  ChevronLeft, ChevronRight, LogOut,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import logoProativa from "@/assets/logo-proativa.png";
@@ -17,7 +17,7 @@ const navItems = [
   { title: "Galeria", path: "/gallery", icon: Image, multiLine: false },
   { title: "Membros", path: "/members", icon: Users, multiLine: false },
   { title: "Shark", path: "/shark", icon: Fish, multiLine: false },
-  { title: "Gestão (Monday)", path: "/monday", icon: Columns3, multiLine: false },
+  
   { title: "Configurações", path: "/settings", icon: Settings, multiLine: false },
 ];
 
