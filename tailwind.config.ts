@@ -19,7 +19,13 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Poppins", "sans-serif"],
+        sans: ["DM Sans", "sans-serif"],
+        display: ["Sora", "sans-serif"],
+      },
+      fontSize: {
+        "page-title": ["22px", { lineHeight: "1.3", fontWeight: "600" }],
+        "nav-item": ["14px", { lineHeight: "1.5", fontWeight: "500" }],
+        "section-label": ["11px", { lineHeight: "1", fontWeight: "600", letterSpacing: "0.08em" }],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -38,6 +44,10 @@ export default {
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -84,11 +94,28 @@ export default {
           from: { opacity: "0", transform: "translateY(8px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        "counter": {
+          from: { opacity: "0", transform: "translateY(4px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "shark-swim": {
+          "0%, 100%": { transform: "translateX(0) rotate(0deg)" },
+          "25%": { transform: "translateX(15px) rotate(2deg)" },
+          "50%": { transform: "translateX(0) rotate(0deg)" },
+          "75%": { transform: "translateX(-15px) rotate(-2deg)" },
+        },
+        "shark-wave": {
+          "0%, 100%": { transform: "scaleX(1)" },
+          "50%": { transform: "scaleX(1.02)" },
+        },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in": "fade-in 0.4s ease-out forwards",
+        "accordion-down": "accordion-down 0.3s ease-out",
+        "accordion-up": "accordion-up 0.3s ease-out",
+        "fade-in": "fade-in 0.2s ease-out forwards",
+        "counter": "counter 0.6s ease-out",
+        "shark-swim": "shark-swim 4s ease-in-out infinite",
+        "shark-wave": "shark-wave 2s ease-in-out infinite",
       },
     },
   },
