@@ -13,9 +13,7 @@ export default {
     container: {
       center: true,
       padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
+      screens: { "2xl": "1400px" },
     },
     extend: {
       fontFamily: {
@@ -23,15 +21,16 @@ export default {
         display: ["Sora", "sans-serif"],
       },
       fontSize: {
-        "page-title": ["22px", { lineHeight: "1.3", fontWeight: "600" }],
+        "page-title": ["clamp(18px, 2.5vw, 22px)", { lineHeight: "1.3", fontWeight: "600" }],
         "nav-item": ["14px", { lineHeight: "1.5", fontWeight: "500" }],
-        "section-label": ["11px", { lineHeight: "1", fontWeight: "600", letterSpacing: "0.08em" }],
+        "section-label": ["11px", { lineHeight: "1", fontWeight: "700", letterSpacing: "0.1em" }],
       },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
+        "background-secondary": "hsl(var(--background-secondary))",
         foreground: "hsl(var(--foreground))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
@@ -56,6 +55,7 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          hover: "hsl(var(--accent-hover))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
