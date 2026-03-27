@@ -1,25 +1,36 @@
-import { createContext, useContext, useState, ReactNode, useCallback } from "react";
+import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import { toast } from "@/hooks/use-toast";
 
 interface FinanceiroEntry {
   id: string;
-  description: string;
-  category: string;
-  type: "Receita" | "Despesa";
-  value: number;
-  date: string;
-  notes: string;
+  categoria: string;
+  tipo: "Receita" | "Despesa";
+  descricao: string;
+  valor: number;
+  data: string;
+  status: "Confirmado" | "Pendente";
 }
 
 interface FinanceiroContextType {
   entries: FinanceiroEntry[];
   addEntry: (entry: Omit<FinanceiroEntry, "id">) => void;
-  updateEntry: (id: string, entry: Partial<FinanceiroEntry>) => void;
+  updateEntry: (id: string, updates: Partial<FinanceiroEntry>) => void;
   removeEntry: (id: string) => void;
-  balance: number;
+  totalReceitas: number;
+  totalDespesas: number;
+  saldo: number;
 }
 
-const STORAGE_KEY = "proativa_financeiro_data";
+const STORAGE_KEY = "proativa_financeiro_v2";
+
+const defaultEntries: FinanceiroEntry[] = [
+  { id: "1", categoria: "Projetos", tipo: "Receita", descricao: "Projeto Alpha", valor: 5200, data: "2026-01-15", status: "Confirmado" },
+  { id: "2", categoria: "Operacional", tipo: "Despesa", descricao: "Aluguel coworking", valor: 800, data: "2026-01-20", status: "Confirmado" },
+  { id: "3", categoria: "Projetos", tipo: "Receita", descricao: "Projeto Beta", valor: 3500, data: "2026-02-10", status: "Confirmado" },
+  { id: "4", categoria: "Infraestrutura", tipo: "Despesa", descricao: "Material escritório", valor: 350, data: "2026-02-15", status: "Pendente" },
+  { id: "5", categoria: "Projetos", tipo: "Receita", descricao: "Consultoria Gamma", valor: 7200, data: "2026-03-05", status: "Confirmado" },
+  { id: "6", categoria: "Marketing", tipo: "Despesa", descricao: "Marketing digital", valor: 1200, data: "2026-03-10", status: "Pendente" },
+];
 
 const getStored = (): FinanceiroEntry[] => {
   try {
@@ -28,49 +39,38 @@ const getStored = (): FinanceiroEntry[] => {
   } catch { return defaultEntries; }
 };
 
-const defaultEntries: FinanceiroEntry[] = [
-  { id: "1", description: "Projeto Alpha", category: "Projetos", type: "Receita", value: 5200, date: "2026-01-15", notes: "" },
-  { id: "2", description: "Aluguel coworking", category: "Operacional", type: "Despesa", value: 800, date: "2026-01-20", notes: "" },
-  { id: "3", description: "Projeto Beta", category: "Projetos", type: "Receita", value: 3500, date: "2026-02-10", notes: "" },
-  { id: "4", description: "Material escritório", category: "Infraestrutura", type: "Despesa", value: 350, date: "2026-02-15", notes: "" },
-  { id: "5", description: "Consultoria Gamma", category: "Projetos", type: "Receita", value: 7200, date: "2026-03-05", notes: "" },
-  { id: "6", description: "Marketing digital", category: "Marketing", type: "Despesa", value: 1200, date: "2026-03-10", notes: "" },
-];
-
 const FinanceiroContext = createContext<FinanceiroContextType>({
-  entries: [],
-  addEntry: () => {},
-  updateEntry: () => {},
-  removeEntry: () => {},
-  balance: 0,
+  entries: [], addEntry: () => {}, updateEntry: () => {}, removeEntry: () => {},
+  totalReceitas: 0, totalDespesas: 0, saldo: 0,
 });
 
 export const FinanceiroProvider = ({ children }: { children: ReactNode }) => {
   const [entries, setEntries] = useState<FinanceiroEntry[]>(getStored);
 
-  const save = useCallback((next: FinanceiroEntry[]) => {
+  const persist = useCallback((next: FinanceiroEntry[]) => {
     setEntries(next);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     toast({ title: "Alterações salvas", duration: 2000 });
   }, []);
 
   const addEntry = useCallback((entry: Omit<FinanceiroEntry, "id">) => {
-    const newEntry = { ...entry, id: crypto.randomUUID() };
-    save([...getStored(), newEntry]);
-  }, [save]);
+    persist([...getStored(), { ...entry, id: crypto.randomUUID() }]);
+  }, [persist]);
 
   const updateEntry = useCallback((id: string, updates: Partial<FinanceiroEntry>) => {
-    save(getStored().map(e => e.id === id ? { ...e, ...updates } : e));
-  }, [save]);
+    persist(getStored().map(e => e.id === id ? { ...e, ...updates } : e));
+  }, [persist]);
 
   const removeEntry = useCallback((id: string) => {
-    save(getStored().filter(e => e.id !== id));
-  }, [save]);
+    persist(getStored().filter(e => e.id !== id));
+  }, [persist]);
 
-  const balance = entries.reduce((acc, e) => acc + (e.type === "Receita" ? e.value : -e.value), 0);
+  const totalReceitas = entries.filter(e => e.tipo === "Receita").reduce((s, e) => s + e.valor, 0);
+  const totalDespesas = entries.filter(e => e.tipo === "Despesa").reduce((s, e) => s + e.valor, 0);
+  const saldo = totalReceitas - totalDespesas;
 
   return (
-    <FinanceiroContext.Provider value={{ entries, addEntry, updateEntry, removeEntry, balance }}>
+    <FinanceiroContext.Provider value={{ entries, addEntry, updateEntry, removeEntry, totalReceitas, totalDespesas, saldo }}>
       {children}
     </FinanceiroContext.Provider>
   );

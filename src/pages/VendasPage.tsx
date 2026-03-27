@@ -1,74 +1,53 @@
 import { useState } from "react";
-import { TrendingUp, Plus, Trash2, Pencil } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Plus, Trash2, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface Contrato {
   id: string;
   cliente: string;
-  tipo: string;
-  duracao: number;
+  servico: string;
   valor: number;
-  dataFechamento: string;
-  status: "Ativo" | "Concluído" | "Cancelado";
+  dataInicio: string;
+  dataFim: string;
+  status: "Ativo" | "Encerrado" | "Em negociação";
 }
 
-const STORAGE_KEY = "proativa_vendas";
+const STORAGE_KEY = "proativa_vendas_contratos";
 
-const getStored = (): Contrato[] => {
-  try {
-    const d = localStorage.getItem(STORAGE_KEY);
-    return d ? JSON.parse(d) : defaultData;
-  } catch { return defaultData; }
+const defaultContratos: Contrato[] = [
+  { id: "1", cliente: "TechCo Ltda", servico: "Consultoria Digital", valor: 12000, dataInicio: "2026-01-10", dataFim: "2026-04-10", status: "Ativo" },
+  { id: "2", cliente: "StartupX", servico: "Desenvolvimento Web", valor: 8500, dataInicio: "2026-02-01", dataFim: "2026-05-01", status: "Ativo" },
+  { id: "3", cliente: "CorpBig SA", servico: "Pesquisa de Mercado", valor: 25000, dataInicio: "2025-10-15", dataFim: "2026-01-15", status: "Encerrado" },
+];
+
+const getStored = (): Contrato[] => { try { const d = localStorage.getItem(STORAGE_KEY); return d ? JSON.parse(d) : defaultContratos; } catch { return defaultContratos; } };
+
+const statusColors: Record<string, string> = {
+  "Ativo": "bg-success/20 text-success",
+  "Encerrado": "bg-muted text-muted-foreground",
+  "Em negociação": "bg-accent/20 text-accent",
 };
 
-const defaultData: Contrato[] = [
-  { id: "1", cliente: "Empresa Alpha", tipo: "Consultoria", duracao: 3, valor: 8500, dataFechamento: "2026-01-15", status: "Ativo" },
-  { id: "2", cliente: "Startup Beta", tipo: "Projeto", duracao: 6, valor: 15000, dataFechamento: "2026-02-20", status: "Ativo" },
-  { id: "3", cliente: "Corp Gamma", tipo: "Assessoria", duracao: 12, valor: 24000, dataFechamento: "2025-11-10", status: "Concluído" },
-  { id: "4", cliente: "Tech Delta", tipo: "Consultoria", duracao: 2, valor: 5000, dataFechamento: "2026-03-01", status: "Ativo" },
-];
+const daysBetween = (a: string, b: string) => {
+  if (!a || !b) return 0;
+  return Math.max(0, Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000));
+};
 
 const VendasPage = () => {
   const [contratos, setContratos] = useState<Contrato[]>(getStored);
-  const [showAdd, setShowAdd] = useState(false);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState<Omit<Contrato, "id">>({ cliente: "", tipo: "", duracao: 1, valor: 0, dataFechamento: "", status: "Ativo" });
-  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [showPanel, setShowPanel] = useState(false);
+  const [form, setForm] = useState<Omit<Contrato, "id">>({ cliente: "", servico: "", valor: 0, dataInicio: "", dataFim: "", status: "Em negociação" });
 
-  const save = (next: Contrato[]) => {
-    setContratos(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    toast({ title: "Alterações salvas", duration: 2000 });
-  };
+  const save = (next: Contrato[]) => { setContratos(next); localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); toast({ title: "Alterações salvas", duration: 2000 }); };
 
-  const totalFaturado = contratos.reduce((a, c) => a + c.valor, 0);
-  const mediaPorContrato = contratos.length > 0 ? totalFaturado / contratos.length : 0;
-  const contratosAtivos = contratos.filter(c => c.status === "Ativo").length;
+  const totalContratos = contratos.length;
+  const totalReceita = contratos.reduce((s, c) => s + c.valor, 0);
 
-  const handleSave = () => {
-    if (editId) {
-      save(contratos.map(c => c.id === editId ? { ...c, ...form } : c));
-      setEditId(null);
-    } else {
-      save([...contratos, { ...form, id: crypto.randomUUID() }]);
-    }
-    setShowAdd(false);
-    setForm({ cliente: "", tipo: "", duracao: 1, valor: 0, dataFechamento: "", status: "Ativo" });
-  };
-
-  const openEdit = (c: Contrato) => {
-    setForm({ cliente: c.cliente, tipo: c.tipo, duracao: c.duracao, valor: c.valor, dataFechamento: c.dataFechamento, status: c.status });
-    setEditId(c.id);
-    setShowAdd(true);
-  };
-
-  const statusColor: Record<string, string> = {
-    Ativo: "bg-success/20 text-success",
-    Concluído: "bg-primary/20 text-primary",
-    Cancelado: "bg-destructive/20 text-destructive",
+  const handleAdd = () => {
+    if (!form.cliente || !form.servico) return;
+    save([...contratos, { ...form, id: crypto.randomUUID() }]);
+    setForm({ cliente: "", servico: "", valor: 0, dataInicio: "", dataFim: "", status: "Em negociação" });
+    setShowPanel(false);
   };
 
   return (
@@ -76,99 +55,76 @@ const VendasPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-page-title font-display text-foreground">Vendas</h1>
-          <p className="text-sm text-muted-foreground">Contratos fechados e métricas comerciais</p>
+          <p className="text-sm text-muted-foreground">Contratos e faturamento</p>
         </div>
-        <button onClick={() => { setEditId(null); setForm({ cliente: "", tipo: "", duracao: 1, valor: 0, dataFechamento: "", status: "Ativo" }); setShowAdd(true); }}
-          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:brightness-105 active:scale-[0.98] transition-all">
+        <button onClick={() => setShowPanel(true)} className="flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-accent-foreground hover:bg-accent-hover active:scale-[0.98] transition-all">
           <Plus className="h-4 w-4" /> Novo Contrato
         </button>
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[
-          { label: "Total Faturado", value: `R$ ${totalFaturado.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` },
-          { label: "Média por Contrato", value: `R$ ${mediaPorContrato.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` },
-          { label: "Contratos Ativos", value: String(contratosAtivos) },
-        ].map(kpi => (
-          <div key={kpi.label} className="rounded-xl bg-primary p-5">
-            <p className="text-sm text-primary-foreground/70">{kpi.label}</p>
-            <p className="text-2xl font-display font-bold text-primary-foreground mt-1 animate-counter">{kpi.value}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Table */}
-      <div className="rounded-xl bg-card border border-border overflow-hidden">
-        <table className="w-full">
+      <div className="rounded-xl bg-card border border-border overflow-x-auto">
+        <table className="w-full min-w-[700px]">
           <thead>
             <tr className="border-b border-border">
-              {["#", "Cliente", "Tipo de Contrato", "Duração (meses)", "Valor (R$)", "Data de Fechamento", "Status", ""].map(h => (
-                <th key={h} className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-5 py-3">{h}</th>
+              {["Cliente", "Serviço", "Valor (R$)", "Início", "Fim", "Duração", "Status", ""].map(h => (
+                <th key={h} className="text-left text-xs font-semibold text-accent uppercase tracking-wider px-5 py-3">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {contratos.map((c, i) => (
-              <tr key={c.id} className="border-b border-border/50 hover:bg-muted/30 group transition-colors hover:border-l-2 hover:border-l-primary">
-                <td className="px-5 py-3 text-sm text-muted-foreground">{i + 1}</td>
-                <td className="px-5 py-3 text-sm font-medium text-foreground">{c.cliente}</td>
-                <td className="px-5 py-3 text-sm text-muted-foreground">{c.tipo}</td>
-                <td className="px-5 py-3 text-sm text-muted-foreground">{c.duracao}</td>
-                <td className="px-5 py-3 text-sm font-medium text-foreground">R$ {c.valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</td>
-                <td className="px-5 py-3 text-sm text-muted-foreground">{c.dataFechamento}</td>
+              <tr key={c.id} className={`border-b border-border/50 hover:bg-muted/30 ${i % 2 === 0 ? "" : "bg-background-secondary"}`}>
+                <td className="px-5 py-3"><input value={c.cliente} onChange={e => save(contratos.map(x => x.id === c.id ? { ...x, cliente: e.target.value } : x))} className="bg-transparent text-sm text-foreground w-full outline-none" /></td>
+                <td className="px-5 py-3"><input value={c.servico} onChange={e => save(contratos.map(x => x.id === c.id ? { ...x, servico: e.target.value } : x))} className="bg-transparent text-sm text-muted-foreground w-full outline-none" /></td>
+                <td className="px-5 py-3"><input type="number" value={c.valor} onChange={e => save(contratos.map(x => x.id === c.id ? { ...x, valor: Number(e.target.value) } : x))} className="bg-transparent text-sm text-foreground w-24 outline-none" /></td>
+                <td className="px-5 py-3"><input type="date" value={c.dataInicio} onChange={e => save(contratos.map(x => x.id === c.id ? { ...x, dataInicio: e.target.value } : x))} className="bg-transparent text-sm text-muted-foreground outline-none" /></td>
+                <td className="px-5 py-3"><input type="date" value={c.dataFim} onChange={e => save(contratos.map(x => x.id === c.id ? { ...x, dataFim: e.target.value } : x))} className="bg-transparent text-sm text-muted-foreground outline-none" /></td>
+                <td className="px-5 py-3 text-sm text-muted-foreground">{daysBetween(c.dataInicio, c.dataFim)} dias</td>
                 <td className="px-5 py-3">
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusColor[c.status]}`}>{c.status}</span>
+                  <select value={c.status} onChange={e => save(contratos.map(x => x.id === c.id ? { ...x, status: e.target.value as any } : x))}
+                    className={`text-xs font-semibold px-2.5 py-1 rounded-full border-0 outline-none cursor-pointer ${statusColors[c.status]}`}>
+                    <option value="Ativo">Ativo</option>
+                    <option value="Encerrado">Encerrado</option>
+                    <option value="Em negociação">Em negociação</option>
+                  </select>
                 </td>
                 <td className="px-5 py-3">
-                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => openEdit(c)} className="text-muted-foreground hover:text-foreground transition-colors"><Pencil className="h-4 w-4" /></button>
-                    <button onClick={() => setDeleteId(c.id)} className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
-                  </div>
+                  <button onClick={() => save(contratos.filter(x => x.id !== c.id))} className="text-muted-foreground hover:text-destructive transition-colors hover-only-actions"><Trash2 className="h-4 w-4" /></button>
                 </td>
               </tr>
             ))}
           </tbody>
+          <tfoot>
+            <tr className="border-t border-border bg-muted/30">
+              <td className="px-5 py-3 text-sm font-semibold text-foreground">{totalContratos} contratos</td>
+              <td className="px-5 py-3" />
+              <td className="px-5 py-3 text-sm font-semibold text-accent">R$ {totalReceita.toLocaleString("pt-BR")}</td>
+              <td colSpan={5} />
+            </tr>
+          </tfoot>
         </table>
       </div>
 
-      {/* Add/Edit Dialog */}
-      <Dialog open={showAdd} onOpenChange={setShowAdd}>
-        <DialogContent className="bg-card border-border">
-          <DialogHeader><DialogTitle>{editId ? "Editar Contrato" : "Novo Contrato"}</DialogTitle></DialogHeader>
-          <div className="space-y-4 pt-2">
-            <div><Label>Cliente</Label><Input value={form.cliente} onChange={e => setForm({ ...form, cliente: e.target.value })} /></div>
-            <div><Label>Tipo de Contrato</Label><Input value={form.tipo} onChange={e => setForm({ ...form, tipo: e.target.value })} /></div>
-            <div><Label>Duração (meses)</Label><Input type="number" value={form.duracao} onChange={e => setForm({ ...form, duracao: Number(e.target.value) })} /></div>
-            <div><Label>Valor (R$)</Label><Input type="number" value={form.valor} onChange={e => setForm({ ...form, valor: Number(e.target.value) })} /></div>
-            <div><Label>Data de Fechamento</Label><Input type="date" value={form.dataFechamento} onChange={e => setForm({ ...form, dataFechamento: e.target.value })} /></div>
-            <div>
-              <Label>Status</Label>
-              <div className="flex gap-2 mt-1">
-                {(["Ativo", "Concluído", "Cancelado"] as const).map(s => (
-                  <button key={s} onClick={() => setForm({ ...form, status: s })}
-                    className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${form.status === s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-                    {s}
-                  </button>
-                ))}
-              </div>
+      {showPanel && (
+        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setShowPanel(false)}>
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="relative w-[420px] max-w-full h-full bg-card border-l border-border p-6 space-y-5 overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-display font-semibold text-foreground">Novo Contrato</h3>
+              <button onClick={() => setShowPanel(false)} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
             </div>
-            <button onClick={handleSave} className="w-full rounded-lg bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:brightness-105 active:scale-[0.98] transition-all">Salvar</button>
+            <div className="space-y-4">
+              <div><label className="text-sm font-medium text-foreground block mb-1">Cliente</label><input value={form.cliente} onChange={e => setForm({ ...form, cliente: e.target.value })} className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground" /></div>
+              <div><label className="text-sm font-medium text-foreground block mb-1">Serviço</label><input value={form.servico} onChange={e => setForm({ ...form, servico: e.target.value })} className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground" /></div>
+              <div><label className="text-sm font-medium text-foreground block mb-1">Valor (R$)</label><input type="number" value={form.valor} onChange={e => setForm({ ...form, valor: Number(e.target.value) })} className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground" /></div>
+              <div><label className="text-sm font-medium text-foreground block mb-1">Data Início</label><input type="date" value={form.dataInicio} onChange={e => setForm({ ...form, dataInicio: e.target.value })} className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground" /></div>
+              <div><label className="text-sm font-medium text-foreground block mb-1">Data Fim</label><input type="date" value={form.dataFim} onChange={e => setForm({ ...form, dataFim: e.target.value })} className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground" /></div>
+              <div><label className="text-sm font-medium text-foreground block mb-1">Status</label><select value={form.status} onChange={e => setForm({ ...form, status: e.target.value as any })} className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground"><option value="Em negociação">Em negociação</option><option value="Ativo">Ativo</option><option value="Encerrado">Encerrado</option></select></div>
+              <button onClick={handleAdd} className="w-full rounded-lg bg-accent py-2.5 text-sm font-semibold text-accent-foreground hover:bg-accent-hover active:scale-[0.98] transition-all">Salvar</button>
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete */}
-      <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <DialogContent className="bg-card border-border">
-          <DialogHeader><DialogTitle>Confirmar Exclusão</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">Tem certeza que deseja remover este contrato?</p>
-          <div className="flex gap-3 mt-4">
-            <button onClick={() => setDeleteId(null)} className="flex-1 rounded-lg border border-border py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-all">Cancelar</button>
-            <button onClick={() => { if (deleteId) { save(contratos.filter(c => c.id !== deleteId)); setDeleteId(null); } }} className="flex-1 rounded-lg bg-destructive py-2.5 text-sm font-semibold text-destructive-foreground hover:brightness-105 transition-all">Excluir</button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </div>
   );
 };
