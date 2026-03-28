@@ -1,12 +1,38 @@
 import { useState } from "react";
 import { Upload, Plus, Trash2, Download, FileText, GripVertical } from "lucide-react";
 import { useGente } from "@/contexts/GenteContext";
+import { PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 const statusColors: Record<string, string> = {
   "Em andamento": "bg-accent/20 text-accent",
   "Concluído": "bg-success/20 text-success",
   "Atrasado": "bg-destructive/20 text-destructive",
 };
+
+// PCO chart mock data
+const pcoStatusData = [
+  { name: "Concluído", value: 42 },
+  { name: "Em andamento", value: 35 },
+  { name: "Atrasado", value: 23 },
+];
+const pcoStatusColors = ["#16a34a", "#f5c400", "#dc2626"];
+
+const pcoDiretoriaData = [
+  { name: "Projetos", value: 38 },
+  { name: "Comercial", value: 28 },
+  { name: "VP", value: 20 },
+  { name: "Presidência", value: 14 },
+];
+const pcoDiretoriaColors = ["#021f3f", "#2b3f65", "#f5c400", "#c9a84c"];
+
+const pcoMonthlyData = [
+  { month: "Out", count: 12 },
+  { month: "Nov", count: 18 },
+  { month: "Dez", count: 15 },
+  { month: "Jan", count: 22 },
+  { month: "Fev", count: 28 },
+  { month: "Mar", count: 35 },
+];
 
 const GenteGestaoPage = () => {
   const { uploads, metas, addUpload, removeUpload, addMeta, updateMeta, removeMeta } = useGente();
@@ -103,6 +129,46 @@ const GenteGestaoPage = () => {
             </button>
           </div>
         ))}
+      </div>
+
+      {/* PCO Charts */}
+      <div>
+        <h2 className="text-lg font-display font-semibold text-foreground mb-4">Gráficos de PCO</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="rounded-xl bg-card border border-border p-4">
+            <p className="text-sm font-semibold text-foreground mb-3">Distribuição por Status</p>
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie data={pcoStatusData} dataKey="value" cx="50%" cy="50%" outerRadius={70} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
+                  {pcoStatusData.map((_, i) => <Cell key={i} fill={pcoStatusColors[i]} />)}
+                </Pie>
+                <Legend fontSize={11} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="rounded-xl bg-card border border-border p-4">
+            <p className="text-sm font-semibold text-foreground mb-3">Distribuição por Diretoria</p>
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie data={pcoDiretoriaData} dataKey="value" cx="50%" cy="50%" outerRadius={70} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
+                  {pcoDiretoriaData.map((_, i) => <Cell key={i} fill={pcoDiretoriaColors[i]} />)}
+                </Pie>
+                <Legend fontSize={11} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="rounded-xl bg-card border border-border p-4">
+            <p className="text-sm font-semibold text-foreground mb-3">Evolução Mensal</p>
+            <ResponsiveContainer width="100%" height={220}>
+              <AreaChart data={pcoMonthlyData}>
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                <Tooltip />
+                <Area type="monotone" dataKey="count" stroke="#f5c400" fill="#f5c400" fillOpacity={0.4} strokeWidth={2} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
     </div>
   );
