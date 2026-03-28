@@ -15,13 +15,13 @@ import Culture from "./pages/Culture";
 import Gallery from "./pages/Gallery";
 import Members from "./pages/Members";
 import Settings from "./pages/Settings";
-import Shark from "./pages/Shark";
 import FinanceiroPage from "./pages/FinanceiroPage";
 import VendasPage from "./pages/VendasPage";
 import GenteGestaoPage from "./pages/GenteGestaoPage";
 import MondayCRMPage from "./pages/MondayCRMPage";
-import MondayBasePage from "./pages/MondayBasePage";
+import MondayBoardSupabase from "./pages/MondayBoardSupabase";
 import ParceriasPage from "./pages/ParceriasPage";
+import ParceriasShowcasePage from "./pages/ParceriasShowcasePage";
 import EmDesenvolvimento from "./components/EmDesenvolvimento";
 import AccessCodeGate from "./components/AccessCodeGate";
 import NotFound from "./pages/NotFound";
@@ -45,34 +45,35 @@ const App = () => (
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/strategy" element={<Strategy />} />
                     <Route path="/culture" element={<Culture />} />
+                    <Route path="/parcerias" element={<ParceriasShowcasePage />} />
                     <Route path="/gallery" element={<Gallery />} />
                     <Route path="/members" element={<Members />} />
                     <Route path="/settings" element={<Settings />} />
-                    <Route path="/shark" element={<Shark />} />
+                    <Route path="/gamificacao" element={<EmDesenvolvimento title="Gamificação" />} />
 
                     {/* Presidência */}
                     <Route path="/presidencia/mej" element={<EmDesenvolvimento title="MEJ" />} />
                     <Route path="/presidencia/relacao-institucional" element={<EmDesenvolvimento />} />
                     <Route path="/presidencia/parcerias" element={<ParceriasPage />} />
                     <Route path="/presidencia/financeiro" element={<AccessCodeGate storageKey="access_pres_financeiro" allowPasswordChange><FinanceiroPage /></AccessCodeGate>} />
-                    <Route path="/presidencia/monday" element={<MondayBasePage title="Monday Base — Presidência" />} />
+                    <Route path="/presidencia/monday" element={<MondayBoardSupabase boardId="board_presidencia" title="Monday — Presidência" />} />
 
                     {/* Vice-Presidência */}
                     <Route path="/vice-presidencia/financeiro" element={<AccessCodeGate storageKey="access_vp_financeiro" allowPasswordChange><FinanceiroPage /></AccessCodeGate>} />
                     <Route path="/vice-presidencia/gente-gestao" element={<AccessCodeGate storageKey="access_gente_gestao" allowPasswordChange><GenteGestaoPage /></AccessCodeGate>} />
                     <Route path="/vice-presidencia/endomarketing" element={<EmDesenvolvimento />} />
-                    <Route path="/vice-presidencia/monday" element={<MondayBasePage title="Monday Base — Vice-Presidência" />} />
+                    <Route path="/vice-presidencia/monday" element={<MondayBoardSupabase boardId="board_vp" title="Monday — Vice-Presidência" />} />
 
                     {/* Projetos */}
                     <Route path="/projetos/lista" element={<EmDesenvolvimento title="Projetos" />} />
                     <Route path="/projetos/inovacao" element={<EmDesenvolvimento />} />
-                    <Route path="/projetos/monday" element={<MondayBasePage title="Monday Base — Projetos" />} />
+                    <Route path="/projetos/monday" element={<MondayBoardSupabase boardId="board_projetos" title="Monday — Projetos" />} />
 
                     {/* Comercial */}
                     <Route path="/comercial/crm" element={<MondayCRMPage />} />
                     <Route path="/comercial/vendas" element={<VendasPage />} />
                     <Route path="/comercial/marketing" element={<EmDesenvolvimento />} />
-                    <Route path="/comercial/monday" element={<MondayBasePage title="Monday Base — Comercial" />} />
+                    <Route path="/comercial/monday" element={<MondayBoardSupabase boardId="board_comercial" title="Monday — Comercial" />} />
                   </Route>
                   <Route path="*" element={<NotFound />} />
                 </Routes>

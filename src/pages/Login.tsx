@@ -43,14 +43,13 @@ const Login = () => {
 
   return (
     <div className="flex min-h-screen">
-      {/* Left Panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-card flex-col items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0" style={{ background: "repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(201,168,76,0.04) 20px, rgba(201,168,76,0.04) 40px)" }} />
+      {/* Left Panel — solid matte gold */}
+      <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center relative" style={{ backgroundColor: "#c9a84c" }}>
         <div className="relative z-10 flex flex-col items-center text-center px-12">
           <img src={logoIcon} alt="Proativa Jr" className="h-16 mb-6 rounded-xl" />
           <img src={logoText} alt="Proativa Jr" className="w-56 mb-6" />
-          <p className="text-[22px] font-display font-semibold text-accent">Torre de Controle</p>
-          <p className="text-[15px] text-muted-foreground mt-2 max-w-sm leading-relaxed">
+          <p className="text-[22px] font-display font-semibold" style={{ color: "#111111" }}>Torre de Controle</p>
+          <p className="text-[15px] mt-2 max-w-sm leading-relaxed" style={{ color: "rgba(0,0,0,0.6)" }}>
             Centralize KPIs, projetos e parcerias em um só lugar.
           </p>
         </div>
@@ -59,7 +58,8 @@ const Login = () => {
       {/* Right Panel */}
       <div className="flex-1 flex items-center justify-center bg-background-secondary px-6">
         <div className="w-full max-w-md">
-          <div className="lg:hidden flex flex-col items-center justify-center mb-8">
+          {/* Mobile compact header */}
+          <div className="lg:hidden flex flex-col items-center justify-center mb-8 rounded-xl py-6" style={{ backgroundColor: "#c9a84c" }}>
             <img src={logoIcon} alt="Proativa Jr" className="h-12 mb-3 rounded-xl" />
             <img src={logoText} alt="Proativa Jr" className="w-44" />
           </div>

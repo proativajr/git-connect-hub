@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, Target, BookOpen, Image, Users, Settings, Fish,
-  ChevronLeft, ChevronRight, ChevronDown, LogOut, Crown, Award, Briefcase, ShoppingCart,
+  LayoutDashboard, Target, BookOpen, Image, Users, Settings, Gamepad2,
+  ChevronLeft, ChevronRight, ChevronDown, ChevronRight as ChevronR, LogOut, Crown, Award, Briefcase, ShoppingCart,
   Grid3X3, FileText, Handshake, DollarSign, UserCheck, Megaphone, Lightbulb, BarChart3, TrendingUp, Menu, X,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -51,17 +51,20 @@ const topNavItems = [{ title: "Visão Geral", path: "/dashboard", icon: LayoutDa
 const bottomNavItems = [
   { title: "Planejamento Estratégico", path: "/strategy", icon: Target },
   { title: "Identidade & Governança", path: "/culture", icon: BookOpen },
+  { title: "Parcerias", path: "/parcerias", icon: Handshake },
   { title: "Galeria", path: "/gallery", icon: Image },
   { title: "Membros", path: "/members", icon: Users },
-  { title: "Shark", path: "/shark", icon: Fish },
+  { title: "Gamificação", path: "/gamificacao", icon: Gamepad2 },
   { title: "Configurações", path: "/settings", icon: Settings },
 ];
 
 const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
-  const [diretoriasOpen, setDiretoriasOpen] = useState(false);
+  const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [activeDirectory, setActiveDirectory] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const flyoutRef = useRef<HTMLDivElement>(null);
+  const flyoutBtnRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, loading, signOut } = useAuth();
@@ -69,17 +72,29 @@ const DashboardLayout = () => {
 
   useEffect(() => { if (!loading && !user) navigate("/"); }, [loading, user, navigate]);
 
+  // Auto-detect active directory from path
   useEffect(() => {
     for (const group of diretorias) {
       if (group.items.some(i => location.pathname === i.path)) {
-        setDiretoriasOpen(true);
         setActiveDirectory(group.title);
-        break;
+        return;
       }
     }
   }, [location.pathname]);
 
-  useEffect(() => { setMobileOpen(false); }, [location.pathname]);
+  useEffect(() => { setMobileOpen(false); setFlyoutOpen(false); }, [location.pathname]);
+
+  // Close flyout on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (flyoutRef.current && !flyoutRef.current.contains(e.target as Node) &&
+          flyoutBtnRef.current && !flyoutBtnRef.current.contains(e.target as Node)) {
+        setFlyoutOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   if (loading) return <div className="flex items-center justify-center min-h-screen bg-background"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent" /></div>;
   if (!user) return null;
@@ -87,51 +102,73 @@ const DashboardLayout = () => {
   const handleLogout = async () => { await signOut(); navigate("/"); };
   const toggleDirectory = (title: string) => setActiveDirectory(prev => prev === title ? null : title);
   const isActive = (path: string) => location.pathname === path;
+  const isDiretoriaActive = diretorias.some(g => g.items.some(i => location.pathname === i.path));
   const sidebarWidth = collapsed ? "64px" : "260px";
 
-  const navContent = (
+  const navContent = (isMobile = false) => (
     <>
       <div className="flex items-center justify-center px-4 py-5">
-        <img src={logoProativa} alt="Proativa Jr" className={`transition-all duration-300 ${collapsed ? "w-8" : "w-14"}`} />
+        <img src={logoProativa} alt="Proativa Jr" className={`transition-all duration-300 ${collapsed && !isMobile ? "w-8" : "w-14"}`} />
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 space-y-0.5 pb-2">
+        {/* Visão Geral */}
         {topNavItems.map(item => (
           <button key={item.path} onClick={() => navigate(item.path)}
             className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-nav-item font-medium transition-all duration-150 ${
               isActive(item.path) ? "bg-accent/20 text-accent border-l-[3px] border-accent" : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
             }`}>
             <item.icon className="h-5 w-5 shrink-0" />
-            {!collapsed && <span>{item.title}</span>}
+            {(!collapsed || isMobile) && <span>{item.title}</span>}
           </button>
         ))}
 
-        {!collapsed && (
-          <div className="pt-5">
-            <p className="px-3 mb-2 text-section-label uppercase text-accent">Diretorias</p>
-            <button onClick={() => setDiretoriasOpen(!diretoriasOpen)}
-              className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-nav-item font-medium text-sidebar-foreground/80 hover:bg-sidebar-accent transition-all">
-              <OrgChartIcon className="h-[18px] w-[18px] shrink-0" />
-              <span className="flex-1 text-left">Diretorias</span>
-              <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${diretoriasOpen ? "rotate-180" : ""}`} />
-            </button>
+        {/* DIRETORIAS section */}
+        {(!collapsed || isMobile) && <p className="px-3 mb-2 mt-5 text-section-label uppercase text-accent pt-5">Diretorias</p>}
 
-            <div className={`overflow-hidden transition-all duration-300 ${diretoriasOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"}`}>
+        <div className="relative">
+          <button
+            ref={flyoutBtnRef}
+            onClick={() => {
+              if (collapsed && !isMobile) { setCollapsed(false); setFlyoutOpen(true); return; }
+              setFlyoutOpen(!flyoutOpen);
+            }}
+            className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-nav-item font-medium transition-all duration-150 ${
+              isDiretoriaActive || flyoutOpen ? "bg-accent/20 text-accent" : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+            }`}>
+            <OrgChartIcon className="h-[18px] w-[18px] shrink-0" />
+            {(!collapsed || isMobile) && (
+              <>
+                <span className="flex-1 text-left">Diretorias</span>
+                <ChevronR className={`h-3.5 w-3.5 transition-transform duration-200 ${flyoutOpen ? "rotate-90" : ""}`} />
+              </>
+            )}
+          </button>
+
+          {/* Flyout panel — appears to the RIGHT on desktop, inline on mobile */}
+          {flyoutOpen && !isMobile && (
+            <div
+              ref={flyoutRef}
+              className="absolute left-full top-0 ml-1 w-[220px] bg-sidebar border border-sidebar-border rounded-r-lg shadow-xl z-50 py-2 animate-fade-in"
+              style={{ maxHeight: "70vh", overflowY: "auto" }}
+            >
               {diretorias.map(group => (
-                <div key={group.title} className="mt-0.5">
+                <div key={group.title}>
                   <button onClick={() => toggleDirectory(group.title)}
-                    className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-nav-item font-semibold text-sidebar-foreground/90 hover:bg-sidebar-accent transition-all">
+                    className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-[13px] font-semibold transition-all ${
+                      activeDirectory === group.title ? "text-accent" : "text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+                    }`}>
                     <group.icon className="h-4 w-4 shrink-0" />
                     <span className="flex-1 text-left">{group.title}</span>
-                    <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${activeDirectory === group.title ? "rotate-180" : ""}`} />
+                    <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${activeDirectory === group.title ? "rotate-180" : ""}`} />
                   </button>
-                  <div className={`overflow-hidden transition-all duration-300 ${activeDirectory === group.title ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"}`}>
+                  <div className={`overflow-hidden transition-all duration-250 ${activeDirectory === group.title ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"}`}>
                     {group.items.map(item => (
-                      <button key={item.path} onClick={() => navigate(item.path)}
-                        className={`flex w-full items-center gap-2.5 rounded-md pl-10 pr-3 py-2 text-[13px] transition-all duration-150 ${
-                          isActive(item.path) ? "text-accent bg-accent/20 border-l-[3px] border-accent" : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                      <button key={item.path} onClick={() => { navigate(item.path); setFlyoutOpen(false); }}
+                        className={`flex w-full items-center gap-2 pl-10 pr-4 py-2 text-[12px] transition-all ${
+                          isActive(item.path) ? "text-accent bg-accent/15 border-l-[3px] border-accent" : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                         }`}>
-                        <item.icon className="h-4 w-4 shrink-0" />
+                        <item.icon className="h-3.5 w-3.5 shrink-0" />
                         <span>{item.title}</span>
                       </button>
                     ))}
@@ -139,18 +176,40 @@ const DashboardLayout = () => {
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
 
-        {collapsed && (
-          <button onClick={() => { setCollapsed(false); setDiretoriasOpen(true); }}
-            className="flex w-full items-center justify-center rounded-lg px-3 py-2.5 text-sidebar-foreground/70 hover:bg-sidebar-accent transition-all">
-            <OrgChartIcon className="h-5 w-5" />
-          </button>
-        )}
+          {/* Mobile: inline accordion */}
+          {flyoutOpen && isMobile && (
+            <div className="pl-2 mt-1 space-y-0.5">
+              {diretorias.map(group => (
+                <div key={group.title}>
+                  <button onClick={() => toggleDirectory(group.title)}
+                    className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-semibold transition-all ${
+                      activeDirectory === group.title ? "text-accent" : "text-sidebar-foreground/80 hover:bg-sidebar-accent"
+                    }`}>
+                    <group.icon className="h-4 w-4 shrink-0" />
+                    <span className="flex-1 text-left">{group.title}</span>
+                    <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${activeDirectory === group.title ? "rotate-180" : ""}`} />
+                  </button>
+                  <div className={`overflow-hidden transition-all duration-250 ${activeDirectory === group.title ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"}`}>
+                    {group.items.map(item => (
+                      <button key={item.path} onClick={() => navigate(item.path)}
+                        className={`flex w-full items-center gap-2 rounded-md pl-10 pr-3 py-2 text-[12px] transition-all ${
+                          isActive(item.path) ? "text-accent bg-accent/20 border-l-[3px] border-accent" : "text-sidebar-foreground/60 hover:bg-sidebar-accent"
+                        }`}>
+                        <item.icon className="h-3.5 w-3.5 shrink-0" />
+                        <span>{item.title}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-        {!collapsed && <div className="my-3 mx-3 border-t border-sidebar-border/30" />}
-        {!collapsed && <p className="px-3 mb-2 text-section-label uppercase text-accent">Planejamento</p>}
+        {(!collapsed || isMobile) && <div className="my-3 mx-3 border-t border-sidebar-border/30" />}
+        {(!collapsed || isMobile) && <p className="px-3 mb-2 text-section-label uppercase text-accent pt-5">Planejamento</p>}
 
         {bottomNavItems.map(item => (
           <button key={item.path} onClick={() => navigate(item.path)}
@@ -158,18 +217,20 @@ const DashboardLayout = () => {
               isActive(item.path) ? "bg-accent/20 text-accent border-l-[3px] border-accent" : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
             }`}>
             <item.icon className="h-5 w-5 shrink-0" />
-            {!collapsed && <span>{item.title}</span>}
+            {(!collapsed || isMobile) && <span>{item.title}</span>}
           </button>
         ))}
       </nav>
 
       <div className="space-y-0.5 px-3 pb-4 border-t border-sidebar-border/30 pt-2">
         <button onClick={handleLogout} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-nav-item font-medium text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all">
-          <LogOut className="h-5 w-5 shrink-0" />{!collapsed && <span>Sair</span>}
+          <LogOut className="h-5 w-5 shrink-0" />{(!collapsed || isMobile) && <span>Sair</span>}
         </button>
-        <button onClick={() => setCollapsed(!collapsed)} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-nav-item font-medium text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all">
-          {collapsed ? <ChevronRight className="h-5 w-5 shrink-0" /> : <><ChevronLeft className="h-5 w-5 shrink-0" /><span>Recolher</span></>}
-        </button>
+        {!isMobile && (
+          <button onClick={() => setCollapsed(!collapsed)} className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-nav-item font-medium text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all">
+            {collapsed ? <ChevronRight className="h-5 w-5 shrink-0" /> : <><ChevronLeft className="h-5 w-5 shrink-0" /><span>Recolher</span></>}
+          </button>
+        )}
       </div>
     </>
   );
@@ -191,14 +252,14 @@ const DashboardLayout = () => {
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
           <aside className="relative w-[280px] h-full bg-sidebar flex flex-col overflow-y-auto">
             <button onClick={() => setMobileOpen(false)} className="absolute top-4 right-4 text-sidebar-foreground/60"><X className="h-5 w-5" /></button>
-            {navContent}
+            {navContent(true)}
           </aside>
         </div>
       )}
 
       {/* Desktop sidebar */}
-      <aside className="hidden sm:flex fixed inset-y-0 left-0 z-30 flex-col bg-sidebar transition-all duration-300 overflow-hidden" style={{ width: sidebarWidth }}>
-        {navContent}
+      <aside className="hidden sm:flex fixed inset-y-0 left-0 z-30 flex-col bg-sidebar transition-all duration-300 overflow-visible" style={{ width: sidebarWidth }}>
+        {navContent(false)}
       </aside>
 
       {/* Main content */}

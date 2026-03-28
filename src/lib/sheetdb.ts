@@ -1,5 +1,4 @@
-const SHEETDB_URL = "https://sheetdb.io/api/v1/r5p56ziig2wbc";
-const SHEETDB_TOKEN = "hqm570apxqc443sv4jsd2ud5pqr9b9aw6q6c3p3l";
+const SHEETDB_URL = "https://sheetdb.io/api/v1/sca9l43oxk08c";
 
 export interface OKR {
   id: string;
@@ -67,7 +66,7 @@ export const defaultOkrs: OKR[] = [
     titulo: "Gestão Inteligente do Caixa",
     avaliacao: 0,
     krs: [
-      { id: "kr3-1", label: "SUPERÁVIT de 15% da margem de dois meses de \"manutenção\" da empresa", desejado: "15%", realizado: "0%", progresso: 0 },
+      { id: "kr3-1", label: "SUPERÁVIT de 15% da margem de dois meses de manutenção da empresa", desejado: "15%", realizado: "0%", progresso: 0 },
       { id: "kr3-2", label: "Diminuição do teto de custos fixos com dívidas", desejado: "15%", realizado: "0%", progresso: 0 },
     ],
   },
@@ -107,21 +106,18 @@ interface SheetRow {
   realizado: string;
   progresso: string;
   "avaliação": string;
+  [key: string]: string;
 }
 
 export async function fetchOKRsFromSheetDB(): Promise<{ info: OKRInfo; okrs: OKR[] } | null> {
   try {
-    const res = await fetch(
-      `${SHEETDB_URL}?sheet=Planilha%20Automatizada(Lovable)&limit=30`,
-      { headers: { Authorization: `Bearer ${SHEETDB_TOKEN}` } }
-    );
+    const res = await fetch(SHEETDB_URL);
     if (!res.ok) return null;
     const data: SheetRow[] = await res.json();
     if (!data || !Array.isArray(data) || data.length === 0) return null;
 
     // Split rows into KR rows and info rows
     const krRows = data.filter(r => r.objetivo && r.kr && r.kr.startsWith("KR"));
-    const infoRows = data.filter(r => r.objetivo && !r.kr?.startsWith("KR") && r.kr && r.objetivo !== "metrica");
 
     // Parse info from key-value rows
     const infoMap = new Map<string, string>();
@@ -152,7 +148,6 @@ export async function fetchOKRsFromSheetDB(): Promise<{ info: OKRInfo; okrs: OKR
         objMap.set(objName, { krs: [], avaliacao: parsePercent(row["avaliação"]) });
       }
       const entry = objMap.get(objName)!;
-      // If avaliação is set on this row, update (first KR of each obj has it)
       if (row["avaliação"]) {
         entry.avaliacao = parsePercent(row["avaliação"]);
       }
