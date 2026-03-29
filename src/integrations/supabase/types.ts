@@ -216,6 +216,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          metadata: Json | null
           nome_arquivo: string
           storage_path: string
           tamanho_bytes: number | null
@@ -225,6 +226,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          metadata?: Json | null
           nome_arquivo: string
           storage_path: string
           tamanho_bytes?: number | null
@@ -234,6 +236,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          metadata?: Json | null
           nome_arquivo?: string
           storage_path?: string
           tamanho_bytes?: number | null
