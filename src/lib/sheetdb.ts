@@ -1,4 +1,4 @@
-const SHEETDB_URL = "https://sheetdb.io/api/v1/sca9l43oxk08c";
+const SHEETDB_URL = "https://sheetdb.io/api/v1/sca9l43oxk08c?sheet=Planilha%20Automatizada(Lovable)%20NAO%20MEXER%20PORRA";
 
 export interface OKR {
   id: string;
