@@ -1,54 +1,21 @@
-import { Target, Eye, Star, DollarSign, Briefcase, FileText, ClipboardList } from "lucide-react";
+import { Target, Eye, Star, DollarSign, Briefcase } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useFinanceiro } from "@/contexts/FinanceiroContext";
-import { useGente } from "@/contexts/GenteContext";
 import { fetchOKRsFromSheetDB, defaultInfo } from "@/lib/sheetdb";
 import EditButton from "@/components/EditButton";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { supabase } from "@/integrations/supabase/client";
+import { ChartRenderer, type ChartConfig } from "@/pages/GenteGestaoPage";
+import EmDesenvolvimento from "@/components/EmDesenvolvimento";
 
-const predadorValues = [
-  { letter: "P", word: "Proatividade", meaning: "agir antes que seja necessário" },
-  { letter: "R", word: "Resultado", meaning: "foco em entregas de alto impacto" },
-  { letter: "E", word: "Excelência", meaning: "qualidade em tudo que fazemos" },
-  { letter: "D", word: "Dono", meaning: "senso de responsabilidade total" },
-  { letter: "A", word: "Antecipação", meaning: "prever e se preparar para o futuro" },
-  { letter: "D", word: "Dedicação", meaning: "comprometimento total com a causa" },
-  { letter: "O", word: "Organização", meaning: "processos claros e estruturados" },
-  { letter: "R", word: "Rede", meaning: "construção de relacionamentos estratégicos" },
-];
-
-// PCO chart mock data
-const pcoStatusData = [
-  { name: "Concluído", value: 42 },
-  { name: "Em andamento", value: 35 },
-  { name: "Atrasado", value: 23 },
-];
-const pcoStatusColors = ["#16a34a", "#f5c400", "#dc2626"];
-
-const pcoDiretoriaData = [
-  { name: "Projetos", value: 38 },
-  { name: "Comercial", value: 28 },
-  { name: "VP", value: 20 },
-  { name: "Presidência", value: 14 },
-];
-const pcoDiretoriaColors = ["#021f3f", "#2b3f65", "#f5c400", "#c9a84c"];
-
-const pcoMonthlyData = [
-  { month: "Out", count: 12 },
-  { month: "Nov", count: 18 },
-  { month: "Dez", count: 15 },
-  { month: "Jan", count: 22 },
-  { month: "Fev", count: 28 },
-  { month: "Mar", count: 35 },
-];
+const valoreWords = ["Proatividade", "Resultado", "Excelência", "Dono", "Antecipação", "Dedicação", "Organização", "Rede"];
 
 const Dashboard = () => {
   const { saldo } = useFinanceiro();
-  const { pdiCount, pcoCount } = useGente();
+  const [pcoCharts, setPcoCharts] = useState<ChartConfig[]>([]);
 
   const { data: okrData } = useQuery({
     queryKey: ["sheetdb_okrs"],
@@ -72,6 +39,21 @@ const Dashboard = () => {
   const today = new Date().toLocaleDateString("pt-BR", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+  // Fetch PCO charts
+  useEffect(() => {
+    const fetchCharts = async () => {
+      const { data } = await supabase.from("gente_uploads").select("*").eq("tipo", "chart").order("created_at");
+      const parsed = (data || []).map((d: any) => ({ id: d.id, ...(d.metadata as any) })) as ChartConfig[];
+      setPcoCharts(parsed);
+    };
+    fetchCharts();
+
+    const channel = supabase.channel("pco_charts_dashboard")
+      .on("postgres_changes", { event: "*", schema: "public", table: "gente_uploads" }, () => fetchCharts())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
   return (
     <div className="space-y-8 transition-page">
       {/* Welcome Hero */}
@@ -81,7 +63,7 @@ const Dashboard = () => {
         <p className="text-accent font-medium mt-3 italic">"Navegar é preciso. Resultados são inevitáveis."</p>
       </div>
 
-      {/* Indicator Cards - 2x2 */}
+      {/* Indicator Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="rounded-xl bg-card border border-border p-5">
           <Briefcase className="h-5 w-5 text-accent/70 mb-2" />
@@ -93,52 +75,43 @@ const Dashboard = () => {
           <p className={`text-metric font-display ${saldo >= 0 ? "text-success" : "text-destructive"}`}>{fmt(saldo)}</p>
           <p className="text-sm text-muted-foreground">Saldo atual</p>
         </div>
-        <div className="rounded-xl bg-card border border-border p-5">
-          <ClipboardList className="h-5 w-5 text-accent/70 mb-2" />
-          <p className="text-metric font-display text-accent">{pcoCount}</p>
-          <p className="text-sm text-muted-foreground">PCOs registrados</p>
-        </div>
-        <div className="rounded-xl bg-card border border-border p-5">
-          <FileText className="h-5 w-5 text-accent/70 mb-2" />
-          <p className="text-metric font-display text-accent">{pdiCount}</p>
-          <p className="text-sm text-muted-foreground">PDIs registrados</p>
-        </div>
       </div>
 
-      {/* MVV Redesign — 3 identical spotlight cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Missão */}
-        <div className="rounded-2xl bg-card border border-border p-8 text-center relative overflow-hidden"
-          style={{ background: "radial-gradient(circle at center, hsl(var(--accent) / 0.05), transparent)" }}>
-          <Target className="h-8 w-8 text-accent mx-auto mb-3" />
-          <p className="text-[10px] uppercase tracking-[0.12em] text-accent font-bold mb-4">Missão</p>
-          <p className="text-base font-light italic text-foreground leading-relaxed">
-            Formar líderes, por meio da vivência empresarial, realizando projetos de alto impacto.
-          </p>
+      {/* MVV Redesign — 2+1 layout */}
+      <div className="space-y-5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Missão */}
+          <div className="rounded-2xl bg-card border border-border p-8 text-center relative overflow-hidden"
+            style={{ background: "radial-gradient(circle at center, hsl(var(--accent) / 0.05), transparent)" }}>
+            <Target className="h-8 w-8 text-accent mx-auto mb-3" />
+            <p className="text-[10px] uppercase tracking-[0.12em] text-accent font-bold mb-4">Missão</p>
+            <p className="text-base font-light italic text-foreground leading-relaxed">
+              Formar líderes, por meio da vivência empresarial, realizando projetos de alto impacto.
+            </p>
+          </div>
+
+          {/* Visão */}
+          <div className="rounded-2xl bg-card border border-border p-8 text-center relative overflow-hidden"
+            style={{ background: "radial-gradient(circle at center, hsl(var(--accent) / 0.05), transparent)" }}>
+            <Eye className="h-8 w-8 text-accent mx-auto mb-3" />
+            <p className="text-[10px] uppercase tracking-[0.12em] text-accent font-bold mb-4">Visão</p>
+            <p className="text-base font-light italic text-foreground leading-relaxed">
+              Alcançar maturidade de gestão e fortalecer nossa imagem no ecossistema em 2026, operando com processos estruturados e pessoas proativas que garantam resultados agressivos.
+            </p>
+          </div>
         </div>
 
-        {/* Visão */}
-        <div className="rounded-2xl bg-card border border-border p-8 text-center relative overflow-hidden"
-          style={{ background: "radial-gradient(circle at center, hsl(var(--accent) / 0.05), transparent)" }}>
-          <Eye className="h-8 w-8 text-accent mx-auto mb-3" />
-          <p className="text-[10px] uppercase tracking-[0.12em] text-accent font-bold mb-4">Visão</p>
-          <p className="text-base font-light italic text-foreground leading-relaxed">
-            Alcançar maturidade de gestão e fortalecer nossa imagem no ecossistema em 2026, operando com processos estruturados e pessoas proativas que garantam resultados agressivos.
-          </p>
-        </div>
-
-        {/* Valores — PREDADOR expanded */}
+        {/* Valores — full width pills */}
         <div className="rounded-2xl bg-card border border-border p-8 text-center relative overflow-hidden"
           style={{ background: "radial-gradient(circle at center, hsl(var(--accent) / 0.05), transparent)" }}>
           <Star className="h-8 w-8 text-accent mx-auto mb-3" />
-          <p className="text-[10px] uppercase tracking-[0.12em] text-accent font-bold mb-4">Valores</p>
-          <div className="space-y-0 text-left">
-            {predadorValues.map((v, i) => (
-              <div key={i} className={`flex items-baseline gap-3 py-1.5 ${i < predadorValues.length - 1 ? "border-b border-border" : ""}`}>
-                <span className="text-lg font-bold text-accent w-6 shrink-0">{v.letter}</span>
-                <span className="text-sm font-semibold text-foreground">{v.word}</span>
-                <span className="text-xs text-muted-foreground hidden sm:inline">— {v.meaning}</span>
-              </div>
+          <p className="text-[10px] uppercase tracking-[0.12em] text-accent font-bold mb-6">Valores</p>
+          <div className="flex flex-wrap gap-3 justify-center">
+            {valoreWords.map(word => (
+              <span key={word} className="valores-pill px-5 py-2.5 rounded-full text-sm font-medium border">
+                <span className="valores-pill-letter text-lg font-bold mr-0.5">{word[0]}</span>
+                {word.slice(1)}
+              </span>
             ))}
           </div>
         </div>
@@ -156,8 +129,7 @@ const Dashboard = () => {
 
         <div>
           <div className="flex justify-between text-sm text-muted-foreground mb-1">
-            <span>Receita Atual</span>
-            <span>{faturamento} — {pctInterna}%</span>
+            <span>Receita Atual</span><span>{faturamento} — {pctInterna}%</span>
           </div>
           <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
             <div className="h-full bg-accent rounded-full transition-all duration-700" style={{ width: `${pctInterna}%` }} />
@@ -166,8 +138,7 @@ const Dashboard = () => {
 
         <div>
           <div className="flex justify-between text-sm text-muted-foreground mb-1">
-            <span>Meta Externa</span>
-            <span>R$ 200.000 — {pctExterna}%</span>
+            <span>Meta Externa</span><span>R$ 200.000 — {pctExterna}%</span>
           </div>
           <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
             <div className="h-full bg-accent/60 rounded-full transition-all duration-700" style={{ width: `${pctExterna}%` }} />
@@ -176,8 +147,7 @@ const Dashboard = () => {
 
         <div>
           <div className="flex justify-between text-sm text-muted-foreground mb-1">
-            <span>Meta Interna</span>
-            <span>R$ 260.000 — {pctInterna}%</span>
+            <span>Meta Interna</span><span>R$ 260.000 — {pctInterna}%</span>
           </div>
           <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
             <div className="h-full bg-accent rounded-full transition-all duration-700" style={{ width: `${pctInterna}%` }} />
@@ -187,47 +157,19 @@ const Dashboard = () => {
 
       {/* PCO Charts Section */}
       <div>
-        <h2 className="text-base font-display font-semibold text-foreground mb-4">Indicadores de PCO</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Status Distribution */}
-          <div className="rounded-xl bg-card border border-border p-4">
-            <p className="text-sm font-semibold text-foreground mb-3">Distribuição por Status</p>
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie data={pcoStatusData} dataKey="value" cx="50%" cy="50%" outerRadius={70} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
-                  {pcoStatusData.map((_, i) => <Cell key={i} fill={pcoStatusColors[i]} />)}
-                </Pie>
-                <Legend fontSize={11} />
-              </PieChart>
-            </ResponsiveContainer>
+        <h2 className="text-base font-display font-semibold text-foreground mb-4">Indicadores PCO</h2>
+        {pcoCharts.length === 0 ? (
+          <EmDesenvolvimento title="Indicadores PCO" />
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}>
+            {pcoCharts.map(chart => (
+              <div key={chart.id} className="rounded-xl bg-card border border-border p-4">
+                <p className="text-sm font-semibold text-foreground mb-3">{chart.title}</p>
+                <ChartRenderer config={chart} height={220} />
+              </div>
+            ))}
           </div>
-
-          {/* Diretoria Distribution */}
-          <div className="rounded-xl bg-card border border-border p-4">
-            <p className="text-sm font-semibold text-foreground mb-3">Distribuição por Diretoria</p>
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie data={pcoDiretoriaData} dataKey="value" cx="50%" cy="50%" outerRadius={70} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
-                  {pcoDiretoriaData.map((_, i) => <Cell key={i} fill={pcoDiretoriaColors[i]} />)}
-                </Pie>
-                <Legend fontSize={11} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Monthly Evolution */}
-          <div className="rounded-xl bg-card border border-border p-4">
-            <p className="text-sm font-semibold text-foreground mb-3">Evolução Mensal</p>
-            <ResponsiveContainer width="100%" height={220}>
-              <AreaChart data={pcoMonthlyData}>
-                <XAxis dataKey="month" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                <Tooltip />
-                <Area type="monotone" dataKey="count" stroke="#f5c400" fill="#f5c400" fillOpacity={0.4} strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        )}
       </div>
 
       <Dialog open={editRevenue} onOpenChange={setEditRevenue}>
