@@ -215,6 +215,7 @@ export type Database = {
       gente_uploads: {
         Row: {
           created_at: string
+          folder_id: string | null
           id: string
           metadata: Json | null
           nome_arquivo: string
@@ -225,6 +226,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          folder_id?: string | null
           id?: string
           metadata?: Json | null
           nome_arquivo: string
@@ -235,6 +237,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          folder_id?: string | null
           id?: string
           metadata?: Json | null
           nome_arquivo?: string
@@ -244,6 +247,13 @@ export type Database = {
           uploaded_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "gente_uploads_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "pco_folders"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "gente_uploads_uploaded_by_fkey"
             columns: ["uploaded_by"]
@@ -499,6 +509,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "parcerias_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pco_folders: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          name: string
+          position: number | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name: string
+          position?: number | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name?: string
+          position?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pco_folders_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"

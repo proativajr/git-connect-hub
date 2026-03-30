@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { ChartRenderer, type ChartConfig } from "@/pages/GenteGestaoPage";
+import { ChartRenderer, type ChartConfig } from "@/components/pco/ChartRenderer";
 import EmDesenvolvimento from "@/components/EmDesenvolvimento";
 
 const valoreWords = ["Proatividade", "Resultado", "Excelência", "Dono", "Antecipação", "Dedicação", "Organização", "Rede"];

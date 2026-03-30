@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Plus, X, Clipboard, CalendarDays, Trash2 } from "lucide-react";
+import { Plus, X, Clipboard, CalendarDays, Trash2, GripVertical } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -60,56 +60,56 @@ const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: strin
   const [view, setView] = useState<"board" | "table" | "timeline">("board");
   const [loading, setLoading] = useState(true);
   const [showNewPanel, setShowNewPanel] = useState(false);
-  const [newItem, setNewItem] = useState({ title: "", status: "backlog", priority: "media", due_date: "", description: "", tags: "" });
+  const [newItem, setNewItem] = useState({ title: "", status: "backlog", priority: "media", due_date: "", start_date: "", description: "", tags: "" });
   const [dbBoardId, setDbBoardId] = useState<string | null>(null);
   const [dragItem, setDragItem] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [filterPriority, setFilterPriority] = useState<string>("all");
+
+  const loadBoard = useCallback(async () => {
+    try {
+      setLoading(true);
+      // Ensure board exists
+      let bid: string | null = null;
+      const { data: existing } = await supabase.from("monday_boards").select("id").eq("board_id", boardId).maybeSingle();
+      if (existing) {
+        bid = existing.id;
+      } else {
+        const { data: created } = await supabase.from("monday_boards").insert({ board_id: boardId, title, diretoria: boardId }).select("id").single();
+        if (created) bid = created.id;
+      }
+      if (!bid) { setLoading(false); return; }
+      setDbBoardId(bid);
+
+      // Ensure default columns
+      const { data: cols } = await supabase.from("monday_columns").select("*").eq("board_id", bid).order("position");
+      let colList = (cols || []) as BoardColumn[];
+      if (colList.length === 0) {
+        const inserts = DEFAULT_COLUMNS.map((t, i) => ({ board_id: bid!, title: t, position: i, color: "#c9a84c" }));
+        const { data: newCols } = await supabase.from("monday_columns").insert(inserts).select();
+        colList = (newCols || []) as BoardColumn[];
+      }
+      setColumns(colList);
+
+      // Load items
+      const colIds = colList.map(c => c.id);
+      if (colIds.length > 0) {
+        const { data: itms } = await supabase.from("monday_items").select("*").in("column_id", colIds).order("position");
+        setItems((itms || []).map(i => ({ ...i, tags: i.tags || [] })) as BoardItem[]);
+      }
+    } catch (err) {
+      console.error("Board load error:", err);
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [boardId, title]);
 
   useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout>;
-    let mounted = true;
-
-    const ensureBoard = async (): Promise<string | null> => {
-      const { data: existing } = await supabase.from("monday_boards").select("id").eq("board_id", boardId).maybeSingle();
-      if (existing) return existing.id;
-      const { data: created } = await supabase.from("monday_boards").insert({ board_id: boardId, title, diretoria: boardId }).select("id").single();
-      if (created) {
-        for (let i = 0; i < DEFAULT_COLUMNS.length; i++) {
-          await supabase.from("monday_columns").insert({ board_id: created.id, title: DEFAULT_COLUMNS[i], position: i });
-        }
-        return created.id;
-      }
-      return null;
-    };
-
-    const loadBoard = async () => {
-      try {
-        const bid = await ensureBoard();
-        if (!mounted || !bid) { if (mounted) setLoading(false); return; }
-        setDbBoardId(bid);
-
-        const { data: cols } = await supabase.from("monday_columns").select("*").eq("board_id", bid).order("position");
-        const colList = (cols || []) as BoardColumn[];
-        if (mounted) setColumns(colList);
-
-        const colIds = colList.map(c => c.id);
-        if (colIds.length > 0) {
-          const { data: itms } = await supabase.from("monday_items").select("*").in("column_id", colIds).order("position");
-          if (mounted) setItems((itms || []).map(i => ({ ...i, tags: i.tags || [] })) as BoardItem[]);
-        }
-      } catch (err) {
-        console.error("Board load error:", err);
-        if (mounted) setItems([]);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
-    // Timeout fallback: 5s
-    timeout = setTimeout(() => { if (mounted && loading) setLoading(false); }, 5000);
+    const timeout = setTimeout(() => setLoading(false), 5000);
     loadBoard();
-
-    return () => { mounted = false; clearTimeout(timeout); };
-  }, [boardId, title]);
+    return () => clearTimeout(timeout);
+  }, [loadBoard]);
 
   const handleAddItem = async () => {
     if (!newItem.title.trim() || !dbBoardId) return;
@@ -118,35 +118,58 @@ const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: strin
     const maxPos = items.filter(i => i.column_id === targetCol.id).reduce((m, i) => Math.max(m, i.position), -1);
     const { data, error } = await supabase.from("monday_items").insert({
       column_id: targetCol.id, title: newItem.title, status: newItem.status, priority: newItem.priority,
-      due_date: newItem.due_date || null, description: newItem.description || null,
+      due_date: newItem.due_date || null, start_date: newItem.start_date || null,
+      description: newItem.description || null,
       tags: newItem.tags ? newItem.tags.split(",").map(t => t.trim()) : [],
       position: maxPos + 1, created_by: user?.id,
     }).select().single();
     if (error) { toast({ title: "Erro ao criar item", variant: "destructive" }); return; }
     if (data) setItems(prev => [...prev, { ...data, tags: data.tags || [] } as BoardItem]);
-    setNewItem({ title: "", status: "backlog", priority: "media", due_date: "", description: "", tags: "" });
+    setNewItem({ title: "", status: "backlog", priority: "media", due_date: "", start_date: "", description: "", tags: "" });
     setShowNewPanel(false);
     toast({ title: "Item criado", duration: 2000 });
   };
 
   const handleDeleteItem = async (id: string) => {
-    setItems(prev => prev.filter(i => i.id !== id));
-    await supabase.from("monday_items").delete().eq("id", id);
-    toast({ title: "Item removido", duration: 2000 });
+    const { error } = await supabase.from("monday_items").delete().eq("id", id);
+    if (!error) {
+      setItems(prev => prev.filter(i => i.id !== id));
+      toast({ title: "Item excluído", duration: 2000 });
+    } else {
+      toast({ title: "Erro ao excluir", variant: "destructive" });
+    }
+    setConfirmDelete(null);
   };
 
   const handleDragStart = (id: string) => setDragItem(id);
   const handleDrop = async (columnId: string) => {
     if (!dragItem) return;
     setItems(prev => prev.map(i => i.id === dragItem ? { ...i, column_id: columnId } : i));
-    await supabase.from("monday_items").update({ column_id: columnId }).eq("id", dragItem);
+    await supabase.from("monday_items").update({ column_id: columnId, updated_at: new Date().toISOString() }).eq("id", dragItem);
     setDragItem(null);
   };
 
-  const handleInlineEdit = async (id: string, field: string, value: string) => {
-    setItems(prev => prev.map(i => i.id === id ? { ...i, [field]: value } : i));
-    await supabase.from("monday_items").update({ [field]: value }).eq("id", id);
+  const handleInlineEdit = async (id: string, field: string, value: any) => {
+    const prev = items.find(i => i.id === id);
+    setItems(p => p.map(i => i.id === id ? { ...i, [field]: value } : i));
+    const { error } = await supabase.from("monday_items").update({ [field]: value, updated_at: new Date().toISOString() }).eq("id", id);
+    if (error) {
+      // rollback
+      if (prev) setItems(p => p.map(i => i.id === id ? prev : i));
+      toast({ title: "Erro ao salvar", variant: "destructive" });
+    }
   };
+
+  const addColumn = async () => {
+    const title = prompt("Nome da coluna:");
+    if (!title || !dbBoardId) return;
+    const { data, error } = await supabase.from("monday_columns").insert({
+      board_id: dbBoardId, title, position: columns.length, color: "#c9a84c"
+    }).select().single();
+    if (!error && data) setColumns(prev => [...prev, data as BoardColumn]);
+  };
+
+  const filteredItems = filterPriority === "all" ? items : items.filter(i => i.priority === filterPriority);
 
   if (loading) return <SkeletonBoard />;
 
@@ -155,6 +178,13 @@ const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: strin
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-page-title font-display text-foreground">{title}</h1>
         <div className="flex items-center gap-2">
+          <select value={filterPriority} onChange={e => setFilterPriority(e.target.value)}
+            className="text-xs rounded-lg border border-border bg-card px-2 py-1.5 text-foreground">
+            <option value="all">Todas prioridades</option>
+            <option value="alta">Alta</option>
+            <option value="media">Média</option>
+            <option value="baixa">Baixa</option>
+          </select>
           <div className="flex rounded-lg border border-border overflow-hidden">
             {(["board", "table", "timeline"] as const).map(v => (
               <button key={v} onClick={() => setView(v)}
@@ -182,10 +212,10 @@ const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: strin
         </div>
       )}
 
-      {view === "board" && items.length > 0 && (
+      {view === "board" && filteredItems.length > 0 && (
         <div className="flex gap-4 overflow-x-auto pb-4">
           {columns.map(col => {
-            const colItems = items.filter(i => i.column_id === col.id).sort((a, b) => a.position - b.position);
+            const colItems = filteredItems.filter(i => i.column_id === col.id).sort((a, b) => a.position - b.position);
             return (
               <div key={col.id} className="min-w-[260px] flex-shrink-0 rounded-xl bg-muted/50 p-3 space-y-2"
                 onDragOver={e => e.preventDefault()} onDrop={() => handleDrop(col.id)}>
@@ -196,7 +226,10 @@ const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: strin
                 {colItems.map(item => (
                   <div key={item.id} draggable onDragStart={() => handleDragStart(item.id)}
                     className={`rounded-lg bg-card border border-border p-3 cursor-grab hover:-translate-y-px hover:shadow-md transition-all duration-150 relative group ${dragItem === item.id ? "opacity-60 border-accent border-2" : ""}`}>
-                    <p className="text-sm font-medium text-foreground mb-2">{item.title}</p>
+                    <div className="flex items-start gap-2">
+                      <GripVertical className="h-3.5 w-3.5 text-muted-foreground/40 mt-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab" />
+                      <p className="text-sm font-medium text-foreground mb-2 flex-1">{item.title}</p>
+                    </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       {item.priority && (
                         <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${priorityStyles[item.priority] || ""}`}>
@@ -209,38 +242,50 @@ const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: strin
                         </span>
                       )}
                     </div>
-                    <button onClick={() => handleDeleteItem(item.id)} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity hover-only-actions">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    {confirmDelete === item.id ? (
+                      <div className="absolute top-1 right-1 flex items-center gap-1 bg-card border border-border rounded-lg px-2 py-1 shadow-lg z-10">
+                        <span className="text-[11px] text-muted-foreground mr-1">Excluir?</span>
+                        <button onClick={() => handleDeleteItem(item.id)} className="text-[11px] text-destructive font-semibold hover:underline">Sim</button>
+                        <button onClick={() => setConfirmDelete(null)} className="text-[11px] text-muted-foreground font-semibold hover:underline">Não</button>
+                      </div>
+                    ) : (
+                      <button onClick={() => setConfirmDelete(item.id)} className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity hover-only-actions">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
                   </div>
                 ))}
                 <button onClick={() => setShowNewPanel(true)} className="w-full text-xs text-muted-foreground hover:text-foreground py-2 transition-colors">+ Adicionar Item</button>
               </div>
             );
           })}
+          <button onClick={addColumn} className="min-w-[200px] flex-shrink-0 rounded-xl border-2 border-dashed border-border p-3 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-accent transition-all">
+            <Plus className="h-4 w-4 mr-1" /> Nova Coluna
+          </button>
         </div>
       )}
 
-      {view === "table" && items.length > 0 && (
+      {view === "table" && filteredItems.length > 0 && (
         <div className="rounded-xl bg-card border border-border overflow-x-auto">
           <table className="w-full min-w-[700px]">
             <thead>
               <tr className="border-b-2 border-border">
-                {["Item", "Status", "Prioridade", "Data", ""].map(h => (
+                {["Item", "Coluna", "Prioridade", "Data Início", "Data Entrega", ""].map(h => (
                   <th key={h} className="text-left text-xs font-semibold text-foreground uppercase tracking-wider px-4 py-3 sticky top-0 bg-card">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {items.map((item, i) => (
-                <tr key={item.id} className={`border-b border-border/50 hover:bg-muted/30 ${i % 2 ? "bg-background-secondary" : ""}`}>
-                  <td className="px-4 py-3"><input value={item.title} onChange={e => handleInlineEdit(item.id, "title", e.target.value)} className="bg-transparent text-sm text-foreground w-full outline-none" /></td>
+              {filteredItems.map((item, i) => (
+                <tr key={item.id} className={`border-b border-border/50 hover:bg-muted/30 ${i % 2 ? "bg-background" : ""}`}>
                   <td className="px-4 py-3">
-                    <select value={columns.find(c => c.id === item.column_id)?.title || ""} onChange={e => {
-                      const col = columns.find(c => c.title === e.target.value);
-                      if (col) { setDragItem(item.id); handleDrop(col.id); }
-                    }} className="text-xs bg-transparent text-foreground outline-none">
-                      {columns.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
+                    <input defaultValue={item.title} onBlur={e => { if (e.target.value !== item.title) handleInlineEdit(item.id, "title", e.target.value); }}
+                      className="bg-transparent text-sm text-foreground w-full outline-none focus:border-b focus:border-accent" />
+                  </td>
+                  <td className="px-4 py-3">
+                    <select value={item.column_id} onChange={e => handleInlineEdit(item.id, "column_id", e.target.value)}
+                      className="text-xs bg-transparent text-foreground outline-none">
+                      {columns.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                     </select>
                   </td>
                   <td className="px-4 py-3">
@@ -249,8 +294,20 @@ const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: strin
                       <option value="alta">Alta</option><option value="media">Média</option><option value="baixa">Baixa</option>
                     </select>
                   </td>
-                  <td className="px-4 py-3"><input type="date" value={item.due_date || ""} onChange={e => handleInlineEdit(item.id, "due_date", e.target.value)} className="bg-transparent text-xs text-muted-foreground outline-none" /></td>
-                  <td className="px-4 py-3"><button onClick={() => handleDeleteItem(item.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button></td>
+                  <td className="px-4 py-3">
+                    <input type="date" value={item.start_date || ""} onChange={e => handleInlineEdit(item.id, "start_date", e.target.value || null)}
+                      className="bg-transparent text-xs text-muted-foreground outline-none" />
+                  </td>
+                  <td className="px-4 py-3">
+                    <input type="date" value={item.due_date || ""} onChange={e => handleInlineEdit(item.id, "due_date", e.target.value || null)}
+                      className="bg-transparent text-xs text-muted-foreground outline-none" />
+                  </td>
+                  <td className="px-4 py-3">
+                    <button onClick={() => confirmDelete === item.id ? handleDeleteItem(item.id) : setConfirmDelete(item.id)}
+                      className="text-muted-foreground hover:text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -258,7 +315,10 @@ const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: strin
         </div>
       )}
 
-      {view === "timeline" && items.length > 0 && <TimelineView items={items} />}
+      {view === "timeline" && filteredItems.length > 0 && <TimelineView items={filteredItems} />}
+      {view !== "board" && filteredItems.length === 0 && items.length > 0 && (
+        <p className="text-sm text-muted-foreground text-center py-8">Nenhum item corresponde ao filtro selecionado.</p>
+      )}
 
       {showNewPanel && (
         <div className="fixed inset-0 z-50 flex justify-end">
@@ -279,6 +339,11 @@ const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: strin
                 </select>
               </div>
               <div>
+                <label className="text-sm font-medium text-foreground block mb-1">Data de início</label>
+                <input type="date" value={newItem.start_date} onChange={e => setNewItem({ ...newItem, start_date: e.target.value })}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground" />
+              </div>
+              <div>
                 <label className="text-sm font-medium text-foreground block mb-1">Data de entrega</label>
                 <input type="date" value={newItem.due_date} onChange={e => setNewItem({ ...newItem, due_date: e.target.value })}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground" />
@@ -294,7 +359,7 @@ const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: strin
                   className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground" />
               </div>
               <button onClick={handleAddItem}
-                className="w-full rounded-lg bg-foreground text-background py-3 text-sm font-semibold hover:opacity-90 transition-all h-[44px]">
+                className="w-full rounded-lg bg-accent text-accent-foreground py-3 text-sm font-semibold hover:bg-accent-hover active:scale-[0.98] transition-all h-[44px]">
                 Salvar
               </button>
             </div>
