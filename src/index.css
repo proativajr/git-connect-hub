@@ -117,6 +117,14 @@
   }
 }
 
+@keyframes pulse-skeleton {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+.animate-pulse-skeleton {
+  animation: pulse-skeleton 1.5s ease-in-out infinite;
+}
+
 @layer utilities {
   .transition-page {
     animation: page-enter 0.2s ease-out;
