@@ -7,7 +7,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import logoProativa from "@/assets/logo-proativa.png";
+import logoProativaColor from "@/assets/logo-proativa.png";
+import logoProativaWhite from "@/assets/logo-white.png";
 
 const OrgChartIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>

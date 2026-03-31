@@ -6,6 +6,7 @@ import { toast } from "@/hooks/use-toast";
 import { useTheme } from "@/contexts/ThemeContext";
 import logoIcon from "@/assets/logo-icon.png";
 import logoText from "@/assets/logo-text.png";
+import logoWhite from "@/assets/logo-white.png";
 
 const Login = () => {
   const navigate = useNavigate();
