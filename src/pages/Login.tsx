@@ -6,6 +6,7 @@ import { toast } from "@/hooks/use-toast";
 import { useTheme } from "@/contexts/ThemeContext";
 import logoIcon from "@/assets/logo-icon.png";
 import logoText from "@/assets/logo-text.png";
+import logoWhite from "@/assets/logo-white.png";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -76,17 +77,28 @@ const Login = () => {
         style={{ backgroundColor: leftBg, borderRight: `1px solid ${dividerColor}` }}
       >
         <div className="flex flex-col items-center text-center px-8">
-          <img
-            src={logoIcon}
-            alt="Proativa Jr"
-            className="h-12 sm:h-16 mb-3 sm:mb-6 rounded-xl"
-          />
-          <img
-            src={logoText}
-            alt="Proativa Jr"
-            className="w-36 sm:w-56 mb-3 sm:mb-6"
-            style={{ filter: isDark ? "none" : "brightness(0) invert(1)" }}
-          />
+          {isDark ? (
+            <img
+              src={logoWhite}
+              alt="Proativa Jr"
+              className="h-16 sm:h-24 mb-3 sm:mb-6"
+            />
+          ) : (
+            <>
+              <img
+                src={logoIcon}
+                alt="Proativa Jr"
+                className="h-12 sm:h-16 mb-3 sm:mb-6 rounded-xl"
+                style={{ filter: "brightness(0) invert(1)" }}
+              />
+              <img
+                src={logoText}
+                alt="Proativa Jr"
+                className="w-36 sm:w-56 mb-3 sm:mb-6"
+                style={{ filter: "brightness(0) invert(1)" }}
+              />
+            </>
+          )}
           <p
             className="hidden sm:block text-[22px] font-display font-semibold"
             style={{ color: torreColor }}
