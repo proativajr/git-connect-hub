@@ -88,7 +88,7 @@ const Login = () => {
               <img
                 src={logoIcon}
                 alt="Proativa Jr"
-                className="h-24 sm:h-36 mb-3 sm:mb-6 rounded-xl"
+                className="h-36 sm:h-52 mb-3 sm:mb-6 rounded-xl"
                 style={{ filter: "brightness(0) invert(1)" }}
               />
               <img
