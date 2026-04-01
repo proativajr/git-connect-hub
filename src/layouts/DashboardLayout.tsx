@@ -117,7 +117,7 @@ const DashboardLayout = () => {
   const navContent = (isMobile = false) => (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="flex items-center justify-center px-4 py-4">
-        <img src={theme === 'dark' ? logoDarkIcon : logoProativaColor} alt="Proativa Jr" className={`transition-all duration-300 ${collapsed && !isMobile ? "w-8" : "w-12"}`} />
+        <img src={theme === 'dark' ? logoDarkIcon : logoProativaColor} alt="Proativa Jr" className={`transition-all duration-300 ${collapsed && !isMobile ? "w-24" : "w-36"}`} />
       </div>
 
       <nav className="flex-1 px-3 space-y-0.5">
@@ -215,7 +215,7 @@ const DashboardLayout = () => {
       {/* Mobile top bar */}
       <div className="sm:hidden fixed top-0 left-0 right-0 h-14 z-40 flex items-center justify-between px-4 bg-sidebar border-b border-sidebar-border">
         <button onClick={() => setMobileOpen(true)} className="text-accent"><Menu className="h-6 w-6" /></button>
-        <img src={theme === 'dark' ? logoDarkIcon : logoProativaColor} alt="Proativa" className="h-8" />
+        <img src={theme === 'dark' ? logoDarkIcon : logoProativaColor} alt="Proativa" className="h-10" />
         <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-accent-foreground text-xs font-bold">
           {(user?.email || "U")[0].toUpperCase()}
         </div>
