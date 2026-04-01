@@ -94,7 +94,7 @@ const Login = () => {
               <img
                 src={logoText}
                 alt="Proativa Jr"
-                className="w-48 sm:w-72 mb-3 sm:mb-6"
+                className="w-64 sm:w-96 mb-3 sm:mb-6"
                 style={{ filter: "brightness(0) invert(1)" }}
               />
             </>
