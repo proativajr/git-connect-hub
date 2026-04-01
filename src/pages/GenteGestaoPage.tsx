@@ -65,19 +65,37 @@ const GenteGestaoPage = () => {
   }, [fetchAll]);
 
   const handleSaveChart = async (config: Omit<ChartConfig, "id">) => {
+    if (!config.title?.trim()) {
+      toast({ title: "Adicione um título ao gráfico", variant: "destructive" });
+      return;
+    }
+    const validData = config.data.filter(r => r.label.trim() !== "" && !isNaN(r.value));
+    if (validData.length === 0) {
+      toast({ title: "Adicione pelo menos uma linha com rótulo e valor", variant: "destructive" });
+      return;
+    }
+
+    const metadata = { ...config, data: validData };
+
     if (editingChart) {
-      await supabase.from("gente_uploads").update({
-        metadata: config as any, nome_arquivo: config.title,
+      const { error } = await supabase.from("gente_uploads").update({
+        metadata: metadata as any, nome_arquivo: config.title.trim(),
         folder_id: selectedFolder || null,
       }).eq("id", editingChart.id);
+      if (error) { toast({ title: "Erro ao atualizar gráfico", variant: "destructive" }); return; }
       toast({ title: "Gráfico atualizado", duration: 2000 });
     } else {
       const { error } = await supabase.from("gente_uploads").insert({
-        nome_arquivo: config.title, tipo: "chart", storage_path: "chart",
-        metadata: config as any, uploaded_by: user?.id,
+        nome_arquivo: config.title.trim(), tipo: "chart", storage_path: "chart",
+        metadata: metadata as any, uploaded_by: user?.id,
         folder_id: selectedFolder || null,
+        position: charts.length,
       });
-      if (error) { toast({ title: "Erro ao salvar gráfico", variant: "destructive" }); return; }
+      if (error) {
+        console.error("Chart save error:", error);
+        toast({ title: `Erro ao salvar gráfico: ${error.message}`, variant: "destructive" });
+        return;
+      }
       toast({ title: "Gráfico criado", duration: 2000 });
     }
     setEditingChart(null);
@@ -86,22 +104,47 @@ const GenteGestaoPage = () => {
   };
 
   const handleDeleteChart = async (id: string) => {
-    await supabase.from("gente_uploads").delete().eq("id", id);
+    const { error } = await supabase.from("gente_uploads").delete().eq("id", id);
+    if (error) { toast({ title: "Erro ao excluir gráfico", variant: "destructive" }); return; }
     setCharts(prev => prev.filter(c => c.id !== id));
     toast({ title: "Gráfico removido", duration: 2000 });
   };
 
   const handleUploadDocument = async (file: File) => {
-    const fileName = `${Date.now()}_${file.name}`;
-    const { error: uploadError } = await supabase.storage.from("pco-documentos").upload(fileName, file, { upsert: false });
-    if (uploadError) { toast({ title: "Erro ao fazer upload", variant: "destructive" }); return; }
+    const allowedTypes = [
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      toast({ title: "Apenas PDF e DOCX são aceitos", variant: "destructive" });
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: "Arquivo muito grande. Máximo 20MB", variant: "destructive" });
+      return;
+    }
+
+    const ext = file.name.split(".").pop();
+    const fileName = `${user?.id}/${Date.now()}_${file.name}`;
+    const { error: uploadError } = await supabase.storage.from("pco-documentos").upload(fileName, file, { upsert: false, cacheControl: "3600" });
+    if (uploadError) {
+      console.error("Storage upload error:", uploadError);
+      toast({ title: `Erro no upload: ${uploadError.message}`, variant: "destructive" });
+      return;
+    }
     const { data: urlData } = supabase.storage.from("pco-documentos").getPublicUrl(fileName);
-    await supabase.from("gente_uploads").insert({
+    const { error: dbError } = await supabase.from("gente_uploads").insert({
       uploaded_by: user?.id, tipo: "documento", nome_arquivo: file.name,
       storage_path: urlData.publicUrl, tamanho_bytes: file.size,
-      folder_id: selectedFolder || null, metadata: { file_type: file.type },
+      folder_id: selectedFolder || null, position: documents.length,
+      metadata: { file_type: file.type, extension: ext },
     });
-    toast({ title: "Documento enviado", duration: 2000 });
+    if (dbError) {
+      console.error("DB insert error:", dbError);
+      toast({ title: `Erro ao registrar arquivo: ${dbError.message}`, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Arquivo enviado com sucesso", duration: 2000 });
     fetchAll();
   };
 
