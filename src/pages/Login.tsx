@@ -79,7 +79,7 @@ const Login = () => {
         <div className="flex flex-col items-center text-center px-8">
           {isDark ? (
             <img
-              src={logoWhite}
+              src={logoDarkFull}
               alt="Proativa Jr"
               className="h-16 sm:h-24 mb-3 sm:mb-6"
             />

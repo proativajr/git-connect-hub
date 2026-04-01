@@ -8,7 +8,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import logoProativaColor from "@/assets/logo-proativa.png";
-import logoProativaWhite from "@/assets/logo-white.png";
+import logoDarkIcon from "@/assets/logo-dark-icon.png";
 
 const OrgChartIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" className={className}>
