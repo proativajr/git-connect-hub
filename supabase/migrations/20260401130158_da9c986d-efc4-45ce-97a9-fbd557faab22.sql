@@ -1,0 +1,1 @@
+ALTER TABLE public.gente_uploads ADD COLUMN IF NOT EXISTS position INT DEFAULT 0;

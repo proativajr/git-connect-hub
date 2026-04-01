@@ -219,6 +219,7 @@ export type Database = {
           id: string
           metadata: Json | null
           nome_arquivo: string
+          position: number | null
           storage_path: string
           tamanho_bytes: number | null
           tipo: string
@@ -230,6 +231,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           nome_arquivo: string
+          position?: number | null
           storage_path: string
           tamanho_bytes?: number | null
           tipo: string
@@ -241,6 +243,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           nome_arquivo?: string
+          position?: number | null
           storage_path?: string
           tamanho_bytes?: number | null
           tipo?: string
