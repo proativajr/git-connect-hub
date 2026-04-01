@@ -81,7 +81,7 @@ const Login = () => {
             <img
               src={logoDarkFull}
               alt="Proativa Jr"
-              className="h-32 sm:h-48 mb-3 sm:mb-6"
+              className="h-48 sm:h-72 mb-3 sm:mb-6"
             />
           ) : (
             <>
