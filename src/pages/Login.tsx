@@ -4,9 +4,8 @@ import { Mail, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useTheme } from "@/contexts/ThemeContext";
-import logoIcon from "@/assets/logo-icon.png";
-import logoText from "@/assets/logo-text.png";
 import logoDarkFull from "@/assets/logo-dark-full.png";
+import logoVertical from "@/assets/proativa-logo-vertical.png";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -77,28 +76,12 @@ const Login = () => {
         style={{ backgroundColor: leftBg, borderRight: `1px solid ${dividerColor}` }}
       >
         <div className="flex flex-col items-center text-center px-8">
-          {isDark ? (
-            <img
-              src={logoDarkFull}
-              alt="Proativa Jr"
-              className="h-80 sm:h-[480px] mb-3 sm:mb-6"
-            />
-          ) : (
-            <>
-              <img
-                src={logoIcon}
-                alt="Proativa Jr"
-                className="h-60 sm:h-80 mb-3 sm:mb-4 rounded-xl"
-                style={{ filter: "brightness(0) invert(1)" }}
-              />
-              <img
-                src={logoText}
-                alt="Proativa Jr"
-                className="w-[480px] sm:w-[640px] mb-3 sm:mb-4"
-                style={{ filter: "brightness(0) invert(1)" }}
-              />
-            </>
-          )}
+          <img
+            src={isDark ? logoDarkFull : logoVertical}
+            alt="Proativa Jr"
+            className="h-40 sm:h-[240px] mb-3 sm:mb-6"
+            style={!isDark ? { filter: "brightness(0) invert(1)" } : undefined}
+          />
           <p
             className="text-[18px] sm:text-[22px] font-display font-semibold"
             style={{ color: torreColor }}
