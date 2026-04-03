@@ -81,20 +81,20 @@ const Login = () => {
             <img
               src={logoDarkFull}
               alt="Proativa Jr"
-              className="h-16 sm:h-24 mb-2 sm:mb-4"
+              className="h-80 sm:h-[480px] mb-3 sm:mb-6"
             />
           ) : (
             <>
               <img
                 src={logoIcon}
                 alt="Proativa Jr"
-                className="h-12 sm:h-16 mb-2 sm:mb-3 rounded-xl"
+                className="h-60 sm:h-80 mb-3 sm:mb-4 rounded-xl"
                 style={{ filter: "brightness(0) invert(1)" }}
               />
               <img
                 src={logoText}
                 alt="Proativa Jr"
-                className="w-24 sm:w-32 mb-2 sm:mb-3"
+                className="w-[480px] sm:w-[640px] mb-3 sm:mb-4"
                 style={{ filter: "brightness(0) invert(1)" }}
               />
             </>
