@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-import logoProativaColor from "@/assets/logo-proativa.png";
+import logoIconColor from "@/assets/proativa-logo-icon-color.png";
 import logoDarkIcon from "@/assets/logo-dark-icon.png";
 
 const OrgChartIcon = ({ className }: { className?: string }) => (
