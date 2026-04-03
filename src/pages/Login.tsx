@@ -100,13 +100,13 @@ const Login = () => {
             </>
           )}
           <p
-            className="hidden sm:block text-[22px] font-display font-semibold"
+            className="text-[18px] sm:text-[22px] font-display font-semibold"
             style={{ color: torreColor }}
           >
             Torre de Controle
           </p>
           <p
-            className="hidden sm:block text-[15px] mt-2 max-w-sm leading-relaxed"
+            className="text-[13px] sm:text-[15px] mt-1 sm:mt-2 max-w-sm leading-relaxed"
             style={{ color: taglineColor }}
           >
             Centralize KPIs, projetos e parcerias em um só lugar.
