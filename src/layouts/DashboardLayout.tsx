@@ -117,7 +117,7 @@ const DashboardLayout = () => {
   const navContent = (isMobile = false) => (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="flex items-center justify-center px-4 py-4">
-        <img src={theme === 'dark' ? logoDarkIcon : logoProativaColor} alt="Proativa Jr" className={`transition-all duration-300 ${collapsed && !isMobile ? "w-20" : "w-32"}`} />
+        <img src={theme === 'dark' ? logoDarkIcon : logoIconColor} alt="Proativa Jr" className={`transition-all duration-300 ${collapsed && !isMobile ? "w-20" : "w-32"}`} />
       </div>
 
       <nav className="flex-1 px-3 space-y-0.5">
