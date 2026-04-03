@@ -4,9 +4,8 @@ import { Mail, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useTheme } from "@/contexts/ThemeContext";
-import logoIcon from "@/assets/logo-icon.png";
-import logoText from "@/assets/logo-text.png";
 import logoDarkFull from "@/assets/logo-dark-full.png";
+import logoVertical from "@/assets/proativa-logo-vertical.png";
 
 const Login = () => {
   const navigate = useNavigate();
