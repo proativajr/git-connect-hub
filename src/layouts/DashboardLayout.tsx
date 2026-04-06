@@ -71,7 +71,8 @@ const DashboardLayout = () => {
   const { user, loading, signOut } = useAuth();
   const { theme } = useTheme();
 
-  useEffect(() => { if (!loading && !user) navigate("/"); }, [loading, user, navigate]);
+  // Login temporarily disabled — skip auth redirect
+  // useEffect(() => { if (!loading && !user) navigate("/"); }, [loading, user, navigate]);
 
   useEffect(() => {
     for (const group of diretorias) {
@@ -99,7 +100,8 @@ const DashboardLayout = () => {
   }, []);
 
   if (loading) return <div className="flex items-center justify-center min-h-screen bg-background"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent" /></div>;
-  if (!user) return null;
+  // Login temporarily disabled — allow access without auth
+  // if (!user) return null;
 
   const handleLogout = async () => { await signOut(); navigate("/"); };
   const toggleDirectory = (title: string) => setActiveDirectory(prev => prev === title ? null : title);
