@@ -71,7 +71,8 @@ const DashboardLayout = () => {
   const { user, loading, signOut } = useAuth();
   const { theme } = useTheme();
 
-  useEffect(() => { if (!loading && !user) navigate("/"); }, [loading, user, navigate]);
+  // Login temporarily disabled — skip auth redirect
+  // useEffect(() => { if (!loading && !user) navigate("/"); }, [loading, user, navigate]);
 
   useEffect(() => {
     for (const group of diretorias) {
