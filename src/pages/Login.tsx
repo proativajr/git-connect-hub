@@ -80,7 +80,6 @@ const Login = () => {
             src={isDark ? logoDarkFull : logoVertical}
             alt="Proativa Jr"
             className="h-40 sm:h-[240px] mb-3 sm:mb-6"
-            style={!isDark ? { filter: "brightness(0) invert(1)" } : undefined}
           />
           <p
             className="text-[18px] sm:text-[22px] font-display font-semibold"
