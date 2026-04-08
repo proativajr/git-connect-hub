@@ -207,3 +207,7 @@
     visibility: visible !important;
   }
 }
+
+/* Kanban card delete button — show on hover */
+.card-delete-btn { opacity: 0; transition: opacity 0.15s; }
+*:hover > .card-delete-btn { opacity: 1; }
