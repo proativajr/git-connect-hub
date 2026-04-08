@@ -1,17 +1,45 @@
 
 
-## Plano: Substituir banner de citação por 3 caixas (Missão, Visão, Valores)
+## Root Cause Analysis
 
-### O que será feito
-Remover o banner de citação atual (fundo azul com o texto "Performance é o resultado...") e substituí-lo por 3 caixas lado a lado na mesma cor azul (bg-primary), com texto branco, contendo: **Missão**, **Visão** e **Valores**.
+There are **two database-level issues** blocking both Monday boards and PCO charts:
 
-### Alterações em `src/pages/Dashboard.tsx`:
+### Issue 1: Infinite recursion on `profiles` table (CRITICAL)
+The RLS policy `profiles_admin_all` queries the `profiles` table itself to check if the user is admin:
+```sql
+EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin')
+```
+This causes PostgreSQL error `42P17: infinite recursion detected in policy for relation "profiles"`. This cascades to **every table** that has policies referencing `profiles`, including `monday_boards` (via `boards_admin_write` policy).
 
-1. **Remover** o bloco do Quote Banner e o botão de edição associado
-2. **Remover** estados relacionados à citação (`editQuote`, `tmpQuote`, `tmpAuthor`) e o Dialog de edição da citação
-3. **Remover** import do ícone `Quote`
-4. **Adicionar** 3 caixas em grid (`grid-cols-3`) com `bg-primary` e `text-primary-foreground`, cada uma com o título centralizado (Missão, Visão, Valores)
-5. Cada caixa será editável (com conteúdo vindo do banco) — ou inicialmente estática com placeholder para o usuário informar o conteúdo depois
+### Issue 2: `user_roles` table does not exist
+The `AuthContext` queries `user_roles` on every login, returning a 404 error. The `has_role` function also references this non-existent table.
 
-As caixas terão o mesmo estilo visual do banner atual (cor primária azul), com texto branco e cantos arredondados.
+### Impact
+- `profiles` query fails on every page load (500 error)
+- `monday_boards` SELECT and INSERT both fail (500 error) because `boards_admin_write` references `profiles`
+- `user_roles` query fails (404 error)
+- Charts (`gente_uploads`) work at the DB level (returns 200) but may have UI issues
+
+---
+
+## Plan
+
+### Step 1 -- Fix `profiles` RLS policies (SQL migration)
+- Drop the recursive `profiles_admin_all` policy
+- Replace with a `SECURITY DEFINER` function that checks admin status without triggering RLS
+- Create new policy using the security definer function
+
+### Step 2 -- Fix `monday_boards` write policy (SQL migration)
+- Drop `boards_admin_write` which references the broken `profiles` policy
+- Replace with a simple `auth.role() = 'authenticated'` policy so any logged-in user can create/update boards
+
+### Step 3 -- Create `user_roles` table (SQL migration)
+- Create the `user_roles` table with proper RLS
+- Seed the current user as admin
+- This fixes the 404 errors from `AuthContext.fetchRole()`
+
+### Step 4 -- Update `AuthContext` to handle missing `user_roles` gracefully
+- Add error handling so that if `user_roles` query fails, `isAdmin` defaults to `false` instead of breaking the app
+
+All SQL changes in a single migration. One code file change (`AuthContext.tsx`).
 
