@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useTheme } from "@/contexts/ThemeContext";
 import logoDarkFull from "@/assets/logo-dark-full.png";
-import logoVertical from "@/assets/proativa-logo-vertical.png";
+import logoColorProativa from "@/assets/logo-color-proativa.png";
 
 const Login = () => {
   const navigate = useNavigate();
