@@ -83,7 +83,8 @@ const ParceriasPage = () => {
 
   const handleInlineEdit = async (id: string, field: string, value: string) => {
     setParcerias(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
-    await supabase.from("parcerias").update({ [field]: value }).eq("id", id);
+    const updatePayload: Record<string, any> = { [field]: value };
+    await (supabase as any).from("parcerias").update(updatePayload).eq("id", id);
   };
 
   const resetForm = () => {

@@ -152,7 +152,8 @@ const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: strin
   const handleInlineEdit = async (id: string, field: string, value: any) => {
     const prev = items.find(i => i.id === id);
     setItems(p => p.map(i => i.id === id ? { ...i, [field]: value } : i));
-    const { error } = await supabase.from("monday_items").update({ [field]: value, updated_at: new Date().toISOString() }).eq("id", id);
+    const updatePayload: Record<string, any> = { [field]: value, updated_at: new Date().toISOString() };
+    const { error } = await (supabase as any).from("monday_items").update(updatePayload).eq("id", id);
     if (error) {
       // rollback
       if (prev) setItems(p => p.map(i => i.id === id ? prev : i));
