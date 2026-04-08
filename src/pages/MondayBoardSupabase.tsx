@@ -145,14 +145,15 @@ const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: strin
   const handleDrop = async (columnId: string) => {
     if (!dragItem) return;
     setItems(prev => prev.map(i => i.id === dragItem ? { ...i, column_id: columnId } : i));
-    await supabase.from("monday_items").update({ column_id: columnId, updated_at: new Date().toISOString() }).eq("id", dragItem);
+    await (supabase as any).from("monday_items").update({ column_id: columnId, updated_at: new Date().toISOString() }).eq("id", dragItem);
     setDragItem(null);
   };
 
   const handleInlineEdit = async (id: string, field: string, value: any) => {
     const prev = items.find(i => i.id === id);
     setItems(p => p.map(i => i.id === id ? { ...i, [field]: value } : i));
-    const { error } = await supabase.from("monday_items").update({ [field]: value, updated_at: new Date().toISOString() }).eq("id", id);
+    const updatePayload: Record<string, any> = { [field]: value, updated_at: new Date().toISOString() };
+    const { error } = await (supabase as any).from("monday_items").update(updatePayload).eq("id", id);
     if (error) {
       // rollback
       if (prev) setItems(p => p.map(i => i.id === id ? prev : i));

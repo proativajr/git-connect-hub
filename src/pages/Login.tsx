@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useTheme } from "@/contexts/ThemeContext";
 import logoDarkFull from "@/assets/logo-dark-full.png";
-import logoVertical from "@/assets/proativa-logo-vertical.png";
+import logoColorProativa from "@/assets/logo-color-proativa.png";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -77,7 +77,7 @@ const Login = () => {
       >
         <div className="flex flex-col items-center text-center px-8">
           <img
-            src={logoDarkFull}
+            src={isDark ? logoDarkFull : logoColorProativa}
             alt="Proativa Jr"
             className="h-40 sm:h-[240px] mb-3 sm:mb-6"
           />
