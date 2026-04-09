@@ -54,7 +54,7 @@ const SkeletonBoard = () => (
 );
 
 const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: string }) => {
-  const { user } = useAuth();
+  const { profile } = useAuth();
   const [columns, setColumns] = useState<BoardColumn[]>([]);
   const [items, setItems] = useState<BoardItem[]>([]);
   const [view, setView] = useState<"board" | "table" | "timeline">("board");
@@ -69,7 +69,6 @@ const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: strin
   const loadBoard = useCallback(async () => {
     try {
       setLoading(true);
-      // Ensure board exists
       let bid: string | null = null;
       const { data: existing } = await supabase.from("monday_boards").select("id").eq("board_id", boardId).maybeSingle();
       if (existing) {
@@ -78,10 +77,12 @@ const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: strin
         const { data: created } = await supabase.from("monday_boards").insert({ board_id: boardId, title, diretoria: boardId }).select("id").single();
         if (created) bid = created.id;
       }
-      if (!bid) { setLoading(false); return; }
+      if (!bid) {
+        setLoading(false);
+        return;
+      }
       setDbBoardId(bid);
 
-      // Ensure default columns
       const { data: cols } = await supabase.from("monday_columns").select("*").eq("board_id", bid).order("position");
       let colList = (cols || []) as BoardColumn[];
       if (colList.length === 0) {
@@ -91,11 +92,10 @@ const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: strin
       }
       setColumns(colList);
 
-      // Load items
-      const colIds = colList.map(c => c.id);
+      const colIds = colList.map((c) => c.id);
       if (colIds.length > 0) {
         const { data: itms } = await supabase.from("monday_items").select("*").in("column_id", colIds).order("position");
-        setItems((itms || []).map(i => ({ ...i, tags: i.tags || [] })) as BoardItem[]);
+        setItems((itms || []).map((i) => ({ ...i, tags: i.tags || [] })) as BoardItem[]);
       }
     } catch (err) {
       console.error("Board load error:", err);
@@ -113,18 +113,26 @@ const MondayBoardSupabase = ({ boardId, title }: { boardId: string; title: strin
 
   const handleAddItem = async () => {
     if (!newItem.title.trim() || !dbBoardId) return;
-    const targetCol = columns.find(c => c.title === "Backlog") || columns[0];
+    const targetCol = columns.find((c) => c.title === "Backlog") || columns[0];
     if (!targetCol) return;
-    const maxPos = items.filter(i => i.column_id === targetCol.id).reduce((m, i) => Math.max(m, i.position), -1);
+    const maxPos = items.filter((i) => i.column_id === targetCol.id).reduce((m, i) => Math.max(m, i.position), -1);
     const { data, error } = await supabase.from("monday_items").insert({
-      column_id: targetCol.id, title: newItem.title, status: newItem.status, priority: newItem.priority,
-      due_date: newItem.due_date || null, start_date: newItem.start_date || null,
+      column_id: targetCol.id,
+      title: newItem.title,
+      status: newItem.status,
+      priority: newItem.priority,
+      due_date: newItem.due_date || null,
+      start_date: newItem.start_date || null,
       description: newItem.description || null,
-      tags: newItem.tags ? newItem.tags.split(",").map(t => t.trim()) : [],
-      position: maxPos + 1, created_by: user?.id,
+      tags: newItem.tags ? newItem.tags.split(",").map((t) => t.trim()) : [],
+      position: maxPos + 1,
+      created_by: profile?.id ?? null,
     }).select().single();
-    if (error) { toast({ title: "Erro ao criar item", variant: "destructive" }); return; }
-    if (data) setItems(prev => [...prev, { ...data, tags: data.tags || [] } as BoardItem]);
+    if (error) {
+      toast({ title: "Erro ao criar item", variant: "destructive" });
+      return;
+    }
+    if (data) setItems((prev) => [...prev, { ...data, tags: data.tags || [] } as BoardItem]);
     setNewItem({ title: "", status: "backlog", priority: "media", due_date: "", start_date: "", description: "", tags: "" });
     setShowNewPanel(false);
     toast({ title: "Item criado", duration: 2000 });
