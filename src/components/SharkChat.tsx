@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 type Msg = { role: "user" | "assistant"; content: string };
 type GeminiMsg = { role: "user" | "model"; parts: { text: string }[] };
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/shark-chat`;
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/jaws-chat`;
 
 async function sendChat(messages: Msg[]): Promise<string> {
   const {
