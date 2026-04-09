@@ -1,45 +1,34 @@
 
 
-## Root Cause Analysis
-
-There are **two database-level issues** blocking both Monday boards and PCO charts:
-
-### Issue 1: Infinite recursion on `profiles` table (CRITICAL)
-The RLS policy `profiles_admin_all` queries the `profiles` table itself to check if the user is admin:
-```sql
-EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin')
-```
-This causes PostgreSQL error `42P17: infinite recursion detected in policy for relation "profiles"`. This cascades to **every table** that has policies referencing `profiles`, including `monday_boards` (via `boards_admin_write` policy).
-
-### Issue 2: `user_roles` table does not exist
-The `AuthContext` queries `user_roles` on every login, returning a 404 error. The `has_role` function also references this non-existent table.
-
-### Impact
-- `profiles` query fails on every page load (500 error)
-- `monday_boards` SELECT and INSERT both fail (500 error) because `boards_admin_write` references `profiles`
-- `user_roles` query fails (404 error)
-- Charts (`gente_uploads`) work at the DB level (returns 200) but may have UI issues
-
----
-
 ## Plan
 
-### Step 1 -- Fix `profiles` RLS policies (SQL migration)
-- Drop the recursive `profiles_admin_all` policy
-- Replace with a `SECURITY DEFINER` function that checks admin status without triggering RLS
-- Create new policy using the security definer function
+### What's happening
+1. **Jaws Chat endpoint**: The SharkChat component currently points to `/functions/v1/shark-chat`. The user wants it to point to `/functions/v1/jaws-chat`. There is no `jaws-chat` edge function in the codebase — only `shark-chat` exists. I need to either rename the function or create a new one.
 
-### Step 2 -- Fix `monday_boards` write policy (SQL migration)
-- Drop `boards_admin_write` which references the broken `profiles` policy
-- Replace with a simple `auth.role() = 'authenticated'` policy so any logged-in user can create/update boards
+2. **Monday boards and charts**: After investigating the database, RLS policies, and application code, the previous migration successfully fixed the RLS recursion issues. The DB has no errors in recent logs. The boards and columns exist and are properly seeded. The insert logic in both `MondayBoardSupabase.tsx` and `GenteGestaoPage.tsx` looks correct. The errors the user experienced were likely from before the last migration was applied and should now be resolved.
 
-### Step 3 -- Create `user_roles` table (SQL migration)
-- Create the `user_roles` table with proper RLS
-- Seed the current user as admin
-- This fixes the 404 errors from `AuthContext.fetchRole()`
+### Changes
 
-### Step 4 -- Update `AuthContext` to handle missing `user_roles` gracefully
-- Add error handling so that if `user_roles` query fails, `isAdmin` defaults to `false` instead of breaking the app
+#### Step 1 -- Create `jaws-chat` edge function
+- Create `supabase/functions/jaws-chat/index.ts` with the same logic as `shark-chat/index.ts`
+- Use the secret `jaws-chat` (already exists in Supabase secrets) as the Gemini API key name
+- Keep the same request/response format: `{ message, history }` -> `{ reply }`
 
-All SQL changes in a single migration. One code file change (`AuthContext.tsx`).
+#### Step 2 -- Update SharkChat component
+- Change `CHAT_URL` from `/functions/v1/shark-chat` to `/functions/v1/jaws-chat`
+- Line 10 in `src/components/SharkChat.tsx`
+
+#### Step 3 -- Deploy and test
+- Deploy the `jaws-chat` edge function
+- Test it with curl to verify it works
+
+#### Step 4 -- Verify Monday boards and charts
+- Navigate to a Monday board page and test creating an item
+- Navigate to Gente e Gestao page and test creating a chart
+- If errors persist, capture and fix them
+
+### Technical details
+- The `jaws-chat` secret already exists in Supabase — it will be used as `Deno.env.get("jaws-chat")` or mapped to `API_KEY_GEMINI`
+- The edge function format matches the user's specification: body `{ message: string, history: GeminiMsg[] }`, response `{ reply: string }`
+- No database changes needed — the RLS fixes from the last migration resolved the insert issues
 
