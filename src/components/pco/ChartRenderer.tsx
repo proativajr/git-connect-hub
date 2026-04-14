@@ -1,16 +1,17 @@
-import { PieChart, Pie, Cell, AreaChart, Area, BarChart as ReBarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter } from "recharts";
+import { PieChart, Pie, Cell, AreaChart, Area, BarChart as ReBarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 export interface ChartConfig {
   id: string;
   title: string;
-  type: "bar" | "barH" | "line" | "area" | "pie" | "donut" | "scatter";
-  data: { label: string; value: number }[];
+  type: "bar" | "barH" | "line" | "area" | "pie" | "donut" | "scatter" | "barras" | "barras_h" | "linhas" | "pizza" | "rosca";
+  chartType?: "barras" | "barras_h" | "linhas" | "area" | "pizza" | "rosca";
+  data: { label?: string; name?: string; value: number }[];
   color: string;
   showLegend: boolean;
   showLabels: boolean;
 }
 
-export const CHART_COLORS = ["hsl(var(--accent))", "#16a34a", "#dc2626", "#2563eb", "#8b5cf6", "#f59e0b", "#ec4899", "#06b6d4"];
+export const CHART_COLORS = ["#c9a84c", "#021f3f", "#2b3f65", "#16a34a", "#3b82f6", "#dc2626", "#9333ea", "#f59e0b", "#ec4899", "#06b6d4"];
 
 const tooltipStyle = {
   contentStyle: {
@@ -23,88 +24,82 @@ const tooltipStyle = {
 };
 
 export const ChartRenderer = ({ config, height = 220 }: { config: ChartConfig; height?: number }) => {
-  const data = config.data.map(d => ({ name: d.label, value: d.value }));
+  // Normalize: support both old format (label) and new format (name)
+  const data = (config.data || []).map(d => ({ name: d.name || d.label || "", value: d.value }));
   const colors = [config.color, ...CHART_COLORS.filter(c => c !== config.color)];
 
-  if (config.type === "pie" || config.type === "donut") {
+  // Normalize type: support both old and new naming
+  const resolvedType = config.chartType || config.type;
+
+  if (resolvedType === "pie" || resolvedType === "pizza" || resolvedType === "donut" || resolvedType === "rosca") {
+    const innerRadius = (resolvedType === "donut" || resolvedType === "rosca") ? "40%" : 0;
     return (
       <ResponsiveContainer width="100%" height={height}>
         <PieChart>
-          <Pie data={data} dataKey="value" cx="50%" cy="50%" outerRadius={70} innerRadius={config.type === "donut" ? 40 : 0}
+          <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius="70%" innerRadius={innerRadius}
             isAnimationActive animationDuration={600}
-            label={config.showLabels ? ({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%` : false} labelLine={false} fontSize={11}>
+            label={config.showLabels ? ({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%` : false} labelLine={false} fontSize={11}>
             {data.map((_, i) => <Cell key={i} fill={colors[i % colors.length]} />)}
           </Pie>
-          {config.showLegend && <Legend fontSize={11} />}
+          {config.showLegend && <Legend wrapperStyle={{ fontSize: '11px' }} />}
           <Tooltip {...tooltipStyle} />
         </PieChart>
       </ResponsiveContainer>
     );
   }
 
-  if (config.type === "line") {
+  if (resolvedType === "line" || resolvedType === "linhas") {
     return (
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data}>
           <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
           <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
           <Tooltip {...tooltipStyle} />
-          {config.showLegend && <Legend />}
-          <Line type="monotone" dataKey="value" stroke={config.color} strokeWidth={2} dot={{ fill: config.color }} isAnimationActive animationDuration={600} />
+          {config.showLegend && <Legend wrapperStyle={{ fontSize: '11px' }} />}
+          <Line type="monotone" dataKey="value" stroke={config.color} strokeWidth={2} dot={{ fill: config.color, r: 4 }} isAnimationActive animationDuration={600} />
         </LineChart>
       </ResponsiveContainer>
     );
   }
 
-  if (config.type === "area") {
+  if (resolvedType === "area") {
     return (
       <ResponsiveContainer width="100%" height={height}>
         <AreaChart data={data}>
           <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
           <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
           <Tooltip {...tooltipStyle} />
-          {config.showLegend && <Legend />}
-          <Area type="monotone" dataKey="value" stroke={config.color} fill={config.color} fillOpacity={0.4} strokeWidth={2} isAnimationActive animationDuration={600} />
+          {config.showLegend && <Legend wrapperStyle={{ fontSize: '11px' }} />}
+          <Area type="monotone" dataKey="value" stroke={config.color} fill={`${config.color}33`} strokeWidth={2} isAnimationActive animationDuration={600} />
         </AreaChart>
       </ResponsiveContainer>
     );
   }
 
-  if (config.type === "scatter") {
-    return (
-      <ResponsiveContainer width="100%" height={height}>
-        <ScatterChart>
-          <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-          <YAxis dataKey="value" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-          <Tooltip {...tooltipStyle} />
-          <Scatter data={data} fill={config.color} isAnimationActive animationDuration={600} />
-        </ScatterChart>
-      </ResponsiveContainer>
-    );
-  }
-
-  if (config.type === "barH") {
+  if (resolvedType === "barH" || resolvedType === "barras_h") {
     return (
       <ResponsiveContainer width="100%" height={height}>
         <ReBarChart data={data} layout="vertical">
           <XAxis type="number" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
           <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" width={80} />
           <Tooltip {...tooltipStyle} />
-          {config.showLegend && <Legend />}
+          {config.showLegend && <Legend wrapperStyle={{ fontSize: '11px' }} />}
           <Bar dataKey="value" fill={config.color} radius={[0, 4, 4, 0]} isAnimationActive animationDuration={600} />
         </ReBarChart>
       </ResponsiveContainer>
     );
   }
 
+  // Default: bar / barras
   return (
     <ResponsiveContainer width="100%" height={height}>
       <ReBarChart data={data}>
         <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
         <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
         <Tooltip {...tooltipStyle} />
-        {config.showLegend && <Legend />}
-        <Bar dataKey="value" fill={config.color} radius={[4, 4, 0, 0]} isAnimationActive animationDuration={600} />
+        {config.showLegend && <Legend wrapperStyle={{ fontSize: '11px' }} />}
+        <Bar dataKey="value" fill={config.color} radius={[4, 4, 0, 0]} isAnimationActive animationDuration={600}
+          label={config.showLabels ? { position: 'top', fontSize: 10 } : false} />
       </ReBarChart>
     </ResponsiveContainer>
   );
