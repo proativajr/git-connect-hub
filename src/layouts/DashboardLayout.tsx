@@ -117,12 +117,12 @@ const DashboardLayout = () => {
   };
 
   const navContent = (isMobile = false) => (
-    <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex items-center justify-center px-4 py-4">
-        <img src={theme === 'dark' ? logoDarkIcon : logoIconColor} alt="Proativa Jr" className={`transition-all duration-300 ${collapsed && !isMobile ? (theme === 'dark' ? "w-20" : "w-10") : (theme === 'dark' ? "w-32" : "w-16")}`} />
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-center px-4 py-4 shrink-0">
+        <img src={theme === 'dark' ? logoDarkIcon : logoIconColor} alt="Proativa Jr" className={`transition-all duration-300 ${collapsed && !isMobile ? (theme === 'dark' ? "w-40" : "w-10") : (theme === 'dark' ? "w-64" : "w-16")}`} />
       </div>
 
-      <nav className="flex-1 px-3 space-y-0.5">
+      <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto scrollbar-hide">
         {topNavItems.map(item => (
           <button key={item.path} onClick={() => navigate(item.path)}
             className={`flex w-full items-center gap-2.5 rounded-lg px-3 h-9 text-[13px] font-medium transition-all duration-150 ${

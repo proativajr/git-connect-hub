@@ -165,7 +165,15 @@
   animation: pulse-skeleton 1.5s ease-in-out infinite;
 }
 
-@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+
   .transition-page {
     animation: page-enter 0.2s ease-out;
   }
