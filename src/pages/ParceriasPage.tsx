@@ -40,10 +40,64 @@ const ParceriasPage = () => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
+  const removeWhiteBackground = (file: File): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const d = imageData.data;
+
+        // Remove white/near-white and checkered pattern pixels
+        for (let i = 0; i < d.length; i += 4) {
+          const r = d[i], g = d[i + 1], b = d[i + 2];
+          // White / near-white
+          if (r > 240 && g > 240 && b > 240) { d[i + 3] = 0; continue; }
+          // Light gray (checkered pattern)
+          if (r > 200 && g > 200 && b > 200 && Math.abs(r - g) < 10 && Math.abs(g - b) < 10) { d[i + 3] = 0; continue; }
+        }
+
+        // Auto-crop to bounding box of non-transparent pixels
+        let minX = canvas.width, minY = canvas.height, maxX = 0, maxY = 0;
+        for (let y = 0; y < canvas.height; y++) {
+          for (let x = 0; x < canvas.width; x++) {
+            const idx = (y * canvas.width + x) * 4;
+            if (d[idx + 3] > 0) {
+              minX = Math.min(minX, x); minY = Math.min(minY, y);
+              maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+            }
+          }
+        }
+
+        if (maxX < minX || maxY < minY) {
+          // All transparent — return original
+          canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Canvas error")), "image/png");
+          return;
+        }
+
+        const cropW = maxX - minX + 1;
+        const cropH = maxY - minY + 1;
+        const croppedData = ctx.getImageData(minX, minY, cropW, cropH);
+        canvas.width = cropW;
+        canvas.height = cropH;
+        ctx.putImageData(croppedData, 0, 0);
+
+        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Canvas error")), "image/png");
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const uploadLogo = async (file: File, parceriaId: string) => {
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${parceriaId}.${fileExt}`;
-    const { error: uploadError } = await supabase.storage.from("parcerias-logos").upload(fileName, file, { upsert: true });
+    const cleanBlob = await removeWhiteBackground(file);
+    const fileName = `${parceriaId}.png`;
+    const cleanFile = new File([cleanBlob], fileName, { type: "image/png" });
+    const { error: uploadError } = await supabase.storage.from("parcerias-logos").upload(fileName, cleanFile, { upsert: true });
     if (uploadError) throw uploadError;
     const { data } = supabase.storage.from("parcerias-logos").getPublicUrl(fileName);
     return data.publicUrl;
