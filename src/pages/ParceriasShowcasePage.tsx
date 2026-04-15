@@ -75,7 +75,7 @@ const ParceriasShowcasePage = () => {
                 <HoverCardTrigger asChild>
                   <button className="group flex flex-col items-center gap-3 outline-none w-full">
                     {p.logo_url ? (
-                      <div className="h-28 w-28 flex items-center justify-center rounded-xl bg-card p-3 transition-transform duration-300 group-hover:scale-105">
+                      <div className="h-28 w-28 flex items-center justify-center p-3 transition-transform duration-300 group-hover:scale-105">
                         <img
                           src={p.logo_url}
                           alt={p.parceiro}

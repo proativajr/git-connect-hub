@@ -173,21 +173,30 @@ const GenteGestaoPage = () => {
       toast({ title: "Arquivo muito grande. Máximo 20MB", variant: "destructive" });
       return;
     }
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (!authUser) {
+      toast({ title: "Sessão expirada. Faça login novamente.", variant: "destructive" });
+      return;
+    }
     const ext = file.name.split(".").pop();
-    const fileName = `${user?.id}/${Date.now()}_${file.name}`;
+    const fileName = `${authUser.id}/${Date.now()}_${file.name}`;
     const { error: uploadError } = await supabase.storage.from("pco-documentos").upload(fileName, file, { upsert: false, cacheControl: "3600" });
     if (uploadError) {
       toast({ title: `Erro no upload: ${uploadError.message}`, variant: "destructive" });
       return;
     }
     const { error: dbError } = await supabase.from("gente_uploads").insert({
-      uploaded_by: user?.id, tipo: "pco", nome_arquivo: file.name,
+      uploaded_by: authUser.id, tipo: "pco", nome_arquivo: file.name,
       storage_path: fileName, tamanho_bytes: file.size,
       folder_id: selectedFolder || null, position: documents.length,
       metadata: { file_type: file.type, extension: ext },
     });
     if (dbError) {
-      toast({ title: `Erro ao registrar arquivo: ${dbError.message}`, variant: "destructive" });
+      if (dbError.message.includes("foreign key")) {
+        toast({ title: "Sessão inválida. Faça login novamente.", variant: "destructive" });
+      } else {
+        toast({ title: "Erro ao salvar. Tente novamente.", variant: "destructive" });
+      }
       return;
     }
     toast({ title: "Arquivo enviado com sucesso", duration: 2000 });
