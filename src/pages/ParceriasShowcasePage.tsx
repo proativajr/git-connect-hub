@@ -67,7 +67,7 @@ const ParceriasShowcasePage = () => {
           <p className="text-sm text-muted-foreground mt-1">Parcerias serão exibidas aqui quando cadastradas</p>
         </div>
       ) : (
-        <div className="flex flex-wrap items-center justify-center gap-16 py-12">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-12 py-12">
           {parcerias.map(p => {
             const bullets = buildBullets(p);
             return (
