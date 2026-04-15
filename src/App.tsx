@@ -23,6 +23,7 @@ import MondayBoardSupabase from "./pages/MondayBoardSupabase";
 import ParceriasPage from "./pages/ParceriasPage";
 import ParceriasShowcasePage from "./pages/ParceriasShowcasePage";
 import EmDesenvolvimento from "./components/EmDesenvolvimento";
+import PasswordGate from "./components/PasswordGate";
 
 import NotFound from "./pages/NotFound";
 import SharkChat from "./components/SharkChat";
