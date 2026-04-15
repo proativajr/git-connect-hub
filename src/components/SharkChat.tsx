@@ -13,8 +13,9 @@ async function sendChat(messages: Msg[]): Promise<string> {
   const {
     data: { session },
   } = await supabase.auth.getSession();
+  if (!session?.access_token) throw new Error("Faça login para usar o chat");
   const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-  const authToken = session?.access_token ?? anonKey;
+  const authToken = session.access_token;
 
   // Convert chat history to Gemini format
   const history: GeminiMsg[] = messages.slice(0, -1).map((m) => ({
