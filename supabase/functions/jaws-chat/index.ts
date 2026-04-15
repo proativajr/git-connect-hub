@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -70,6 +71,30 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
 
   try {
+    // Authenticate the request
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !data?.user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { message, history } = await req.json();
     const API_KEY = Deno.env.get("jaws-chat");
     if (!API_KEY) throw new Error("jaws-chat secret is not configured");
@@ -100,8 +125,8 @@ serve(async (req) => {
       );
     }
 
-    const data = await response.json();
-    const reply = data.candidates[0].content.parts[0].text;
+    const apiData = await response.json();
+    const reply = apiData.candidates[0].content.parts[0].text;
 
     return new Response(JSON.stringify({ reply }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -109,7 +134,7 @@ serve(async (req) => {
   } catch (e) {
     console.error("jaws-chat error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Erro desconhecido" }),
+      JSON.stringify({ error: "Erro interno" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
