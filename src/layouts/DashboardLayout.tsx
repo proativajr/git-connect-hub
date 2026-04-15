@@ -85,6 +85,7 @@ const DashboardLayout = () => {
       navigate(path);
       setFlyoutOpen(false);
     } else {
+      setFlyoutOpen(false);
       setPendingPresPath(path);
       setPresGateOpen(true);
       setPresPassword("");
