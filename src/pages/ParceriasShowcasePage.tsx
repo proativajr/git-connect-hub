@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 interface Parceria {
   id: string;
@@ -33,13 +34,20 @@ const ParceriasShowcasePage = () => {
 
   const getInitials = (name: string) => name.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase();
 
+  const buildBullets = (p: Parceria) => {
+    const bullets: string[] = [];
+    if (p.oferece) p.oferece.split(/[,;.\n]/).map(s => s.trim()).filter(Boolean).forEach(b => bullets.push(b));
+    if (p.beneficios) p.beneficios.split(/[,;.\n]/).map(s => s.trim()).filter(Boolean).forEach(b => bullets.push(b));
+    return bullets;
+  };
+
   if (loading) {
     return (
       <div className="space-y-6 transition-page">
         <h1 className="text-page-title font-display text-foreground">Parcerias</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="flex flex-wrap justify-center gap-16 py-12">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="rounded-xl bg-card border border-border p-6 animate-pulse h-48" />
+            <div key={i} className="w-32 h-32 rounded-2xl bg-muted animate-pulse" />
           ))}
         </div>
       </div>
@@ -59,20 +67,47 @@ const ParceriasShowcasePage = () => {
           <p className="text-sm text-muted-foreground mt-1">Parcerias serão exibidas aqui quando cadastradas</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {parcerias.map(p => (
-            <div key={p.id} className="rounded-xl bg-card border border-border p-6 text-center hover:-translate-y-0.5 transition-all duration-200 hover:shadow-lg cursor-default">
-              {p.logo_url ? (
-                <img src={p.logo_url} alt={p.parceiro} className="w-20 h-20 object-contain mx-auto mb-4 rounded-lg" />
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center text-accent text-xl font-bold mx-auto mb-4">
-                  {getInitials(p.parceiro)}
-                </div>
-              )}
-              <p className="text-base font-semibold text-foreground">{p.parceiro}</p>
-              {p.oferece && <p className="text-xs text-muted-foreground mt-2 line-clamp-3">{p.oferece}</p>}
-            </div>
-          ))}
+        <div className="flex flex-wrap items-center justify-center gap-16 py-12">
+          {parcerias.map(p => {
+            const bullets = buildBullets(p);
+            return (
+              <HoverCard key={p.id} openDelay={100} closeDelay={200}>
+                <HoverCardTrigger asChild>
+                  <button className="group flex flex-col items-center gap-3 outline-none">
+                    {p.logo_url ? (
+                      <img
+                        src={p.logo_url}
+                        alt={p.parceiro}
+                        className="h-28 w-28 object-contain transition-transform duration-300 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="h-28 w-28 rounded-full bg-accent/20 flex items-center justify-center text-accent text-2xl font-bold transition-transform duration-300 group-hover:scale-110">
+                        {getInitials(p.parceiro)}
+                      </div>
+                    )}
+                    <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                      {p.parceiro}
+                    </span>
+                  </button>
+                </HoverCardTrigger>
+                {bullets.length > 0 && (
+                  <HoverCardContent className="w-72">
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-semibold text-foreground">{p.parceiro}</h4>
+                      <ul className="space-y-1">
+                        {bullets.map((b, i) => (
+                          <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                            <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-accent shrink-0" />
+                            {b}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </HoverCardContent>
+                )}
+              </HoverCard>
+            );
+          })}
         </div>
       )}
     </div>
