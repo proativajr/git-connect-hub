@@ -3,10 +3,12 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Target, BookOpen, Image, Users, Settings, Gamepad2,
   ChevronLeft, ChevronRight, ChevronDown, ChevronRight as ChevronR, LogOut, Crown, Award, Briefcase, ShoppingCart,
-  Grid3X3, FileText, Handshake, DollarSign, UserCheck, Megaphone, Lightbulb, BarChart3, TrendingUp, Menu, X,
+  Grid3X3, FileText, Handshake, DollarSign, UserCheck, Megaphone, Lightbulb, BarChart3, TrendingUp, Menu, X, Lock,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import logoIconColor from "@/assets/proativa-logo-icon-color.png";
 import logoDarkIcon from "@/assets/logo-dark-icon.png";
 
@@ -18,10 +20,10 @@ const OrgChartIcon = ({ className }: { className?: string }) => (
 );
 
 interface SubItem { title: string; path: string; icon: any; }
-interface SubGroup { title: string; icon: any; items: SubItem[]; }
+interface SubGroup { title: string; icon: any; items: SubItem[]; needsGate?: boolean; }
 
 const diretorias: SubGroup[] = [
-  { title: "Presidência", icon: Crown, items: [
+  { title: "Presidência", icon: Crown, needsGate: true, items: [
     { title: "MEJ", path: "/presidencia/mej", icon: Target },
     { title: "Relação Institucional", path: "/presidencia/relacao-institucional", icon: FileText },
     { title: "Parcerias", path: "/presidencia/parcerias", icon: Handshake },
@@ -64,12 +66,61 @@ const DashboardLayout = () => {
   const [flyoutPos, setFlyoutPos] = useState({ top: 0, left: 0 });
   const [activeDirectory, setActiveDirectory] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [presGateOpen, setPresGateOpen] = useState(false);
+  const [presPassword, setPresPassword] = useState("");
+  const [presError, setPresError] = useState(false);
+  const [presLoading, setPresLoading] = useState(false);
+  const [pendingPresPath, setPendingPresPath] = useState<string | null>(null);
   const flyoutRef = useRef<HTMLDivElement>(null);
   const flyoutBtnRef = useRef<HTMLButtonElement>(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, loading, signOut } = useAuth();
   const { theme } = useTheme();
+
+  const isPresUnlocked = () => sessionStorage.getItem('presidencia_unlocked') === 'true';
+
+  const handlePresNavigate = (path: string) => {
+    if (isPresUnlocked()) {
+      navigate(path);
+      setFlyoutOpen(false);
+    } else {
+      setPendingPresPath(path);
+      setPresGateOpen(true);
+      setPresPassword("");
+      setPresError(false);
+    }
+  };
+
+  const handlePresSubmit = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!presPassword || presLoading) return;
+    setPresLoading(true);
+    try {
+      const { data } = await supabase.rpc("verify_access_code", {
+        p_section_key: "diretoria_presidencia",
+        p_candidate: presPassword,
+      });
+      if (data === true) {
+        sessionStorage.setItem('presidencia_unlocked', 'true');
+        setPresGateOpen(false);
+        setPresPassword("");
+        if (pendingPresPath) {
+          navigate(pendingPresPath);
+          setFlyoutOpen(false);
+        }
+        setPendingPresPath(null);
+      } else {
+        setPresError(true);
+        setPresPassword("");
+      }
+    } catch {
+      setPresError(true);
+      setPresPassword("");
+    } finally {
+      setPresLoading(false);
+    }
+  };
 
   useEffect(() => { if (!loading && !user) navigate("/"); }, [loading, user, navigate]);
 
@@ -82,9 +133,18 @@ const DashboardLayout = () => {
     }
   }, [location.pathname]);
 
+  // Redirect away from presidencia routes if not unlocked
+  useEffect(() => {
+    if (location.pathname.startsWith('/presidencia/') && !isPresUnlocked()) {
+      setPendingPresPath(location.pathname);
+      setPresGateOpen(true);
+      setPresPassword("");
+      setPresError(false);
+    }
+  }, [location.pathname]);
+
   useEffect(() => { setMobileOpen(false); setFlyoutOpen(false); }, [location.pathname]);
 
-  // Close flyout on outside click or Escape
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (flyoutRef.current && !flyoutRef.current.contains(e.target as Node) &&
@@ -112,6 +172,15 @@ const DashboardLayout = () => {
     const rect = e.currentTarget.getBoundingClientRect();
     setFlyoutPos({ top: rect.top, left: rect.right });
     setFlyoutOpen(!flyoutOpen);
+  };
+
+  const handleItemClick = (group: SubGroup, item: SubItem) => {
+    if (group.needsGate) {
+      handlePresNavigate(item.path);
+    } else {
+      navigate(item.path);
+      setFlyoutOpen(false);
+    }
   };
 
   const navContent = (isMobile = false) => (
@@ -159,11 +228,12 @@ const DashboardLayout = () => {
                   }`}>
                   <group.icon className="h-4 w-4 shrink-0" />
                   <span className="flex-1 text-left">{group.title}</span>
+                  {group.needsGate && !isPresUnlocked() && <Lock className="h-3 w-3 text-muted-foreground" />}
                   <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${activeDirectory === group.title ? "rotate-180" : ""}`} />
                 </button>
                 <div className={`overflow-hidden transition-all duration-250 ${activeDirectory === group.title ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"}`}>
                   {group.items.map(item => (
-                    <button key={item.path} onClick={() => navigate(item.path)}
+                    <button key={item.path} onClick={() => handleItemClick(group, item)}
                       className={`flex w-full items-center gap-2 rounded-md pl-10 pr-3 h-8 text-[11px] transition-all ${
                         isActive(item.path) ? "text-accent bg-accent/20 border-l-[3px] border-accent" : "text-sidebar-foreground/60 hover:bg-sidebar-accent"
                       }`}>
@@ -252,11 +322,12 @@ const DashboardLayout = () => {
                 }`}>
                 <group.icon className="h-4 w-4 shrink-0" />
                 <span className="flex-1 text-left">{group.title}</span>
+                {group.needsGate && !isPresUnlocked() && <Lock className="h-3 w-3 text-muted-foreground mr-1" />}
                 <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${activeDirectory === group.title ? "rotate-180" : ""}`} />
               </button>
               <div className={`overflow-hidden transition-all duration-250 ${activeDirectory === group.title ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"}`}>
                 {group.items.map(item => (
-                  <button key={item.path} onClick={() => { navigate(item.path); setFlyoutOpen(false); }}
+                  <button key={item.path} onClick={() => handleItemClick(group, item)}
                     className={`flex w-full items-center gap-2 pl-10 pr-4 h-9 text-[12px] transition-all ${
                       isActive(item.path) ? "text-accent bg-accent/15 border-l-[3px] border-accent" : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
                     }`}>
@@ -269,6 +340,41 @@ const DashboardLayout = () => {
           ))}
         </div>
       )}
+
+      {/* Presidência Password Gate Modal */}
+      <Dialog open={presGateOpen} onOpenChange={(open) => { if (!open) { setPresGateOpen(false); setPendingPresPath(null); } }}>
+        <DialogContent className="bg-card border-border max-w-[380px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5 text-accent" />
+              Diretoria da Presidência
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handlePresSubmit} className="space-y-4 pt-2">
+            <p className="text-sm text-muted-foreground">Digite a senha para acessar a diretoria</p>
+            <div className="space-y-2">
+              <input
+                type="password"
+                placeholder="Senha da diretoria"
+                value={presPassword}
+                onChange={e => { setPresPassword(e.target.value); setPresError(false); }}
+                autoFocus
+                className={`w-full h-[44px] rounded-lg border bg-background px-3 text-sm text-foreground outline-none transition-all focus:ring-2 focus:ring-accent ${
+                  presError ? "border-destructive animate-shake" : "border-border"
+                }`}
+              />
+              {presError && <p className="text-xs text-destructive">Senha incorreta. Tente novamente.</p>}
+            </div>
+            <button
+              type="submit"
+              disabled={presLoading}
+              className="w-full rounded-lg bg-accent py-2.5 text-sm font-semibold text-accent-foreground hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
+            >
+              {presLoading ? "Verificando..." : "Entrar"}
+            </button>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Main content */}
       <main className="flex-1 transition-all duration-300 sm:ml-[var(--sw)] mt-14 sm:mt-0" style={{ "--sw": sidebarWidth } as React.CSSProperties}>
