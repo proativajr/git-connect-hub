@@ -47,8 +47,8 @@ const GenteGestaoPage = () => {
 
   const fetchAll = useCallback(async () => {
     const [chartsRes, docsRes, foldersRes] = await Promise.all([
-      supabase.from("gente_uploads").select("*").eq("tipo", "chart").order("position"),
-      supabase.from("gente_uploads").select("*").eq("tipo", "documento").order("created_at"),
+      supabase.from("gente_uploads").select("*").eq("tipo", "grafico").order("position"),
+      supabase.from("gente_uploads").select("*").eq("tipo", "pco").order("created_at"),
       supabase.from("pco_folders").select("*").order("position"),
     ]);
     setChartRecords((chartsRes.data || []) as ChartRecord[]);
@@ -102,6 +102,7 @@ const GenteGestaoPage = () => {
     }
 
     const chartMetadata = {
+      chart_type: config.chartType || config.type,
       chartType: config.chartType || config.type,
       title: config.title.trim(),
       color: config.color || "#c9a84c",
@@ -122,7 +123,7 @@ const GenteGestaoPage = () => {
       } else {
         const { error } = await supabase.from("gente_uploads").insert({
           uploaded_by: authUser.id,
-          tipo: "chart",
+          tipo: "grafico",
           nome_arquivo: config.title.trim(),
           storage_path: "",
           tamanho_bytes: 0,
@@ -180,7 +181,7 @@ const GenteGestaoPage = () => {
       return;
     }
     const { error: dbError } = await supabase.from("gente_uploads").insert({
-      uploaded_by: user?.id, tipo: "documento", nome_arquivo: file.name,
+      uploaded_by: user?.id, tipo: "pco", nome_arquivo: file.name,
       storage_path: fileName, tamanho_bytes: file.size,
       folder_id: selectedFolder || null, position: documents.length,
       metadata: { file_type: file.type, extension: ext },
