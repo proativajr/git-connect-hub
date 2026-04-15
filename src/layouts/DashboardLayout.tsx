@@ -296,7 +296,7 @@ const DashboardLayout = () => {
       {mobileOpen && (
         <div className="fixed inset-0 z-50 sm:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <aside className="relative w-[280px] h-full bg-sidebar flex flex-col overflow-y-auto">
+          <aside className="relative w-[280px] h-full bg-sidebar flex flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <button onClick={() => setMobileOpen(false)} className="absolute top-4 right-4 text-sidebar-foreground/60"><X className="h-5 w-5" /></button>
             {navContent(true)}
           </aside>
