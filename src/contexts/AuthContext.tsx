@@ -106,6 +106,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signOut = async () => {
+    sessionStorage.removeItem('presidencia_unlocked');
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
