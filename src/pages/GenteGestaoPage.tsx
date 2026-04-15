@@ -179,10 +179,9 @@ const GenteGestaoPage = () => {
       toast({ title: `Erro no upload: ${uploadError.message}`, variant: "destructive" });
       return;
     }
-    const { data: urlData } = supabase.storage.from("pco-documentos").getPublicUrl(fileName);
     const { error: dbError } = await supabase.from("gente_uploads").insert({
       uploaded_by: user?.id, tipo: "documento", nome_arquivo: file.name,
-      storage_path: urlData.publicUrl, tamanho_bytes: file.size,
+      storage_path: fileName, tamanho_bytes: file.size,
       folder_id: selectedFolder || null, position: documents.length,
       metadata: { file_type: file.type, extension: ext },
     });
