@@ -1,38 +1,41 @@
 
 
-## Plan: Fix Parcerias Logo Background + Chart Save Bug
+## Plan: Auto-crop Logo Backgrounds + Fix uploaded_by FK Violation
 
-### Issue 1: Parcerias Logo Background
+### Issue 1: Logo backgrounds (checkered/white) not being removed
 
-The current code wraps logos in a white `rounded-2xl bg-white` container, which just covers the checkered pattern with a white box — it doesn't remove it. The checkered pattern is baked into the uploaded image itself (a PNG with a fake transparency grid).
+The uploaded PNGs have baked-in white or checkered backgrounds. CSS blend modes distort colors. The real fix is to **process the image at upload time** using the Canvas API to remove white/near-white pixels and make them transparent before uploading to Supabase Storage.
 
-**Fix**: Remove the white box. Instead, use CSS to visually eliminate the checkered pattern:
-- Use `mix-blend-mode: multiply` on the `<img>` tag itself (not the container). This makes white pixels transparent against any background.
-- For dark theme, invert the image first then apply `mix-blend-mode: screen` — or simpler: just keep a neutral container with `bg-card` that matches the page and apply `mix-blend-multiply` which works well on light backgrounds, with a dark-theme override using `dark:mix-blend-screen dark:invert`.
+**File: `src/pages/ParceriasPage.tsx`**
 
-**File**: `src/pages/ParceriasShowcasePage.tsx`
-- Remove `rounded-2xl bg-white p-3 shadow-sm` from the logo wrapper
-- Add to the `<img>`: `mix-blend-multiply dark:invert dark:mix-blend-screen` — this makes white backgrounds vanish in both themes
+Add a helper function `removeWhiteBackground(file: File): Promise<Blob>` that:
+1. Loads the image into an offscreen canvas
+2. Iterates through all pixels
+3. Converts white/near-white pixels (R>240, G>240, B>240) to transparent (alpha=0)
+4. Also detects the checkered pattern (alternating white/light-gray pixels) and removes those
+5. Auto-crops the resulting image to the bounding box of non-transparent pixels
+6. Returns a clean PNG blob
 
-### Issue 2: Chart Save Constraint Error
+Call this function in `uploadLogo()` before uploading to storage, so every uploaded logo is automatically cleaned.
 
-The DB constraint on `gente_uploads.tipo` only allows `'pdi' | 'pco' | 'grafico'`. The code uses `"chart"` and `"documento"` which both violate this constraint.
+**File: `src/pages/ParceriasShowcasePage.tsx`**
 
-**File**: `src/pages/GenteGestaoPage.tsx`
-- Change `tipo: "chart"` to `tipo: "grafico"` in the insert (line 125)
-- Change `tipo: "documento"` to `tipo: "pco"` in the document upload insert (line 183)
-- Update fetch queries: `.eq("tipo", "chart")` → `.eq("tipo", "grafico")` (line 50) and `.eq("tipo", "documento")` → `.eq("tipo", "pco")` (line 51)
-- Store visual chart type in `metadata.chart_type` field (already partially done via `chartType` key — rename to `chart_type` for consistency with the prompt)
+Remove the `bg-card` and `rounded-xl` wrapper — logos will now have genuine transparency so they blend naturally with any background. Keep the container for sizing but make it transparent.
 
-**File**: `src/components/pco/ChartRenderer.tsx` — no changes needed, it already reads `chartType` from config
+### Issue 2: uploaded_by FK violation in gente_uploads
 
-**Optional**: Create `src/types/uploads.ts` with `UploadTipo`, `ChartTipo`, and `GraficoMetadata` types for type safety.
+**File: `src/pages/GenteGestaoPage.tsx`**
+
+The document upload function (`handleUploadDocument`) uses `user?.id` from the auth context which can be null/stale. Fix:
+1. Add a `supabase.auth.getUser()` guard at the start of `handleUploadDocument` (same pattern already used in `handleSaveChart`)
+2. Use `authUser.id` instead of `user?.id` for both `storage_path` and `uploaded_by`
+3. Add friendly Portuguese error messages for FK and constraint violations
 
 ### Files Changed
 
 | File | Change |
 |------|--------|
-| `src/pages/ParceriasShowcasePage.tsx` | Replace white box with blend-mode CSS for transparent logos |
-| `src/pages/GenteGestaoPage.tsx` | Fix `tipo` values to match DB constraint; restructure metadata |
-| `src/types/uploads.ts` | New file with upload type definitions |
+| `src/pages/ParceriasPage.tsx` | Add `removeWhiteBackground()` canvas processor; call before upload |
+| `src/pages/ParceriasShowcasePage.tsx` | Remove bg-card wrapper, use transparent container |
+| `src/pages/GenteGestaoPage.tsx` | Add auth guard to `handleUploadDocument`, use `authUser.id` |
 
