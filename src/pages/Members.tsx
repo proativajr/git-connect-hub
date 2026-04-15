@@ -165,7 +165,7 @@ const Members = () => {
                 <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-6 py-4">Cargo</th>
                 <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-6 py-4">E-mail</th>
                 <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-6 py-4">Squad</th>
-                <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-6 py-4">Ações</th>
+                {isAdmin && <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-6 py-4">Ações</th>}
               </tr>
             </thead>
             <tbody>
