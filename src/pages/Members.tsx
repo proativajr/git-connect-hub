@@ -143,15 +143,17 @@ const Members = () => {
           <h1 className="text-3xl font-bold text-foreground">Membros</h1>
           <p className="text-muted-foreground mt-1">Gestão do corpo diretivo e consultores</p>
         </div>
-        <div className="flex gap-3">
-          <input type="file" accept=".csv" ref={fileRef} className="hidden" onChange={handleCSV} />
-          <button onClick={() => fileRef.current?.click()} className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-card-foreground hover:bg-muted transition-all duration-300">
-            <Upload className="h-4 w-4" /> Importar CSV
-          </button>
-          <button onClick={openAdd} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition-all duration-300">
-            <Plus className="h-4 w-4" /> Adicionar Membro
-          </button>
-        </div>
+        {isAdmin && (
+          <div className="flex gap-3">
+            <input type="file" accept=".csv" ref={fileRef} className="hidden" onChange={handleCSV} />
+            <button onClick={() => fileRef.current?.click()} className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-card-foreground hover:bg-muted transition-all duration-300">
+              <Upload className="h-4 w-4" /> Importar CSV
+            </button>
+            <button onClick={openAdd} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition-all duration-300">
+              <Plus className="h-4 w-4" /> Adicionar Membro
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="rounded-xl bg-card shadow-sm overflow-hidden">
@@ -163,7 +165,7 @@ const Members = () => {
                 <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-6 py-4">Cargo</th>
                 <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-6 py-4">E-mail</th>
                 <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-6 py-4">Squad</th>
-                <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-6 py-4">Ações</th>
+                {isAdmin && <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-6 py-4">Ações</th>}
               </tr>
             </thead>
             <tbody>
@@ -181,10 +183,12 @@ const Members = () => {
                   <td className="px-6 py-4 text-sm text-muted-foreground">{m.email}</td>
                   <td className="px-6 py-4"><span className="text-xs font-medium bg-accent/10 text-accent-foreground rounded-md px-2.5 py-1">{m.squad}</span></td>
                   <td className="px-6 py-4">
-                    <div className="flex gap-2">
-                      <button onClick={() => openEdit(m)} className="text-muted-foreground hover:text-foreground transition-colors"><Pencil className="h-4 w-4" /></button>
-                      <button onClick={() => setDeleteId(m.id)} className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
-                    </div>
+                    {isAdmin && (
+                      <div className="flex gap-2">
+                        <button onClick={() => openEdit(m)} className="text-muted-foreground hover:text-foreground transition-colors"><Pencil className="h-4 w-4" /></button>
+                        <button onClick={() => setDeleteId(m.id)} className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}

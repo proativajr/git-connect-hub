@@ -23,7 +23,7 @@ import MondayBoardSupabase from "./pages/MondayBoardSupabase";
 import ParceriasPage from "./pages/ParceriasPage";
 import ParceriasShowcasePage from "./pages/ParceriasShowcasePage";
 import EmDesenvolvimento from "./components/EmDesenvolvimento";
-import PasswordGate from "./components/PasswordGate";
+
 import NotFound from "./pages/NotFound";
 import SharkChat from "./components/SharkChat";
 
@@ -52,11 +52,11 @@ const App = () => (
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/gamificacao" element={<EmDesenvolvimento title="Gamificação" />} />
 
-                    {/* Presidência */}
+                    {/* Presidência — gate is handled in DashboardLayout */}
                     <Route path="/presidencia/mej" element={<EmDesenvolvimento title="MEJ" />} />
                     <Route path="/presidencia/relacao-institucional" element={<EmDesenvolvimento />} />
                     <Route path="/presidencia/parcerias" element={<ParceriasPage />} />
-                    <Route path="/presidencia/financeiro" element={<PasswordGate sectionKey="pres_financeiro"><FinanceiroPage /></PasswordGate>} />
+                    <Route path="/presidencia/financeiro" element={<FinanceiroPage />} />
                     <Route path="/presidencia/monday" element={<MondayBoardSupabase boardId="board_presidencia" title="Monday — Presidência" />} />
 
                     {/* Vice-Presidência */}
