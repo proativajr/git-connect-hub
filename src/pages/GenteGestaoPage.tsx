@@ -179,10 +179,9 @@ const GenteGestaoPage = () => {
       toast({ title: `Erro no upload: ${uploadError.message}`, variant: "destructive" });
       return;
     }
-    const { data: urlData } = supabase.storage.from("pco-documentos").getPublicUrl(fileName);
     const { error: dbError } = await supabase.from("gente_uploads").insert({
       uploaded_by: user?.id, tipo: "documento", nome_arquivo: file.name,
-      storage_path: urlData.publicUrl, tamanho_bytes: file.size,
+      storage_path: fileName, tamanho_bytes: file.size,
       folder_id: selectedFolder || null, position: documents.length,
       metadata: { file_type: file.type, extension: ext },
     });
@@ -350,9 +349,12 @@ const GenteGestaoPage = () => {
                   <p className="text-[12px] text-muted-foreground">{formatSize(doc.tamanho_bytes)}</p>
                 </div>
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity hover-only-actions">
-                  <a href={doc.storage_path} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+                  <button onClick={async () => {
+                    const { data } = await supabase.storage.from("pco-documentos").createSignedUrl(doc.storage_path, 300);
+                    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+                  }} className="text-muted-foreground hover:text-foreground">
                     <Download className="h-4 w-4" />
-                  </a>
+                  </button>
                   <button onClick={() => handleDeleteDocument(doc.id)} className="text-muted-foreground hover:text-destructive">
                     <Trash2 className="h-4 w-4" />
                   </button>
