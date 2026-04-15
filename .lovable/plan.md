@@ -1,62 +1,38 @@
 
 
-## Plan: Size Normalization + PCO Chart Fix
+## Plan: Fix Parcerias Logo Background + Chart Save Bug
 
-This prompt has two sections. Here's a concise breakdown of what will be done.
+### Issue 1: Parcerias Logo Background
 
----
+The current code wraps logos in a white `rounded-2xl bg-white` container, which just covers the checkered pattern with a white box — it doesn't remove it. The checkered pattern is baked into the uploaded image itself (a PNG with a fake transparency grid).
 
-### Section 1: Global Size Normalization Between Themes
+**Fix**: Remove the white box. Instead, use CSS to visually eliminate the checkered pattern:
+- Use `mix-blend-mode: multiply` on the `<img>` tag itself (not the container). This makes white pixels transparent against any background.
+- For dark theme, invert the image first then apply `mix-blend-mode: screen` — or simpler: just keep a neutral container with `bg-card` that matches the page and apply `mix-blend-multiply` which works well on light backgrounds, with a dark-theme override using `dark:mix-blend-screen dark:invert`.
 
-**Goal**: Zero layout shift when toggling themes. Only colors change between themes, never sizes.
+**File**: `src/pages/ParceriasShowcasePage.tsx`
+- Remove `rounded-2xl bg-white p-3 shadow-sm` from the logo wrapper
+- Add to the `<img>`: `mix-blend-multiply dark:invert dark:mix-blend-screen` — this makes white backgrounds vanish in both themes
 
-**What we'll do**:
+### Issue 2: Chart Save Constraint Error
 
-1. **Clean up CSS variables in `src/index.css`**: Remove any size-related properties from `[data-theme="dark"]` and `[data-theme="light"]` selectors. Currently the theme selectors only have color tokens (confirmed by audit), so this is already mostly correct. We'll add the **theme-neutral sizing system** as `:root` variables.
+The DB constraint on `gente_uploads.tipo` only allows `'pdi' | 'pco' | 'grafico'`. The code uses `"chart"` and `"documento"` which both violate this constraint.
 
-2. **Add sizing CSS custom properties** to `:root` in `index.css`: sidebar widths, nav item sizes, card/input/button dimensions, logo sizes, typography scale — all in one place, shared by both themes.
+**File**: `src/pages/GenteGestaoPage.tsx`
+- Change `tipo: "chart"` to `tipo: "grafico"` in the insert (line 125)
+- Change `tipo: "documento"` to `tipo: "pco"` in the document upload insert (line 183)
+- Update fetch queries: `.eq("tipo", "chart")` → `.eq("tipo", "grafico")` (line 50) and `.eq("tipo", "documento")` → `.eq("tipo", "pco")` (line 51)
+- Store visual chart type in `metadata.chart_type` field (already partially done via `chartType` key — rename to `chart_type` for consistency with the prompt)
 
-3. **Add utility CSS classes** (`.sidebar`, `.nav-item`, `.sidebar-section-title`, `.logo-sidebar`, `.metric-card`, `.form-input`, `.btn`) that reference the new variables.
+**File**: `src/components/pco/ChartRenderer.tsx` — no changes needed, it already reads `chartType` from config
 
-4. **Update `DashboardLayout.tsx`**: Apply the new CSS classes/variables for sidebar width, nav items, section titles, and logos instead of hardcoded Tailwind values.
-
-5. **Verify no theme-conditional sizing exists**: Already confirmed — no `theme === 'dark' ? 'Xpx' : 'Ypx'` patterns found in the codebase.
-
-6. **Fix transition rule**: Ensure the global `*` transition only covers color properties (already the case in current CSS).
-
----
-
-### Section 2: PCO Chart Builder Definitive Fix
-
-**Goal**: Charts save and render correctly with proper validation and DB compatibility.
-
-**Database**: The `gente_uploads` table already has `metadata` (JSONB), `folder_id` (UUID), and `position` (INT) columns. The `pco-documentos` storage bucket exists. No SQL migration needed.
-
-**What we'll do**:
-
-1. **Rewrite `ChartBuilderModal.tsx`**: Replace the current modal with the new inline form design using horizontal pills for chart type selection, Excel-style data rows, toggle switches, color picker, live preview, and proper validation. The form state uses `{ title, type, color, showLegend, showLabels, rows: [{label, value}] }`.
-
-2. **Update `ChartRenderer.tsx`**: Update the `ChartConfig` type to support the new chart type names (`barras`, `barras_h`, `linhas`, `area`, `pizza`, `rosca`) and render them accordingly. Keep backward compatibility with old type names.
-
-3. **Update `GenteGestaoPage.tsx`**: 
-   - Replace `handleSaveChart` with the new robust version that validates data, checks auth, and handles errors gracefully
-   - Add `ChartCard` component for rendering saved charts with edit/delete actions
-   - Ensure `storage_path` is set to `''` (empty string, not null) since the column is NOT NULL
-   - Add delete function with optimistic UI and rollback
-
-4. **Imports**: Add `Recharts` components (`ResponsiveContainer`, `PieChart`, `BarChart`, `LineChart`, `AreaChart`, etc.) and Lucide icons (`Plus`, `X`, `Pencil`, `Trash2`) as needed.
-
----
+**Optional**: Create `src/types/uploads.ts` with `UploadTipo`, `ChartTipo`, and `GraficoMetadata` types for type safety.
 
 ### Files Changed
 
 | File | Change |
 |------|--------|
-| `src/index.css` | Add `:root` sizing variables + utility CSS classes |
-| `src/layouts/DashboardLayout.tsx` | Apply CSS variable-based sizing |
-| `src/components/pco/ChartBuilderModal.tsx` | Complete rewrite with new form UI |
-| `src/components/pco/ChartRenderer.tsx` | Support new chart type names |
-| `src/pages/GenteGestaoPage.tsx` | New save/delete/render logic for charts |
-
-No database migration needed — all columns and buckets already exist.
+| `src/pages/ParceriasShowcasePage.tsx` | Replace white box with blend-mode CSS for transparent logos |
+| `src/pages/GenteGestaoPage.tsx` | Fix `tipo` values to match DB constraint; restructure metadata |
+| `src/types/uploads.ts` | New file with upload type definitions |
 
