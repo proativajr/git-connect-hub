@@ -190,7 +190,7 @@ const DashboardLayout = () => {
         <img src={theme === 'dark' ? logoDarkIcon : logoIconColor} alt="Proativa Jr" className={`transition-all duration-300 ${collapsed && !isMobile ? (theme === 'dark' ? "w-40" : "w-10") : (theme === 'dark' ? "w-64" : "w-16")}`} />
       </div>
 
-      <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto scrollbar-hide">
+      <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {topNavItems.map(item => (
           <button key={item.path} onClick={() => navigate(item.path)}
             className={`flex w-full items-center gap-2.5 rounded-lg px-3 h-9 text-[13px] font-medium transition-all duration-150 ${
@@ -296,7 +296,7 @@ const DashboardLayout = () => {
       {mobileOpen && (
         <div className="fixed inset-0 z-50 sm:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <aside className="relative w-[280px] h-full bg-sidebar flex flex-col overflow-y-auto">
+          <aside className="relative w-[280px] h-full bg-sidebar flex flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             <button onClick={() => setMobileOpen(false)} className="absolute top-4 right-4 text-sidebar-foreground/60"><X className="h-5 w-5" /></button>
             {navContent(true)}
           </aside>
