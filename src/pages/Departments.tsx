@@ -4,7 +4,7 @@ import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, R
 import { useAuth } from "@/contexts/AuthContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import FinanceiroPasswordGate from "@/components/FinanceiroPasswordGate";
+import PasswordGate from "@/components/PasswordGate";
 
 const DIRECTORIES = [
   { key: "projetos", name: "Projetos", icon: Briefcase, subSections: ["Projetos", "Inovação"] },
@@ -197,9 +197,9 @@ const Departments = () => {
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-5">
               {needsPasswordGate(currentDir.key, sub) ? (
-                <FinanceiroPasswordGate>
+                <PasswordGate sectionKey="financeiro">
                   <FinanceiroContent />
-                </FinanceiroPasswordGate>
+                </PasswordGate>
               ) : isFinanceiro(sub) ? (
                 <FinanceiroContent />
               ) : (
