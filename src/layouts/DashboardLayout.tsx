@@ -34,6 +34,7 @@ const diretorias: SubGroup[] = [
     { title: "Financeiro", path: "/vice-presidencia/financeiro", icon: DollarSign },
     { title: "Gente e Gestão", path: "/vice-presidencia/gente-gestao", icon: UserCheck },
     { title: "EndoMarketing", path: "/vice-presidencia/endomarketing", icon: Megaphone },
+    { title: "Gamificação", path: "/gamificacao", icon: Gamepad2 },
     { title: "Monday - VP", path: "/vice-presidencia/monday", icon: Grid3X3 },
   ]},
   { title: "Projetos", icon: Briefcase, items: [
@@ -57,7 +58,6 @@ const mainNavItems = [
   { title: "Parcerias", path: "/parcerias", icon: Handshake },
   { title: "Galeria", path: "/gallery", icon: Image },
   { title: "Membros", path: "/members", icon: Users },
-  { title: "Gamificação", path: "/gamificacao", icon: Gamepad2 },
 ];
 
 const DashboardLayout = () => {
