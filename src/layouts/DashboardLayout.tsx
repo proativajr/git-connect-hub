@@ -140,9 +140,13 @@ const DashboardLayout = () => {
     }
   }, [location.pathname]);
 
-  // Redirect away from presidencia routes if not unlocked
+  // Redirect away from presidencia routes if not unlocked (Drive is excluded)
   useEffect(() => {
-    if (location.pathname.startsWith('/presidencia/') && !isPresUnlocked()) {
+    if (
+      location.pathname.startsWith('/presidencia/') &&
+      location.pathname !== '/presidencia/drive' &&
+      !isPresUnlocked()
+    ) {
       setPendingPresPath(location.pathname);
       setPresGateOpen(true);
       setPresPassword("");

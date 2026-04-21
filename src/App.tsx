@@ -24,6 +24,8 @@ import ParceriasPage from "./pages/ParceriasPage";
 import ParceriasShowcasePage from "./pages/ParceriasShowcasePage";
 import EmDesenvolvimento from "./components/EmDesenvolvimento";
 import PasswordGate from "./components/PasswordGate";
+import CalendarioPage from "./pages/CalendarioPage";
+import DrivePage from "./pages/DrivePage";
 
 import NotFound from "./pages/NotFound";
 import SharkChat from "./components/SharkChat";
@@ -53,6 +55,7 @@ const App = () => (
                     <Route path="/members" element={<Members />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/gamificacao" element={<EmDesenvolvimento title="Gamificação" />} />
+                    <Route path="/calendario" element={<CalendarioPage />} />
 
                     {/* Presidência — gate is handled in DashboardLayout */}
                     <Route path="/presidencia/mej" element={<EmDesenvolvimento title="MEJ" />} />
@@ -60,23 +63,27 @@ const App = () => (
                     <Route path="/presidencia/parcerias" element={<ParceriasPage />} />
                     <Route path="/presidencia/financeiro" element={<FinanceiroPage />} />
                     <Route path="/presidencia/monday" element={<MondayBoardSupabase boardId="board_presidencia" title="Monday — Presidência" />} />
+                    <Route path="/presidencia/drive" element={<DrivePage diretoria="presidencia" title="Drive — Presidência" />} />
 
                     {/* Vice-Presidência */}
                     <Route path="/vice-presidencia/financeiro" element={<PasswordGate sectionKey="vp_financeiro"><FinanceiroPage /></PasswordGate>} />
                     <Route path="/vice-presidencia/gente-gestao" element={<PasswordGate sectionKey="gente_gestao"><GenteGestaoPage /></PasswordGate>} />
                     <Route path="/vice-presidencia/endomarketing" element={<EmDesenvolvimento />} />
                     <Route path="/vice-presidencia/monday" element={<MondayBoardSupabase boardId="board_vp" title="Monday — Vice-Presidência" />} />
+                    <Route path="/vice-presidencia/drive" element={<DrivePage diretoria="vp" title="Drive — Vice-Presidência" />} />
 
                     {/* Projetos */}
                     <Route path="/projetos/lista" element={<EmDesenvolvimento title="Projetos" />} />
                     <Route path="/projetos/inovacao" element={<EmDesenvolvimento />} />
                     <Route path="/projetos/monday" element={<MondayBoardSupabase boardId="board_projetos" title="Monday — Projetos" />} />
+                    <Route path="/projetos/drive" element={<DrivePage diretoria="projetos" title="Drive — Projetos" />} />
 
                     {/* Comercial */}
                     <Route path="/comercial/crm" element={<MondayCRMPage />} />
                     <Route path="/comercial/vendas" element={<VendasPage />} />
                     <Route path="/comercial/marketing" element={<EmDesenvolvimento />} />
                     <Route path="/comercial/monday" element={<MondayBoardSupabase boardId="board_comercial" title="Monday — Comercial" />} />
+                    <Route path="/comercial/drive" element={<DrivePage diretoria="comercial" title="Drive — Comercial" />} />
                   </Route>
                   <Route path="*" element={<NotFound />} />
                 </Routes>
