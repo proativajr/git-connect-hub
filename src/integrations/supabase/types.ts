@@ -94,6 +94,27 @@ export type Database = {
           },
         ]
       }
+      diretoria_drive_config: {
+        Row: {
+          diretoria: string
+          folder_id: string | null
+          folder_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          diretoria: string
+          folder_id?: string | null
+          folder_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          diretoria?: string
+          folder_id?: string | null
+          folder_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       financeiro_config: {
         Row: {
           id: string
