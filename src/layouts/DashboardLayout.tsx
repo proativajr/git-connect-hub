@@ -4,6 +4,7 @@ import {
   LayoutDashboard, Target, BookOpen, Image, Users, Settings, Gamepad2,
   ChevronLeft, ChevronRight, ChevronDown, ChevronRight as ChevronR, LogOut, Crown, Award, Briefcase, ShoppingCart,
   Grid3X3, FileText, Handshake, DollarSign, UserCheck, Megaphone, Lightbulb, BarChart3, TrendingUp, Menu, X, Lock,
+  Calendar, FolderOpen,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -28,6 +29,7 @@ const diretorias: SubGroup[] = [
     { title: "Relação Institucional", path: "/presidencia/relacao-institucional", icon: FileText },
     { title: "Parcerias", path: "/presidencia/parcerias", icon: Handshake },
     { title: "Financeiro", path: "/presidencia/financeiro", icon: DollarSign },
+    { title: "Drive - Presidência", path: "/presidencia/drive", icon: FolderOpen },
     { title: "Monday - Presidência", path: "/presidencia/monday", icon: Grid3X3 },
   ]},
   { title: "Vice-Presidência", icon: Award, items: [
@@ -35,17 +37,20 @@ const diretorias: SubGroup[] = [
     { title: "Gente e Gestão", path: "/vice-presidencia/gente-gestao", icon: UserCheck },
     { title: "EndoMarketing", path: "/vice-presidencia/endomarketing", icon: Megaphone },
     { title: "Gamificação", path: "/gamificacao", icon: Gamepad2 },
+    { title: "Drive - VP", path: "/vice-presidencia/drive", icon: FolderOpen },
     { title: "Monday - VP", path: "/vice-presidencia/monday", icon: Grid3X3 },
   ]},
   { title: "Projetos", icon: Briefcase, items: [
     { title: "Projetos", path: "/projetos/lista", icon: Briefcase },
     { title: "Inovação", path: "/projetos/inovacao", icon: Lightbulb },
+    { title: "Drive - Projetos", path: "/projetos/drive", icon: FolderOpen },
     { title: "Monday - Projetos", path: "/projetos/monday", icon: Grid3X3 },
   ]},
   { title: "Comercial", icon: ShoppingCart, items: [
     { title: "Monday CRM", path: "/comercial/crm", icon: BarChart3 },
     { title: "Vendas", path: "/comercial/vendas", icon: TrendingUp },
     { title: "Marketing", path: "/comercial/marketing", icon: Megaphone },
+    { title: "Drive - Comercial", path: "/comercial/drive", icon: FolderOpen },
     { title: "Monday - Comercial", path: "/comercial/monday", icon: Grid3X3 },
   ]},
 ];
@@ -56,6 +61,7 @@ const mainNavItems = [
   { title: "Planejamento Estratégico", path: "/strategy", icon: Target },
   { title: "Identidade & Governança", path: "/culture", icon: BookOpen },
   { title: "Parcerias", path: "/parcerias", icon: Handshake },
+  { title: "Calendário", path: "/calendario", icon: Calendar },
   { title: "Galeria", path: "/gallery", icon: Image },
   { title: "Membros", path: "/members", icon: Users },
 ];
