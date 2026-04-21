@@ -186,7 +186,7 @@ const DashboardLayout = () => {
   };
 
   const handleItemClick = (group: SubGroup, item: SubItem) => {
-    if (group.needsGate) {
+    if (group.needsGate && item.path !== '/presidencia/drive') {
       handlePresNavigate(item.path);
     } else {
       navigate(item.path);
