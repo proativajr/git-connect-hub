@@ -57,7 +57,6 @@ const mainNavItems = [
   { title: "Parcerias", path: "/parcerias", icon: Handshake },
   { title: "Galeria", path: "/gallery", icon: Image },
   { title: "Membros", path: "/members", icon: Users },
-  { title: "Gamificação", path: "/gamificacao", icon: Gamepad2 },
 ];
 
 const DashboardLayout = () => {
