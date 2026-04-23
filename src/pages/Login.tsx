@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { GOOGLE_SCOPES } from "@/hooks/useGoogleToken";
 import { toast } from "@/hooks/use-toast";
 import { useTheme } from "@/contexts/ThemeContext";
 import logoDarkFull from "@/assets/logo-dark-full.png";
@@ -39,6 +40,24 @@ const Login = () => {
     } catch (err: any) {
       toast({ title: "Erro", description: err.message, variant: "destructive" });
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogle = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          scopes: GOOGLE_SCOPES,
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: { access_type: "offline", prompt: "consent" },
+        },
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
       setLoading(false);
     }
   };
@@ -180,6 +199,25 @@ const Login = () => {
               {loading ? "Aguarde..." : isSignUp ? "Criar Conta" : "Entrar na Torre"}
             </button>
           </form>
+
+          <div className="flex items-center gap-3 my-5">
+            <div className="flex-1 h-px" style={{ backgroundColor: inputBorder }} />
+            <span className="text-[11px] uppercase tracking-wider" style={{ color: subColor }}>ou</span>
+            <div className="flex-1 h-px" style={{ backgroundColor: inputBorder }} />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogle}
+            disabled={loading}
+            className="w-full rounded-lg py-3 text-sm font-semibold transition-all duration-150 disabled:opacity-50 h-[48px] flex items-center justify-center gap-2.5 bg-white border hover:bg-gray-50"
+            style={{ borderColor: inputBorder, color: "#0d2240" }}
+          >
+            <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.24 1.4-1.66 4.1-5.5 4.1-3.31 0-6-2.74-6-6.1S8.69 6 12 6c1.88 0 3.14.8 3.86 1.49l2.63-2.54C16.84 3.4 14.6 2.4 12 2.4 6.74 2.4 2.5 6.65 2.5 11.9S6.74 21.4 12 21.4c6.93 0 9.5-4.86 9.5-9.4 0-.63-.07-1.11-.16-1.6H12z"/>
+            </svg>
+            Entrar com Google
+          </button>
 
           <p className="text-center text-sm mt-6" style={{ color: linkTextColor }}>
             {isSignUp ? "Já tem conta?" : "Não tem conta?"}{" "}
