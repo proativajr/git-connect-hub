@@ -44,6 +44,24 @@ const Login = () => {
     }
   };
 
+  const handleGoogle = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          scopes: GOOGLE_SCOPES,
+          redirectTo: `${window.location.origin}/dashboard`,
+          queryParams: { access_type: "offline", prompt: "consent" },
+        },
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+      setLoading(false);
+    }
+  };
+
   // Theme colors
   const leftBg = isDark ? "#111111" : "#021f3f";
   const rightBg = isDark ? "#c9a84c" : "#ffffff";
