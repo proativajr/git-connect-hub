@@ -26,6 +26,7 @@ import EmDesenvolvimento from "./components/EmDesenvolvimento";
 import PasswordGate from "./components/PasswordGate";
 import CalendarioPage from "./pages/CalendarioPage";
 import DrivePage from "./pages/DrivePage";
+import DriveConsultoresPage from "./pages/DriveConsultoresPage";
 
 import NotFound from "./pages/NotFound";
 import SharkChat from "./components/SharkChat";
@@ -56,6 +57,7 @@ const App = () => (
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/gamificacao" element={<EmDesenvolvimento title="Gamificação" />} />
                     <Route path="/calendario" element={<CalendarioPage />} />
+                    <Route path="/drive-consultores" element={<DriveConsultoresPage />} />
 
                     {/* Presidência — gate is handled in DashboardLayout */}
                     <Route path="/presidencia/mej" element={<EmDesenvolvimento title="MEJ" />} />

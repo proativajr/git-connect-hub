@@ -62,6 +62,7 @@ const mainNavItems = [
   { title: "Identidade & Governança", path: "/culture", icon: BookOpen },
   { title: "Parcerias", path: "/parcerias", icon: Handshake },
   { title: "Calendário", path: "/calendario", icon: Calendar },
+  { title: "Drive Consultores", path: "/drive-consultores", icon: FolderOpen },
   { title: "Galeria", path: "/gallery", icon: Image },
   { title: "Membros", path: "/members", icon: Users },
 ];
