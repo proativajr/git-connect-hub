@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { GOOGLE_SCOPES } from "@/hooks/useGoogleToken";
 import { toast } from "@/hooks/use-toast";
 import { useTheme } from "@/contexts/ThemeContext";
 import logoDarkFull from "@/assets/logo-dark-full.png";
