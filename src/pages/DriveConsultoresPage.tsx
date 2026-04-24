@@ -254,6 +254,8 @@ const DriveConsultoresPage = () => {
         </div>
       </div>
 
+      <AccessNotice />
+
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         {files.length === 0 && !busy && (
           <p className="text-sm text-muted-foreground py-12 text-center">
