@@ -30,6 +30,7 @@ import DriveConsultoresPage from "./pages/DriveConsultoresPage";
 
 import NotFound from "./pages/NotFound";
 import SharkChat from "./components/SharkChat";
+import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
                 <Routes>
                   <Route path="/login" element={<Login />} />
                   <Route path="/" element={<Login />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route element={<DashboardLayout />}>
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/strategy" element={<Strategy />} />

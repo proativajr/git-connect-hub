@@ -51,7 +51,7 @@ const Login = () => {
         provider: "google",
         options: {
           scopes: GOOGLE_SCOPES,
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: `${window.location.origin}/auth/callback`,
           queryParams: { access_type: "offline", prompt: "consent" },
         },
       });
