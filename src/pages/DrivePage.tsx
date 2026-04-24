@@ -8,6 +8,7 @@ import {
   Settings,
   Upload,
   ChevronRight,
+  Lock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -46,6 +47,24 @@ interface DriveConfig {
 }
 
 const FOLDER_MIME = "application/vnd.google-apps.folder";
+
+const DIRETORIA_LABELS: Record<Props["diretoria"], string> = {
+  presidencia: "Presidência",
+  vp: "Vice-Presidência",
+  projetos: "Projetos",
+  comercial: "Comercial",
+};
+
+const AccessNotice = ({ diretoria }: { diretoria: Props["diretoria"] }) => (
+  <div className="flex items-start gap-2 rounded-lg border border-accent/30 bg-accent/10 px-4 py-3 mb-6">
+    <Lock className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+    <p className="text-sm text-foreground">
+      Acesso restrito: apenas o e-mail oficial da diretoria de{" "}
+      <strong>{DIRETORIA_LABELS[diretoria]}</strong> consegue visualizar e abrir
+      os arquivos desta pasta.
+    </p>
+  </div>
+);
 
 const extractFolderId = (input: string): string => {
   const trimmed = input.trim();
@@ -211,10 +230,11 @@ const DrivePage = ({ diretoria, title }: Props) => {
   if (!token) {
     return (
       <div className="container mx-auto px-4 py-10 sm:py-16">
-        <div className="flex items-center gap-3 mb-8">
+        <div className="flex items-center gap-3 mb-6">
           <FolderOpen className="h-7 w-7 text-accent" />
           <h1 className="text-2xl font-bold text-foreground">{title}</h1>
         </div>
+        <AccessNotice diretoria={diretoria} />
         <GoogleConnectButton
           label="Conectar Google Drive"
           description="Conecte sua conta Google para visualizar os arquivos da pasta desta diretoria."
@@ -230,6 +250,7 @@ const DrivePage = ({ diretoria, title }: Props) => {
           <FolderOpen className="h-7 w-7 text-accent" />
           <h1 className="text-2xl font-bold text-foreground">{title}</h1>
         </div>
+        <AccessNotice diretoria={diretoria} />
         <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center max-w-xl mx-auto">
           <Folder className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-sm text-muted-foreground mb-4">
@@ -304,6 +325,8 @@ const DrivePage = ({ diretoria, title }: Props) => {
           )}
         </div>
       </div>
+
+      <AccessNotice diretoria={diretoria} />
 
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         {files.length === 0 && !busy && (

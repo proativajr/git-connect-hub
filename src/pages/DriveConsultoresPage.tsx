@@ -7,6 +7,7 @@ import {
   ExternalLink,
   Settings,
   ChevronRight,
+  Lock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -48,6 +49,17 @@ const extractFolderId = (input: string): string => {
   if (m2) return m2[1];
   return trimmed;
 };
+
+const AccessNotice = () => (
+  <div className="flex items-start gap-2 rounded-lg border border-accent/30 bg-accent/10 px-4 py-3 mb-6">
+    <Lock className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+    <p className="text-sm text-foreground">
+      Acesso restrito: apenas o e-mail oficial dos{" "}
+      <strong>Consultores</strong> consegue visualizar e abrir os arquivos desta
+      pasta.
+    </p>
+  </div>
+);
 
 const DriveConsultoresPage = () => {
   const { isAdmin } = useAuth();
@@ -175,6 +187,7 @@ const DriveConsultoresPage = () => {
           <FolderOpen className="h-7 w-7 text-accent" />
           <h1 className="text-2xl font-bold text-foreground">Drive Consultores</h1>
         </div>
+        <AccessNotice />
         <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center max-w-xl mx-auto">
           <Folder className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-sm text-muted-foreground mb-4">
@@ -240,6 +253,8 @@ const DriveConsultoresPage = () => {
           )}
         </div>
       </div>
+
+      <AccessNotice />
 
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         {files.length === 0 && !busy && (
