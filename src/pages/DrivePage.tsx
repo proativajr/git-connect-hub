@@ -250,6 +250,7 @@ const DrivePage = ({ diretoria, title }: Props) => {
           <FolderOpen className="h-7 w-7 text-accent" />
           <h1 className="text-2xl font-bold text-foreground">{title}</h1>
         </div>
+        <AccessNotice diretoria={diretoria} />
         <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center max-w-xl mx-auto">
           <Folder className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-sm text-muted-foreground mb-4">
