@@ -230,10 +230,11 @@ const DrivePage = ({ diretoria, title }: Props) => {
   if (!token) {
     return (
       <div className="container mx-auto px-4 py-10 sm:py-16">
-        <div className="flex items-center gap-3 mb-8">
+        <div className="flex items-center gap-3 mb-6">
           <FolderOpen className="h-7 w-7 text-accent" />
           <h1 className="text-2xl font-bold text-foreground">{title}</h1>
         </div>
+        <AccessNotice diretoria={diretoria} />
         <GoogleConnectButton
           label="Conectar Google Drive"
           description="Conecte sua conta Google para visualizar os arquivos da pasta desta diretoria."
