@@ -326,6 +326,8 @@ const DrivePage = ({ diretoria, title }: Props) => {
         </div>
       </div>
 
+      <AccessNotice diretoria={diretoria} />
+
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         {files.length === 0 && !busy && (
           <p className="text-sm text-muted-foreground py-12 text-center">
