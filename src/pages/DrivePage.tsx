@@ -48,6 +48,24 @@ interface DriveConfig {
 
 const FOLDER_MIME = "application/vnd.google-apps.folder";
 
+const DIRETORIA_LABELS: Record<Props["diretoria"], string> = {
+  presidencia: "Presidência",
+  vp: "Vice-Presidência",
+  projetos: "Projetos",
+  comercial: "Comercial",
+};
+
+const AccessNotice = ({ diretoria }: { diretoria: Props["diretoria"] }) => (
+  <div className="flex items-start gap-2 rounded-lg border border-accent/30 bg-accent/10 px-4 py-3 mb-6">
+    <Lock className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+    <p className="text-sm text-foreground">
+      Acesso restrito: apenas o e-mail oficial da diretoria de{" "}
+      <strong>{DIRETORIA_LABELS[diretoria]}</strong> consegue visualizar e abrir
+      os arquivos desta pasta.
+    </p>
+  </div>
+);
+
 const extractFolderId = (input: string): string => {
   const trimmed = input.trim();
   // Match /folders/<id> or id=<id>
