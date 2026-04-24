@@ -50,6 +50,17 @@ const extractFolderId = (input: string): string => {
   return trimmed;
 };
 
+const AccessNotice = () => (
+  <div className="flex items-start gap-2 rounded-lg border border-accent/30 bg-accent/10 px-4 py-3 mb-6">
+    <Lock className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+    <p className="text-sm text-foreground">
+      Acesso restrito: apenas o e-mail oficial dos{" "}
+      <strong>Consultores</strong> consegue visualizar e abrir os arquivos desta
+      pasta.
+    </p>
+  </div>
+);
+
 const DriveConsultoresPage = () => {
   const { isAdmin } = useAuth();
   const [config, setConfig] = useState<DriveConfig | null>(null);
