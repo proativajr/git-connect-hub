@@ -8,6 +8,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import logoDarkFull from "@/assets/logo-dark-full.png";
 import logoColorProativa from "@/assets/logo-color-proativa.png";
 
+const normalizeEmail = (value: string) => value.trim().toLowerCase();
+
 const Login = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
@@ -15,32 +17,99 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState(false);
 
   const isDark = theme === "dark";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    const normalizedEmail = normalizeEmail(email);
+
     try {
       if (isSignUp) {
         const { data: allowed } = await (supabase as any)
-          .from("allowed_emails").select("id").eq("email", email.toLowerCase().trim()).maybeSingle();
+          .from("allowed_emails")
+          .select("id")
+          .eq("email", normalizedEmail)
+          .maybeSingle();
+
         if (!allowed) {
-          toast({ title: "Acesso negado", description: "Seu e-mail não foi autorizado pela diretoria.", variant: "destructive" });
+          toast({
+            title: "Acesso negado",
+            description: "Seu e-mail não foi autorizado pela diretoria.",
+            variant: "destructive",
+          });
           return;
         }
-        const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
+
+        const { error } = await supabase.auth.signUp({
+          email: normalizedEmail,
+          password,
+          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+        });
+
         if (error) throw error;
-        toast({ title: "Conta criada!", description: "Verifique seu e-mail para confirmar o cadastro." });
+
+        toast({
+          title: "Conta criada!",
+          description: "Verifique seu e-mail para confirmar o cadastro.",
+        });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({
+          email: normalizedEmail,
+          password,
+        });
+
         if (error) throw error;
         navigate("/dashboard");
       }
     } catch (err: any) {
-      toast({ title: "Erro", description: err.message, variant: "destructive" });
+      const isInvalidCredentials =
+        err?.message === "Invalid login credentials" ||
+        err?.code === "invalid_credentials";
+
+      toast({
+        title: isInvalidCredentials ? "E-mail ou senha inválidos" : "Erro",
+        description: isInvalidCredentials
+          ? "Confira se o e-mail foi digitado corretamente ou redefina a senha."
+          : err.message,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    const normalizedEmail = normalizeEmail(email);
+
+    if (!normalizedEmail) {
+      toast({
+        title: "Informe seu e-mail",
+        description: "Digite o e-mail da conta para enviar a recuperação de senha.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setResettingPassword(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+        redirectTo: `${window.location.origin}/settings`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Recuperação enviada",
+        description: "Verifique seu e-mail para redefinir a senha.",
+      });
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    } finally {
+      setResettingPassword(false);
     }
   };
 
@@ -62,7 +131,6 @@ const Login = () => {
     }
   };
 
-  // Theme colors
   const leftBg = isDark ? "#111111" : "#021f3f";
   const rightBg = isDark ? "#c9a84c" : "#ffffff";
   const dividerColor = isDark ? "rgba(201,168,76,0.25)" : "rgba(255,255,255,0.15)";
@@ -89,7 +157,6 @@ const Login = () => {
 
   return (
     <div className="flex flex-col sm:flex-row min-h-screen">
-      {/* LEFT — Logo panel */}
       <div
         className="flex flex-col items-center justify-center sm:w-1/2 h-[160px] sm:h-screen shrink-0"
         style={{ backgroundColor: leftBg, borderRight: `1px solid ${dividerColor}` }}
@@ -115,7 +182,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* RIGHT — Form panel */}
       <div
         className="flex-1 flex items-center justify-center px-6 sm:w-1/2"
         style={{ backgroundColor: rightBg }}
@@ -147,6 +213,7 @@ const Login = () => {
                 <input
                   type="email"
                   required
+                  autoComplete="email"
                   placeholder="seu@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -175,6 +242,7 @@ const Login = () => {
                 <input
                   type="password"
                   required
+                  autoComplete={isSignUp ? "new-password" : "current-password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -199,6 +267,20 @@ const Login = () => {
               {loading ? "Aguarde..." : isSignUp ? "Criar Conta" : "Entrar na Torre"}
             </button>
           </form>
+
+          {!isSignUp && (
+            <div className="mt-3 text-right">
+              <button
+                type="button"
+                onClick={handlePasswordReset}
+                disabled={resettingPassword || loading}
+                className="text-sm hover:underline disabled:opacity-50"
+                style={{ color: linkColor }}
+              >
+                {resettingPassword ? "Enviando recuperação..." : "Esqueci minha senha"}
+              </button>
+            </div>
+          )}
 
           <div className="flex items-center gap-3 my-5">
             <div className="flex-1 h-px" style={{ backgroundColor: inputBorder }} />
@@ -236,7 +318,6 @@ const Login = () => {
         </div>
       </div>
 
-      {/* Placeholder styles */}
       <style>{`
         input::placeholder { color: ${placeholderColor} !important; }
       `}</style>
@@ -245,3 +326,4 @@ const Login = () => {
 };
 
 export default Login;
+
