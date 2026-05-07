@@ -53,6 +53,7 @@ const DIRETORIA_LABELS: Record<Props["diretoria"], string> = {
   vp: "Vice-Presidência",
   projetos: "Projetos",
   comercial: "Comercial",
+  consultores: "Consultores",
 };
 
 const AccessNotice = ({ diretoria }: { diretoria: Props["diretoria"] }) => (
