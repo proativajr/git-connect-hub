@@ -132,6 +132,8 @@ const DrivePage = ({ diretoria, title }: Props) => {
       );
       url.searchParams.set("pageSize", "100");
       url.searchParams.set("orderBy", "folder,name");
+      url.searchParams.set("supportsAllDrives", "true");
+      url.searchParams.set("includeItemsFromAllDrives", "true");
       const res = await fetch(url.toString(), {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -186,6 +188,8 @@ const DrivePage = ({ diretoria, title }: Props) => {
         );
         url.searchParams.set("fields", "files(id,name)");
         url.searchParams.set("pageSize", "10");
+        url.searchParams.set("supportsAllDrives", "true");
+        url.searchParams.set("includeItemsFromAllDrives", "true");
 
         const res = await fetch(url.toString(), {
           headers: { Authorization: `Bearer ${token}` },
@@ -302,7 +306,11 @@ const DrivePage = ({ diretoria, title }: Props) => {
         <AccessNotice diretoria={diretoria} />
         <GoogleConnectButton
           label="Conectar Google Drive"
-          description="Conecte sua conta Google para visualizar os arquivos da pasta desta diretoria."
+          description={
+            diretoria === "consultores"
+              ? "Mesmo entrando com e-mail e senha, conecte o Google com o e-mail dos consultores para liberar a pasta compartilhada."
+              : "Conecte sua conta Google para visualizar os arquivos da pasta desta diretoria."
+          }
         />
       </div>
     );
