@@ -27,7 +27,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 
 interface Props {
-  diretoria: "presidencia" | "vp" | "projetos" | "comercial";
+  diretoria: "presidencia" | "vp" | "projetos" | "comercial" | "consultores";
   title: string;
 }
 
