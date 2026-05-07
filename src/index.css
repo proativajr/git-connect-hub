@@ -43,42 +43,42 @@
     --font-metric:        28px;
   }
 
-  /* Dark theme (default) */
+  /* Dark theme (default) — Noir & Gold v2: pure black base, layered surfaces, brighter gold */
   [data-theme="dark"], :root {
-    --background: 0 0% 5.5%;
-    --background-secondary: 0 0% 6.7%;
-    --card: 0 0% 10.2%;
-    --card-foreground: 0 0% 91%;
-    --popover: 0 0% 10.2%;
-    --popover-foreground: 0 0% 91%;
-    --primary: 40 38% 55%;
-    --primary-foreground: 0 0% 5.5%;
-    --secondary: 0 0% 16%;
-    --secondary-foreground: 0 0% 91%;
-    --muted: 0 0% 14%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 40 38% 55%;
-    --accent-foreground: 0 0% 5.5%;
-    --accent-hover: 40 35% 48%;
+    --background: 0 0% 3.5%;
+    --background-secondary: 0 0% 5%;
+    --card: 0 0% 8%;
+    --card-foreground: 45 35% 94%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 45 35% 94%;
+    --primary: 43 55% 62%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 13%;
+    --secondary-foreground: 45 35% 94%;
+    --muted: 0 0% 11%;
+    --muted-foreground: 45 10% 68%;
+    --accent: 43 55% 62%;
+    --accent-foreground: 0 0% 4%;
+    --accent-hover: 43 75% 75%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
-    --border: 0 0% 16.5%;
-    --border-accent: 40 38% 55%;
-    --input: 0 0% 16.5%;
-    --ring: 40 38% 55%;
+    --border: 43 20% 18%;
+    --border-accent: 43 55% 62%;
+    --input: 0 0% 14%;
+    --ring: 43 55% 62%;
     --radius: 0.625rem;
-    --foreground: 0 0% 91%;
+    --foreground: 45 35% 94%;
 
-    --sidebar-background: 0 0% 6.7%;
-    --sidebar-foreground: 0 0% 91%;
-    --sidebar-primary: 40 38% 55%;
-    --sidebar-primary-foreground: 0 0% 5.5%;
-    --sidebar-accent: 40 38% 55% / 0.12;
-    --sidebar-accent-foreground: 0 0% 91%;
-    --sidebar-border: 0 0% 16.5%;
-    --sidebar-ring: 40 38% 55%;
+    --sidebar-background: 0 0% 5%;
+    --sidebar-foreground: 45 35% 94%;
+    --sidebar-primary: 43 55% 62%;
+    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-accent: 43 55% 62% / 0.14;
+    --sidebar-accent-foreground: 45 35% 94%;
+    --sidebar-border: 43 20% 16%;
+    --sidebar-ring: 43 55% 62%;
   }
 
   /* Light theme */
@@ -211,13 +211,13 @@
 /* Valores pill theming */
 [data-theme="dark"] .valores-pill,
 :root .valores-pill {
-  background: hsla(40, 38%, 55%, 0.15);
-  border-color: hsla(40, 38%, 55%, 0.4);
-  color: hsl(0 0% 91%);
+  background: hsla(43, 55%, 62%, 0.15);
+  border-color: hsla(43, 55%, 62%, 0.4);
+  color: hsl(45 35% 94%);
 }
 [data-theme="dark"] .valores-pill-letter,
 :root .valores-pill-letter {
-  color: hsl(40, 38%, 55%);
+  color: hsl(43, 55%, 62%);
 }
 [data-theme="light"] .valores-pill {
   background: hsla(211, 100%, 12%, 0.06);
