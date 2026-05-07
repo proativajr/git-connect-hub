@@ -193,9 +193,23 @@ const Login = () => {
           >
             {isSignUp ? "Criar Conta" : "Bem-vindo de volta"}
           </h1>
-          <p className="text-sm mb-8" style={{ color: subColor }}>
+          <p className="text-sm mb-4" style={{ color: subColor }}>
             {isSignUp ? "Cadastre-se na Torre de Controle" : "Faça login para continuar"}
           </p>
+
+          <div
+            className="rounded-lg px-3 py-2.5 mb-6 text-[12.5px] leading-relaxed"
+            style={{
+              backgroundColor: isDark ? "rgba(0,0,0,0.12)" : "rgba(2,31,63,0.06)",
+              border: `1px solid ${inputBorder}`,
+              color: subColor,
+            }}
+          >
+            <strong style={{ color: labelColor }}>Como entrar:</strong> contas já cadastradas no
+            sistema devem usar <strong style={{ color: labelColor }}>Entrar com Google</strong>.
+            E-mails ainda não cadastrados devem usar{" "}
+            <strong style={{ color: labelColor }}>e-mail e senha</strong> para criar a conta.
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
