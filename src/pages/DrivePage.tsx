@@ -56,6 +56,10 @@ const DIRETORIA_LABELS: Record<Props["diretoria"], string> = {
   consultores: "Consultores",
 };
 
+const CONSULTOR_FOLDER_NAMES = ["Drive Consultores", "Consultores"];
+
+const escapeDriveQueryValue = (value: string) => value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+
 const AccessNotice = ({ diretoria }: { diretoria: Props["diretoria"] }) => (
   <div className="flex items-start gap-2 rounded-lg border border-accent/30 bg-accent/10 px-4 py-3 mb-6">
     <Lock className="h-4 w-4 text-accent shrink-0 mt-0.5" />
@@ -89,11 +93,14 @@ const DrivePage = ({ diretoria, title }: Props) => {
   const [folderInput, setFolderInput] = useState("");
   const [folderName, setFolderName] = useState("");
   const [saving, setSaving] = useState(false);
+  const [resolvingFolder, setResolvingFolder] = useState(false);
+  const [autoResolveAttempted, setAutoResolveAttempted] = useState(false);
 
   const currentFolder = stack[stack.length - 1];
 
   const fetchConfig = async () => {
     setLoadingConfig(true);
+    setAutoResolveAttempted(false);
     const { data } = await (supabase as any)
       .from("diretoria_drive_config")
       .select("*")
@@ -102,6 +109,8 @@ const DrivePage = ({ diretoria, title }: Props) => {
     setConfig(data);
     if (data?.folder_id) {
       setStack([{ id: data.folder_id, name: data.folder_name || title }]);
+    } else {
+      setStack([]);
     }
     setFolderInput(data?.folder_id || "");
     setFolderName(data?.folder_name || title);
@@ -148,6 +157,61 @@ const DrivePage = ({ diretoria, title }: Props) => {
     fetchFiles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, currentFolder?.id]);
+
+  useEffect(() => {
+    if (
+      diretoria !== "consultores" ||
+      !token ||
+      loadingConfig ||
+      config?.folder_id ||
+      currentFolder ||
+      autoResolveAttempted
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+    const resolveSharedConsultoresFolder = async () => {
+      setAutoResolveAttempted(true);
+      setResolvingFolder(true);
+
+      try {
+        const nameQuery = CONSULTOR_FOLDER_NAMES.map(
+          (name) => `name = '${escapeDriveQueryValue(name)}'`
+        ).join(" or ");
+        const url = new URL("https://www.googleapis.com/drive/v3/files");
+        url.searchParams.set(
+          "q",
+          `mimeType = '${FOLDER_MIME}' and trashed = false and (${nameQuery})`
+        );
+        url.searchParams.set("fields", "files(id,name)");
+        url.searchParams.set("pageSize", "10");
+
+        const res = await fetch(url.toString(), {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const folder = data.files?.[0];
+        if (!cancelled && folder?.id) {
+          setConfig({ diretoria, folder_id: folder.id, folder_name: folder.name });
+          setStack([{ id: folder.id, name: folder.name }]);
+          setFolderInput(folder.id);
+          setFolderName(folder.name);
+        }
+      } finally {
+        if (!cancelled) setResolvingFolder(false);
+      }
+    };
+
+    resolveSharedConsultoresFolder();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [autoResolveAttempted, config?.folder_id, currentFolder, diretoria, loadingConfig, token]);
 
   const saveConfig = async () => {
     setSaving(true);
@@ -244,7 +308,7 @@ const DrivePage = ({ diretoria, title }: Props) => {
     );
   }
 
-  if (!config?.folder_id) {
+  if (!currentFolder) {
     return (
       <div className="container mx-auto px-4 py-10">
         <div className="flex items-center gap-3 mb-6">
@@ -255,7 +319,9 @@ const DrivePage = ({ diretoria, title }: Props) => {
         <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center max-w-xl mx-auto">
           <Folder className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
           <p className="text-sm text-muted-foreground mb-4">
-            {isAdmin
+            {resolvingFolder
+              ? "Procurando uma pasta compartilhada chamada Drive Consultores para este Google."
+              : isAdmin
               ? "Nenhuma pasta do Google Drive foi configurada para esta diretoria."
               : "Aguarde — um administrador ainda não configurou a pasta do Drive desta diretoria."}
           </p>
