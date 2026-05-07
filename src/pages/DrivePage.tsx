@@ -27,7 +27,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 
 interface Props {
-  diretoria: "presidencia" | "vp" | "projetos" | "comercial";
+  diretoria: "presidencia" | "vp" | "projetos" | "comercial" | "consultores";
   title: string;
 }
 
@@ -53,6 +53,7 @@ const DIRETORIA_LABELS: Record<Props["diretoria"], string> = {
   vp: "Vice-Presidência",
   projetos: "Projetos",
   comercial: "Comercial",
+  consultores: "Consultores",
 };
 
 const AccessNotice = ({ diretoria }: { diretoria: Props["diretoria"] }) => (
