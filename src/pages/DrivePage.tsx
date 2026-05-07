@@ -178,9 +178,11 @@ const DrivePage = ({ diretoria, title }: Props) => {
       setResolvingFolder(true);
 
       try {
-        const nameQuery = CONSULTOR_FOLDER_NAMES.map(
-          (name) => `name = '${escapeDriveQueryValue(name)}'`
-        ).join(" or ");
+        const nameQuery = [
+          ...CONSULTOR_FOLDER_NAMES.map((name) => `name = '${escapeDriveQueryValue(name)}'`),
+          "name contains 'Consultores'",
+          "name contains 'consultores'",
+        ].join(" or ");
         const url = new URL("https://www.googleapis.com/drive/v3/files");
         url.searchParams.set(
           "q",
